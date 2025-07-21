@@ -7,13 +7,13 @@ This is a fullstack Laravel project consisting of two main components:
 
 ---
 
-## 🧱 Project Structure
+## Project Structure
 travelandtours/
 ├── auth_service/ # Laravel API service for authentication
 ├── tatui/ # Laravel + Inertia frontend app
 └── README.md
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### 1. Clone the Repository
 
