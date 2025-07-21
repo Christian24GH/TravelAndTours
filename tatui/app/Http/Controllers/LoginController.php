@@ -4,15 +4,20 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+
 
 class LoginController extends Controller
 {
     public function index(){
+        if (session()->has('auth_token')) {
+            return redirect()->route('dashboard');
+        }
         return Inertia('login');
     }
     
     public function submit(Request $request){
-         $request->validate([
+        $request->validate([
             'email' => ['required','email'],
             'password' => ['required'],
         ]);

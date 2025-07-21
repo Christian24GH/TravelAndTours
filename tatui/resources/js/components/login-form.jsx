@@ -4,11 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "./ui/alert";
 import { useState } from "react";
-import nProgress from "nprogress";
 import { routes } from "@/routes";
 import { router } from "@inertiajs/react";
-
-nProgress.configure({ showSpinner: false });
 
 export function LoginForm({ className, ...props }) {
     const [FormData, setFormData] = useState({});
@@ -16,36 +13,37 @@ export function LoginForm({ className, ...props }) {
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-
     const FormSubmit = (e) => {
-         e.preventDefault()
-         
-         setIsSubmitting(true)
-         setFormError({}) // reset previous errors
+        e.preventDefault();
 
+        setIsSubmitting(true);
+        setFormError({}); // reset previous errors
 
-         if(!FormData.email || !FormData.password){
+        if (!FormData.email || !FormData.password) {
             setFormError({
-               Email: !FormData.email ? "The Email field is empty" : undefined,
-               Password: !FormData.password ? "The Password field is empty" : undefined,
-            })
+                Email: !FormData.email ? "The Email field is empty" : undefined,
+                Password: !FormData.password
+                    ? "The Password field is empty"
+                    : undefined,
+            });
             setIsSubmitting(false);
-            return
-         }else{
-            setFormError({})
-         }
+            return;
+        } else {
+            setFormError({});
+        }
 
-         router.post(routes.login, FormData, {
-            preserveScroll: true,
+        router.post(routes.login, FormData, {
             onError: (errors) => {
-               setFormError({
-                  Unauthorized: errors.message
-               });
-               
+                console.log(errors)
+                setFormError({
+                    Unauthorized: errors.message,
+                });
             },
-         });
-         setIsSubmitting(false);
-    }
+            onFinish: ()=>{
+                setIsSubmitting(false);
+            }
+        });
+    };
 
     const InputChange = (e) => {
         const { name, value } = e.target;
@@ -124,7 +122,9 @@ export function LoginForm({ className, ...props }) {
                     type="submit"
                     className="w-full"
                     disabled={isSubmitting}
-                > Login
+                >
+                    {" "}
+                    Login
                 </Button>
             </div>
         </form>
