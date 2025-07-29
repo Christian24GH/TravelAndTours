@@ -5,9 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "./ui/alert";
 import { useState } from "react";
 import { routes } from "@/routes";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
+
 
 export function LoginForm({ className, ...props }) {
+    const error = usePage();
+    console.log(error)
     const [FormData, setFormData] = useState({});
     const [FormError, setFormError] = useState({});
 
@@ -32,6 +35,8 @@ export function LoginForm({ className, ...props }) {
             setFormError({});
         }
 
+
+        //Ajax via router
         router.post(routes.login, FormData, {
             onError: (errors) => {
                 console.log(errors)
