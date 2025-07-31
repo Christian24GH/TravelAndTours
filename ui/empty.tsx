@@ -1,1 +1,0 @@
-//just an empty file, remove it and tsconfig will show an error
