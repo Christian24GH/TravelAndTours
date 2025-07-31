@@ -1,16 +1,8 @@
 # TravelAndTours Fullstack System
-
-This is a fullstack Laravel project consisting of two main components:
-
-1. **auth_service** - A Laravel API that handles authentication (e.g., login, token issuing).
-2. **tatui** - The Laravel + Inertia (React) frontend that consumes the API and provides user interface logic.
-
----
-
 ## 🧱 Project Structure
 travelandtours/
 ├── auth_service/ # Laravel API service for authentication
-├── tatui/ # Laravel + Inertia frontend app
+├── Sub-system/ # Laravel + Inertia frontend app
 └── README.md
 
 ## 🚀 Setup Instructions
@@ -26,31 +18,27 @@ cd travelandtours
 You will need two .env files — one for each Laravel app.
 
 auth_service/.env (API)
-tatui/.env (Frontend App)
+template/.env (Frontend App)
 
-# Run this command per folder
+### 3. Configure Database in .env file
 ```bash
-    cd auth_service
-    composer install
-    cp .env.example .env
-    php artisan key:generate
-    php artisan migrate
-    php artisan passport:install
+    DB_CONNECTION=mariadb
+    DB_HOST=127.0.0.1
+    DB_PORT=3306
+    DB_DATABASE=template # Palitan ng DB name niyo
+    DB_USERNAME=root
+    DB_PASSWORD=
+```
 
-    cd ../tatui
+# Run this command on template folder
+``` bash
+    cd ../template
     composer install
     npm install
     cp .env.example .env
     php artisan key:generate
     php artisan migrate
     npm run dev
-
-```
-# at the tatui/.env add the following
-```bash
-
-DOMAIN=http://localhost/TravelAndTours  # Place the root folder path
-
 ```
 
 
