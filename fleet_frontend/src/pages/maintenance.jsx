@@ -1,7 +1,19 @@
+import { Header } from '@/components/vehicles/tabs'
+
+const panels = [
+    {
+        title: "Maintenance",
+        path: "/maintenance"
+    },
+    {
+        title: "Maintenance Request",
+        path: "/maintenance/service"
+    },
+]
 export function MaintenancePage({}){
     return (
-        <>
-            Maintenance Page
-        </>
+        <main>
+            <Header items={panels}/>
+        </main>
     )
 }

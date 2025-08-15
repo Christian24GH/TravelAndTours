@@ -116,8 +116,7 @@ export default function Fleet() {
   }, [page, search]);
 
   
-
-  useEchoPublic('vehicles', "VehicleUpdates", (e)=>{
+  useEchoPublic('vehicle_channel', "VehicleUpdates", (e)=>{
     let v = e.vehicles
 
     setVehicles((prev)=>{

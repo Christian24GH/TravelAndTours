@@ -1,4 +1,3 @@
-import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import {
   Dialog,
@@ -45,6 +44,7 @@ export function RegisterDialog({}){
           handleSubmit,
           control,
           watch,
+          reset,
           formState: { errors, isSubmitting }
         } = useForm({
             defaultValues: {
@@ -54,6 +54,7 @@ export function RegisterDialog({}){
     const [ open, setOpen ] = useState(false)
 
     const onSubmit = async (data) => {
+        
         const formattedData = {
              ...data,
             acqdate: data.acqdate
@@ -67,6 +68,7 @@ export function RegisterDialog({}){
           
           if(response.status === 200){
             setOpen(false)
+            reset()
             toast.success(response.data, {
               position: "top-center"
             })

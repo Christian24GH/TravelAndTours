@@ -94,7 +94,7 @@ class Vehicles extends Controller
                     'year'            => $validated->year,
                     'type'            => $validated->type,
                     'capacity'        => $validated->capacity,
-                    'acquisition_date'=> Carbon::parse($validated->acqdate)->format('Y-m-d'),
+                    'acquisition_date'=> Carbon::parse($validated->acqdate)->format('Y-m-d') ?? '',
                     'status'          => 'active',
                     'created_at'      => now(),
                     'updated_at'      => now(),
@@ -155,6 +155,7 @@ class Vehicles extends Controller
                 ->first(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
 
             broadcast(new VehicleUpdates($new));
+            
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 500);
         }
