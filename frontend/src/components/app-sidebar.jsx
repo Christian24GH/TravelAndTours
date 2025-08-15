@@ -25,20 +25,20 @@ const data = {
     email: "test@testingf.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navMain: [
+  logisticsIINav: [
     {
       title: "Dashboard",
-      url: '/',
+      url: '/logisticsII',
       icon: PieChartIcon,
     },
     {
       title: "Vehicles",
-      url: '/fleet',
+      url: '/logisticsII/fleet',
       icon: Car,
     },
     {
       title: "Maintenance",
-      url: '/maintenance',
+      url: '/logisticsII/maintenance',
       icon: WrenchIcon,
     },
   ],
@@ -81,7 +81,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.logisticsIINav} />
 
         {/*
          * 
