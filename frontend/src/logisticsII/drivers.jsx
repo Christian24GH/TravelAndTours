@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/pagination"
 
 //Custom Components
-import { UpdateDialog } from '@/components/logisticsII/edit-dialog'
-import { RegisterDialog } from '@/components/logisticsII/register-dialog'
+import { UpdateDialog } from '@/components/vehicles/edit-dialog'
+import { RegisterDialog } from '@/components/vehicles/register-dialog'
 
 import axios from "axios";
 import { api } from "@/api_routes";
@@ -32,7 +32,7 @@ import { useEchoPublic, configureEcho } from "@laravel/echo-react";
 
 configureEcho({
     broadcaster: "reverb",
-    key: 'luoioknoyyzonvz8gf6o',
+    key: luoioknoyyzonvz8gf6o,
     wsHost: 'localhost',
     wsPort: 8080,
     wssPort: 8080,
@@ -115,7 +115,6 @@ export default function Fleet() {
     return () => clearTimeout(delayDebounce);
   }, [page, search]);
 
-  
   
   useEchoPublic('vehicle_channel', "VehicleUpdates", (e)=>{
     let v = e.vehicles

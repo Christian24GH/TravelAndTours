@@ -1,4 +1,4 @@
-import { Header } from '@/components/vehicles/tabs'
+import { Header } from '@/components/logisticsII/tabs'
 
 const panels = [
     {

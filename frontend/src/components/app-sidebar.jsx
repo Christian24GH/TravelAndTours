@@ -24,23 +24,33 @@ const data = {
     name: "TestUser",
     email: "test@testingf.com",
     avatar: "/avatars/shadcn.jpg",
+    role: 'Logistics II'
   },
+
   logisticsIINav: [
     {
-      title: "Dashboard",
-      url: '/logisticsII',
-      icon: PieChartIcon,
+      NavGroup: {
+        NavLabel: 'Fleet and Vehicles',
+        NavItems: [
+          {
+            title: "Dashboard",
+            url: '/logisticsII',
+            icon: PieChartIcon,
+          },
+          {
+            title: "Vehicles",
+            url: '/logisticsII/fleet',
+            icon: Car,
+          },
+          {
+            title: "Maintenance",
+            url: '/logisticsII/maintenance',
+            icon: WrenchIcon,
+          },
+        ],
+      }
     },
-    {
-      title: "Vehicles",
-      url: '/logisticsII/fleet',
-      icon: Car,
-    },
-    {
-      title: "Maintenance",
-      url: '/logisticsII/maintenance',
-      icon: WrenchIcon,
-    },
+    {}
   ],
   navSecondary: [
     {
@@ -73,7 +83,9 @@ export function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Travel and Tours</span>
-                  <span className="truncate text-xs">Logistics</span>
+                  <span className="truncate text-xs">
+                    {data.user.role == "Logistics II" && "Logistics"}
+                  </span>
                 </div>
               </a>
             </SidebarMenuButton>
@@ -81,12 +93,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.logisticsIINav} />
-
-        {/*
-         * 
-         * <NavSecondary items={data.navSecondary} className="mt-auto" />
-        */}
+        {data.user.role == "Logistics II" && (<NavMain data={data.logisticsIINav} />)}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
