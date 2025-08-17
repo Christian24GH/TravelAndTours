@@ -26,14 +26,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "TestUser",
-    email: "test@testingf.com",
-    avatar: "/avatars/shadcn.jpg",
-    role: 'Logistics II'
-  },
+import AuthContext from "../context/AuthProvider"
+import { useContext } from "react"
 
+const data = {
   /** Logistics 2 NavItems */
   logisticsIINav: [
     {
@@ -125,9 +121,15 @@ const data = {
   
 }
 
-export function AppSidebar({
-  ...props
-}) {
+export function AppSidebar({...props}) {
+  const { auth, logout } = useContext(AuthContext)
+  const user = {
+    name: auth?.name,
+    role: auth?.role,
+    avatar: null,
+    email: auth?.email
+  }
+ 
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -142,7 +144,7 @@ export function AppSidebar({
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {data.user.role == "Logistics II" && "Logistics"}
+                    {user.role == "LogisticsII Admin" && "Logistics"}
                   </span>
                 </div>
               </a>
@@ -152,10 +154,10 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent className="flex flex-col gap-2">
         {/** Logisitcs 2 */}
-        {data.user.role == "Logistics II" && (<NavMain data={data.logisticsIINav} />)}
+        {user.role == "LogisticsII Admin" && (<NavMain data={data.logisticsIINav} />)}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} logout={logout} />
       </SidebarFooter>
     </Sidebar>
   );

@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { AlertDescription } from '@/components/ui/alert'
+
 import {
   Card,
   CardContent,
@@ -9,11 +11,23 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useForm } from 'react-hook-form'
+import AuthContext from "../context/AuthProvider"
+import { useContext } from "react"
+
 
 export function LoginForm({
   className,
   ...props
 }) {
+
+  const { register, handleSubmit, formState: {errors, isSubmitting} }  = useForm()
+  const {login} = useContext(AuthContext)
+  
+  const formSubmit = async (data) => {
+    await login(data)
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -24,13 +38,18 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit(formSubmit)}>
             <div className="flex flex-col gap-6">
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+              <div className="flex flex-col gap-3">
+                <Label htmlFor='email'>Email</Label>
+                <Input {...register('email', {
+                    required: 'Email is required'
+                  })} id="email" type="email" placeholder="m@example.com"/>
+                {errors.email && (
+                  <AlertDescription className="text-red-500">{errors.email.message}</AlertDescription>
+                )}
               </div>
-              <div className="grid gap-3">
+              <div className="flex flex-col gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <a
@@ -39,14 +58,16 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input {...register('password', {
+                    required: 'Password is required'
+                  })} id="password" type="password"/>
+                {errors.password && (
+                  <AlertDescription className="text-red-500">{errors.password.message}</AlertDescription>
+                )}
               </div>
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
+                <Button disabled={isSubmitting} type="submit" className="w-full">
                   Login
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Login with Google
                 </Button>
               </div>
             </div>

@@ -1,15 +1,30 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Toaster } from "@/components/ui/sonner";
-
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Outlet } from "react-router";
+import { useContext, useEffect } from "react";
+import { useNavigate } from "react-router";
+import AuthContext from "../context/AuthProvider";
 
-export default function Layout() {
+export function Layout() {
+  const {auth, loading} = useContext(AuthContext)
+  const navigate = useNavigate()
+  
+  useEffect(() => {
+    if (!loading && !auth) {
+      navigate("/login"); // redirect if not logged in
+    }
+  }, [auth, loading, navigate]);
+
+  if (loading) {
+    return <p className="p-4">Checking authentication...</p>;
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
