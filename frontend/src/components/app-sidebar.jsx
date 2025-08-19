@@ -26,6 +26,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
+import { Skeleton } from '@/components/ui/skeleton'
+
 import AuthContext from "../context/AuthProvider"
 import { useContext } from "react"
 
@@ -43,7 +45,7 @@ const data = {
           },
           {
             title: "Trip Cost Analysis",
-            url: '/logisticsII/maintenance',
+            url: '#',
             icon: ChartSpline,
           },
         ],
@@ -122,14 +124,14 @@ const data = {
 }
 
 export function AppSidebar({...props}) {
-  const { auth, logout } = useContext(AuthContext)
+  const { auth, logout, loading } = useContext(AuthContext)
   const user = {
     name: auth?.name,
     role: auth?.role,
     avatar: null,
     email: auth?.email
   }
- 
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -144,7 +146,7 @@ export function AppSidebar({...props}) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {user.role == "LogisticsII Admin" && "Logistics"}
+                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "Logistics" : ''}
                   </span>
                 </div>
               </a>
@@ -153,11 +155,27 @@ export function AppSidebar({...props}) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="flex flex-col gap-2">
-        {/** Logisitcs 2 */}
-        {user.role == "LogisticsII Admin" && (<NavMain data={data.logisticsIINav} />)}
+        
+        {loading ? (
+            // Skeleton Placeholder while loading
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : (
+            <>
+              {user.role === "LogisticsII Admin" ? 
+              (<NavMain data={data.logisticsIINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
+              : null}
+            </>
+          )
+        }
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} logout={logout} />
+        {loading ? 
+          (<Skeleton className="w-full h-full"/>) : (<NavUser user={user} logout={logout} />)
+        }
       </SidebarFooter>
     </Sidebar>
   );

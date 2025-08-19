@@ -25,8 +25,6 @@ createRoot(document.getElementById('root')).render(
             <Route index element={<Dashboard/>}/>
             <Route path='fleet' element={<Fleet/>}/>
           </Route>
-
-
         </Routes>
       </AuthProvider>
     </BrowserRouter>

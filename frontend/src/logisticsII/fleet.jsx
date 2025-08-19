@@ -17,6 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
+import { Skeleton } from "@/components/ui/skeleton"
 
 //Custom Components
 import { UpdateDialog } from '@/components/logisticsII/edit-dialog'
@@ -68,6 +69,7 @@ export default function Fleet() {
   const [ page , setPage] = useState(1)
   const [ totalPage, setTotalPage ] = useState()
   const [search, setSearch] = useState("")
+  const [ loading, setLoading ] = useState(true)
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -81,18 +83,22 @@ export default function Fleet() {
           let data = response.data.vehicles;
           setVehicles(data.data || []);
           setTotalPage(data.last_page);
+          
         })
         .catch((error) => {
           console.log(error);
-          toast.error("Error fetching vehicles", { position: "top-center" });
-        });
-    }, 300); // debounce API calls by 300ms
+          toast.error("Error fetching vehicles", { position: "top-center" })
+
+        }).finally(()=>{
+
+          setLoading(false)
+
+        })
+    }, 300) // debounce API calls by 300ms
 
     return () => clearTimeout(delayDebounce);
   }, [page, search]);
 
-  
-  
   useEchoPublic('vehicle_channel', "VehicleUpdates", (e)=>{
     let v = e.vehicles
 
@@ -114,44 +120,43 @@ export default function Fleet() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-
         <RegisterDialog />
       </div>
-      <div className={"min-h-96"}>    
+      <div className={"min-h-96"}> 
         <Table>
-          <TableCaption>A list of registered vehicles.</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">VIN</TableHead>
-              <TableHead>Manufacturer</TableHead>
-              <TableHead>Model</TableHead>
-              <TableHead className="text-right">Year</TableHead>
-              <TableHead className="text-right">Created at</TableHead>
-              <TableHead className="text-right">Updated at</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {vehicles.map(item=>(
-                <TableRow key={item.id} className={item.status === "retired" ? "bg-gray-200" :
-                  item.status === "active" ? "bg-green-200" : item.status === "under_maintenance" ? "bg-red-200" : ""
-                }>
-                  <TableCell className="font-medium">{item.vin}</TableCell>
-                  <TableCell>{item.make}</TableCell>
-                  <TableCell>{item.model}</TableCell>
-                  <TableCell className="text-right">{item.year}</TableCell>
-                  <TableCell className="text-right">{item.created_at}</TableCell>
-                  <TableCell className="text-right">{item.updated_at}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <UpdateDialog
-                        item={item}
-                      />
-                      <Button>Archive</Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-            ))}
-          </TableBody>
+            {vehicles.length === 0 && (<TableCaption>No vehicles found in the records.</TableCaption>)}
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[100px]">VIN</TableHead>
+                <TableHead>Manufacturer</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead className="text-right">Year</TableHead>
+                <TableHead className="text-right">Created at</TableHead>
+                <TableHead className="text-right">Updated at</TableHead>
+              </TableRow>
+            </TableHeader>
+              <TableBody>
+                {vehicles.map(item=>(
+                    <TableRow key={item.id} className={item.status === "retired" ? "bg-gray-200" :
+                      item.status === "active" ? "bg-green-200" : item.status === "under_maintenance" ? "bg-red-200" : ""
+                    }>
+                      <TableCell className="font-medium">{item.vin}</TableCell>
+                      <TableCell>{item.make}</TableCell>
+                      <TableCell>{item.model}</TableCell>
+                      <TableCell className="text-right">{item.year}</TableCell>
+                      <TableCell className="text-right">{item.created_at}</TableCell>
+                      <TableCell className="text-right">{item.updated_at}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <UpdateDialog
+                            item={item}
+                          />
+                          <Button>Archive</Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
         </Table>
       </div>
       <Pagination>
