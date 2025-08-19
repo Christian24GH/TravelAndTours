@@ -23,22 +23,18 @@ import { UpdateDialog } from '@/components/logisticsII/edit-dialog'
 import { RegisterDialog } from '@/components/logisticsII/register-dialog'
 
 import axios from "axios";
-import { api } from "@/api_routes";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useEchoPublic, configureEcho } from "@laravel/echo-react";
+import { useEchoPublic } from "@laravel/echo-react";
 
-configureEcho({
-    broadcaster: "reverb",
-    key: 'luoioknoyyzonvz8gf6o',
-    wsHost: 'localhost',
-    wsPort: 8080,
-    wssPort: 8080,
-    forceTLS: ('http' ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-});
+import { logisticsII } from "../api/logisticsII";
+
+const api = logisticsII.backend.api
+const reverb = logisticsII.reverb
+
+reverb.config()
 
 function getPaginationNumbers(current, total) {
   const delta = 2; // pages to show before/after current
@@ -73,29 +69,9 @@ export default function Fleet() {
   const [ totalPage, setTotalPage ] = useState()
   const [search, setSearch] = useState("")
 
-  /*
-  useEffect(()=>{
-    axios.get(`${api.vehicles}?page=${page}`)
-      .then(response => {
-
-        let data = response.data.vehicles
-
-        setVehicles(data.data || {})
-        setTotalPage(data.last_page)
-
-      })
-      .catch(error => {
-        console.log(error)
-        toast.error("Error fetching vehicles",{position:"top-center"})
-
-      });
-  }, [page])
-  */
-  
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      axios
-        .get(`${api.vehicles}`, {
+      axios.get(`${api.vehicles}`, {
           params: {
             page,
             q: search || undefined

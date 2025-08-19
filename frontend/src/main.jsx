@@ -9,7 +9,6 @@ import { Layout } from './layout/ProtectedLayout';
 import LoginPage from './main/login';
 import Dashboard from './logisticsII/dashboard'
 import Fleet from './logisticsII/fleet'
-import { MaintenancePage } from './logisticsII/maintenance';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -22,11 +21,12 @@ createRoot(document.getElementById('root')).render(
           </Route>
 
           {/**LogisticsII */}
-            <Route path="/logisticsII/" element={<Layout/>}>
-              <Route path='dashboard' index element={<Dashboard/>}/>
-              <Route path='fleet' element={<Fleet/>}/>
-              <Route path='maintenance' element={<MaintenancePage/>}/>
-            </Route>
+          <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
+            <Route index element={<Dashboard/>}/>
+            <Route path='fleet' element={<Fleet/>}/>
+          </Route>
+
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>

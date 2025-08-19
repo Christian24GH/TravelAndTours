@@ -25,20 +25,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        /*
         Schema::create('vehicle_maintenance', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_id')->constrained('vehicles')->onDelete('cascade');
             $table->date('service_date');
             $table->enum('service_type', ['repair', 'preventive', 'inspection'])->comment('Repair, Preventive, Inspection');
             $table->enum('status', ['pending', 'approved', 'rejected', 'ongoing', 'due_soon', 'overdue', 'snoozed', 'done' ])->comment('Repair, Preventive, Inspection');
-            /*
             $table->string('service_provider')->nullable();
             $table->decimal('labor_cost', 10, 2)->default(0);
             $table->decimal('total_cost', 10, 2)->default(0)->comment('Labor + parts total');
             $table->text('notes')->nullable();
-            */
             $table->timestamps();
         });
+        */
 
         /*
         Schema::create('vehicle_maintenance_parts', function (Blueprint $table) {
@@ -51,6 +51,7 @@ return new class extends Migration
             $table->timestamps();
         });*/
 
+        /*
         Schema::create('vehicle_compliance', function (Blueprint $table) {
             $table->id();
             $table->foreignId('vehicle_id')->constrained('vehicles')->onDelete('cascade');
@@ -62,6 +63,7 @@ return new class extends Migration
             $table->string('document_file')->nullable(); // Path to uploaded file
             $table->timestamps();
         });
+        */
     }
 
     /**

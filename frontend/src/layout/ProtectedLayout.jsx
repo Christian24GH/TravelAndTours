@@ -7,22 +7,42 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Outlet } from "react-router";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import AuthContext from "../context/AuthProvider";
-
-export function Layout() {
-  const {auth, loading} = useContext(AuthContext)
+import { toast } from "sonner";
+export function Layout({allowedRoles}) {
+  const {auth, loading, logout} = useContext(AuthContext)
   const navigate = useNavigate()
-  
-  useEffect(() => {
-    if (!loading && !auth) {
-      navigate("/login"); // redirect if not logged in
-    }
-  }, [auth, loading, navigate]);
+  const [authorized, setAuthorized] = useState(null);
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading) {
+      if (!auth) {
+        navigate("/login");
+      } else if (!allowedRoles.includes(auth.role)) {
+
+        toast.error("Unauthorized User! Redirecting to login...", {
+          position: "top-center",
+        });
+
+        const timer = setTimeout(() => {
+          logout(); // clear auth and redirect
+        }, 2500);
+
+        return () => clearTimeout(timer);
+      } else {
+        setAuthorized(true);
+      }
+    }
+  }, [auth, loading, allowedRoles, logout, navigate]);
+
+  if (loading || authorized === null) {
     return <p className="p-4">Checking authentication...</p>;
+  }
+
+  if (authorized === false) {
+    return <p className="p-4">Redirecting...</p>;
   }
 
   return (

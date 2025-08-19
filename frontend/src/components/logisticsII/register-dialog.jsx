@@ -37,7 +37,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import axios from "axios";
-import { api } from "@/api_routes";
+import { logisticsII } from "../../api/logisticsII"
+
+const api = logisticsII.backend.api
 
 export function RegisterDialog({}){
     const { register,

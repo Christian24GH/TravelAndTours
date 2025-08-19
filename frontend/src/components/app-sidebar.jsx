@@ -60,7 +60,7 @@ const data = {
           },
           {
             title: "Maintenance",
-            url: '/logisticsII/maintenance',
+            url: '#',
             icon: WrenchIcon,
           },
           {

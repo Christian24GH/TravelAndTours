@@ -33,10 +33,12 @@ import { Input } from '@/components/ui/input'
 import { useForm, Controller } from 'react-hook-form'
 import { YearCombobox } from "../ui/dropdown-year"
 import axios from "axios"
-import { api } from "../../api_routes"
 import { useState } from "react"
 import { toast } from "sonner"
 import { CalendarIcon } from "lucide-react"
+import { logisticsII } from "../../api/logisticsII"
+
+const api = logisticsII.backend.api
 
 export function UpdateDialog({item}){
     const { register,
