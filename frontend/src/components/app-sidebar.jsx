@@ -79,7 +79,7 @@ const data = {
         NavItems: [
           {
             title: "Reservations",
-            url: '#',
+            url: '/logisticsII/reservation',
             icon: BookOpenCheckIcon,
           },
           {

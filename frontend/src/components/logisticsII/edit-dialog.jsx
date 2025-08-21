@@ -87,7 +87,7 @@ export function UpdateDialog({item}){
     return(
         <Dialog  open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" onClick={() => setOpen(true)}>Edit</Button>
+            <Button variant="outline" size="sm" onClick={() => setOpen(true)}>Edit</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -232,9 +232,9 @@ export function UpdateDialog({item}){
                                       <SelectValue/>
                                   </SelectTrigger>
                                   <SelectContent>
-                                      <SelectItem value="active">Active</SelectItem>
-                                      <SelectItem value="under_maintenance">Maintenance</SelectItem>
-                                      <SelectItem value="retired">Retired</SelectItem>
+                                      <SelectItem value="Available">Available</SelectItem>
+                                      <SelectItem value="Under Maintenance">Maintenance</SelectItem>
+                                      <SelectItem value="Retired">Retired</SelectItem>
                                   </SelectContent>
                               </Select>
                           )}  
@@ -253,23 +253,12 @@ export function UpdateDialog({item}){
                       </div>
                       <Input
                         {...register('capacity', {
-                            min: {
-                            value: 1,
-                            message: "Capacity must be a positive number",
-                            },
-                            maxLength: {
-                            value: 4,
-                            message: "Capacity cannot exceed 4 digits",
-                            },
-                            pattern: {
-                            value: /^[0-9]+$/,
-                            message: "Only positive numbers are allowed",
-                            }
+                            required: 'Capacity is required'
                         })}
+                        type="text"
+                        placeholder="Passengers or weight in kg"
                         defaultValue={item.capacity}
-                        type="number"
-                        min="1"
-                        placeholder="Optional"
+                        className={errors.capacity ? "border-red-500 focus-visible:ring-red-300" : ""}
                         />
                   </div>
                   
@@ -292,7 +281,7 @@ export function UpdateDialog({item}){
                                   <Button
                                       variant="outline"
                                       data-empty={!watch('acqdate')}
-                                      className="data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"
+                                      className="data-[empty=true]:text-muted-foreground justify-start text-left font-normal"
                                       >
                                   <CalendarIcon />
                                   {watch('acqdate') ? format(watch('acqdate'), "PPP") : <span>{"Pick a Date(Optional)"}</span>}
@@ -321,3 +310,5 @@ export function UpdateDialog({item}){
         </Dialog>
     )
 }
+
+export default UpdateDialog

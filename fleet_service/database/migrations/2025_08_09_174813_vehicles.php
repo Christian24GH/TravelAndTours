@@ -11,45 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vehicles', function (Blueprint $table){
+        Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('vin', 20)->unique(); // Vehicle Identification Number
+            $table->string('vin', 17)->unique(); // Vehicle Identification Number
             $table->string('plate_number', 15)->unique();
             $table->string('make'); // Toyota, Ford, etc.
             $table->string('model');
             $table->year('year');
             $table->string('type')->comment('Sedan, SUV, Truck, Van, etc.');
-            $table->integer('capacity')->nullable()->comment('Passengers or weight in kg');
+            $table->string('capacity')->nullable()->comment('Passengers or weight in kg');
             $table->date('acquisition_date')->nullable();
-            $table->enum('status', ['active', 'under_maintenance', 'retired'])->default('active');
+
+            // Instead of another table, track vehicle lifecycle state here
+            $table->enum('status', ['Available', 'Reserved', 'Under Maintenance', 'Retired'])->default('available');
+
             $table->timestamps();
         });
-
-        /*
-        Schema::create('vehicle_maintenance', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('vehicle_id')->constrained('vehicles')->onDelete('cascade');
-            $table->date('service_date');
-            $table->enum('service_type', ['repair', 'preventive', 'inspection'])->comment('Repair, Preventive, Inspection');
-            $table->enum('status', ['pending', 'approved', 'rejected', 'ongoing', 'due_soon', 'overdue', 'snoozed', 'done' ])->comment('Repair, Preventive, Inspection');
-            $table->string('service_provider')->nullable();
-            $table->decimal('labor_cost', 10, 2)->default(0);
-            $table->decimal('total_cost', 10, 2)->default(0)->comment('Labor + parts total');
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
-        */
-
-        /*
-        Schema::create('vehicle_maintenance_parts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('maintenance_id')->constrained('vehicle_maintenance')->onDelete('cascade');
-            $table->string('part_name');
-            $table->integer('quantity')->default(1);
-            $table->decimal('unit_cost', 10, 2)->default(0);
-            $table->decimal('total_cost', 10, 2)->default(0)->comment('quantity × unit_cost');
-            $table->timestamps();
-        });*/
 
         /*
         Schema::create('vehicle_compliance', function (Blueprint $table) {
@@ -72,7 +49,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('vehicle_compliance');
-        Schema::dropIfExists('vehicle_maintenance_parts');
         Schema::dropIfExists('vehicle_maintenance');
         Schema::dropIfExists('vehicles');
     }

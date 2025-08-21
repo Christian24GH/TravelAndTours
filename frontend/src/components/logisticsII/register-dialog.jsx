@@ -239,27 +239,15 @@ export function RegisterDialog({}){
                         </div>
                         <Input
                             {...register('capacity', {
-                                min: {
-                                value: 1,
-                                message: "Capacity must be a positive number",
-                                },
-                                maxLength: {
-                                value: 4,
-                                message: "Capacity cannot exceed 4 digits",
-                                },
-                                pattern: {
-                                value: /^[0-9]+$/,
-                                message: "Only positive numbers are allowed",
-                                }
+                                required: 'Capacity is required'
                             })}
-                            type="number"
-                            min="1"
-                            placeholder="Optional"
+                            type="text"
+                            placeholder="Passengers or weight in kg"
                             className={errors.capacity ? "border-red-500 focus-visible:ring-red-300" : ""}
                             />
                     </div>
                     {/* Acquisition Date */}
-                    <div className="flex flex-col gap-2 mb-3 flex-1">
+                    <div className="flex flex-col gap-2 mb-3 !flex-1">
                         <div className="flex items-center justify-between">
                         <Label>Acquisition Date</Label>
                         {errors.acqdate && (
@@ -274,7 +262,7 @@ export function RegisterDialog({}){
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button
-                                        className={errors.acqdate ? "border-red-500 focus-visible:ring-red-300 data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal" : "data-[empty=true]:text-muted-foreground w-[280px] justify-start text-left font-normal"}
+                                        className={errors.acqdate ? "border-red-500 focus-visible:ring-red-300 data-[empty=true]:text-muted-foreground justify-start text-left font-normal" : "data-[empty=true]:text-muted-foreground justify-start text-left font-normal"}
                                         variant="outline"
                                         data-empty={!watch('acqdate')}
                                         >
