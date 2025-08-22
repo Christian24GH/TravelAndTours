@@ -14,92 +14,85 @@ class Reservations extends Controller
 {
     public function show(Request $request){
 
-        $table = DB::table('reservations', 'r');
-        
         $q = $request->input('q');
 
-        if($request->filled('q')){
-            try{
-                $table->where('uuid', 'like', "%{$q}%")
-                    ->orWhere('start_time', 'like', "%{$q}%")
-                    ->orWhere('end_time', 'like', "%{$q}%")
-                    ->orWhere('status', 'like', "%{$q}%")
-                    ->orWhere('purpose', 'like', "%{$q}%");
-            }catch(Exception $e){
-                return response()->json(['error' => $e->getMessage()], 500);
-            }
+        $table = DB::table('reservations as r')
+            ->join('vehicles as v', 'v.id', '=', 'r.vehicle_id');
+
+        if($q) {
+            $table->where(function ($query) use ($q) {
+                $query->where('r.uuid', 'like', "%{$q}%")
+                    ->orWhere('r.start_time', 'like', "%{$q}%")
+                    ->orWhere('r.end_time', 'like', "%{$q}%")
+                    ->orWhere('r.status', 'like', "%{$q}%")
+                    ->orWhere('r.purpose', 'like', "%{$q}%");
+            });
         }
 
-        $table->join('vehicles as v', 'v.id', '=', 'r.vehicle_id')->get(['r.*', 'r.status', 'v.vin']);
-        
-        $reservations = $table->paginate(15);
+        $table->orderBy('r.status', 'asc')  
+            ->orderBy('r.created_at', 'desc'); 
 
-        return response()->json(['reservations'=>$reservations], 200);
+        $reservations = $table->paginate(15, [
+            'r.*',
+            'v.vin',
+            'v.type', 'v.capacity',
+        ]);
+
+        return response()->json(['reservations' => $reservations], 200);
     }
 
-    public function makeRequest(Request $request){
-        
+    public function makeRequest(Request $request)
+    {
         $validated = $request->validate([
             'vehicle_id'    => 'required|exists:vehicles,id',
             'purpose'       => 'nullable|string',
             'employee_id'   => 'required|integer',
             'start_time'    => 'required|date|after:now',
             'end_time'      => 'required|date|after:start_time',
+            'pickup'        => 'required|string|min:11',
+            'dropoff'       => 'required|string|min:11'
         ]);
-        
-        try{
-            $r = DB::table('reservations')->insert([
-                'uuid'       => (string) Str::uuid(),
-                'vehicle_id' => $validated['vehicle_id'],
-                'purpose'    => $validated['purpose'] ?? null,
-                'employee_id'=> $validated['employee_id'] ?? null,
-                'start_time' => $request->start_time ? Carbon::parse($request->start_time)->format('Y-m-d H:i:s') : null,
-                'end_time'   => $request->end_time ? Carbon::parse($request->end_time)->format('Y-m-d H:i:s') : null,
-                'status'     => 'pending',
-                'created_at' => now(),
-                'updated_at' => now(),
+
+        $uuid = (string) Str::uuid();
+
+        try {
+            DB::table('reservations')->insert([
+                'uuid'        => $uuid,
+                'vehicle_id'  => $validated['vehicle_id'],
+                'purpose'     => $validated['purpose'] ?? null,
+                'employee_id' => $validated['employee_id'],
+                'start_time'  => Carbon::parse($request->start_time)->format('Y-m-d H:i:s'),
+                'end_time'    => Carbon::parse($request->end_time)->format('Y-m-d H:i:s'),
+                'pickup'      => $validated['pickup'],
+                'dropoff'     => $validated['dropoff'],
+                'status'      => 'Pending',
+                'created_at'  => now(),
+                'updated_at'  => now(),
             ]);
 
-            broadcast(new ReservationUpdates($r));
-        }catch(Exception $e){
-             Log::error('Reservation insert failed', [
+        } catch (\Exception $e) {
+            Log::error('Reservation insert failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'data'  => $validated
             ]);
-            
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-        return response()->json(['success' => true], 201);
-    }
+        try {
+            $reservation = DB::table('reservations', 'r')->where('uuid', $uuid)
+                ->join('vehicles as v', 'v.id', '=', 'r.vehicle_id')->first(['r.*', 'r.status', 'v.vin', 'v.type', 'v.capacity']);
+            broadcast(new ReservationUpdates($reservation));
 
-    public function changeRequest(Request $request){
-        $validated = (object) $request->validate([
-            'id'          => 'required|exists:reservations,id',
-            'start_time'  => 'required|date|after:now',
-            'end_time'    => 'required|date|after:start_time',
-            'vehicle_id'  => 'required|exists:vehicles,id',
-            'purpose'     => 'nullable|string',
-            'employee_id' => 'nullable|integer',
-        ]);
-            
-        try{
-            DB::table('reservations')
-                ->where('id', $validated->id)
-                ->update([
-                    'vehicle_id'  => $validated->vehicle_id,
-                    'purpose'     => $validated->purpose,
-                    'employee_id' => $validated->employee_id,
-                    'start_time'  => $validated->start_time,
-                    'end_time'    => $validated->end_time,
-                    'updated_at'  => now(),
-                ]);
-        }catch(Exception $e){
-            return response()->json(['error' => $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch new data'], 500);
         }
 
-        return response()->json(['success' => true], 200);
+        return response()->json([
+            'success'     => true,
+            'reservation' => $reservation
+        ], 201);
     }
 
     public function cancelRequest(Request $request){
@@ -148,6 +141,16 @@ class Reservations extends Controller
         }catch(Exception $e){
             return response()->json(['error' => $e->getMessage()], 500);
         }
+        
+        try {
+            $r = DB::table('reservations as r')->where('r.id', $validated->id)
+                    ->join('vehicles as v', 'v.id', '=', 'r.vehicle_id')->first(['r.*', 'r.status', 'v.vin', 'v.type', 'v.capacity']);
+            
+            broadcast(new ReservationUpdates($r));
+            
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch new data'], 500);
+        }
 
         return response()->json(['success' => true], 200);
     }
@@ -190,26 +193,15 @@ class Reservations extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-        return response()->json(['success' => true], 200);
-    }
-
-    public function updateStatus(Request $request){
-        $validated = (object) $request->validate([
-            'id'     => 'required|exists:reservations,id',
-            'status' => 'required|in:pending,confirmed',
-        ]);
-
         try {
-            DB::table('reservations')
-                ->where('id', $validated->id)
-                ->update([
-                    'status'     => $validated->status,
-                    'updated_at' => now(),
-                ]);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+            $reservation = DB::table('reservations', 'r')->where('id', $validated->id)
+                ->join('vehicles as v', 'v.id', '=', 'r.vehicle_id')->first(['r.*', 'r.status', 'v.vin', 'v.type', 'v.capacity']);
+            
+            broadcast(new ReservationUpdates($reservation));
 
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch new data'], 500);
+        }
         return response()->json(['success' => true], 200);
     }
 

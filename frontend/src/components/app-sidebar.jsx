@@ -11,7 +11,8 @@ import {
   User,
   TagsIcon,
   HistoryIcon,
-  LogsIcon
+  LogsIcon,
+  MapPinIcon
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"

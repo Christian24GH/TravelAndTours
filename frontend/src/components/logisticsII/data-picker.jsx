@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/popover"
 import { Label } from "@/components/ui/label"
 
-export default function DateTimeField({ control, name, label, min, max, className }) {
+export default function DateTimeField({ control, name, label, min, max, className, rules }) {
   return (
     <div className={cn("flex flex-col gap-2 mb-3", className)}>
       <Label htmlFor={name}>{label}</Label>
       <Controller
         name={name}
+        rules={rules}
         control={control}
         render={({ field }) => (
           <Popover>

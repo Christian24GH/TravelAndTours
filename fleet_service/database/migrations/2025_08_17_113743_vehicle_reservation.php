@@ -17,6 +17,8 @@ return new class extends Migration
             $table->dateTime('start_time');
             $table->dateTime('end_time');
             $table->string('purpose')->nullable();
+            $table->string('pickup');
+            $table->string('dropoff');
             $table->enum('status', ['Pending', 'Confirmed', 'Cancelled'])->default('Pending');
             $table->timestamps();
 

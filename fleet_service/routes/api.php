@@ -15,10 +15,8 @@ Route::put('/vehicles/change', [Vehicles::class, 'update']);
 //Reservations
 Route::get('/reserve', [Reservations::class, 'show']);
 Route::post('/reserve/submit', [Reservations::class, 'makeRequest']);
-Route::put('/reserve/change', [Reservations::class, 'changeRequest']);
 Route::put('/reserve/approve', [Reservations::class, 'approveReservation']);
 Route::put('/reserve/cancel', [Reservations::class, 'cancelRequest']);
-Route::put('/reserve/update', [Reservations::class, 'updateStatus']);
 
 
 //Driver

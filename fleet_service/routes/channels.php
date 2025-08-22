@@ -10,6 +10,10 @@ Broadcast::channel('maintenance_channel', function(){
     return true;
 });
 
-Broadcast::channel('reservationChannel', function(){
+Broadcast::channel('reservation_channel', function(){
+    return true;
+});
+
+Broadcast::channel('dispatchChannel', function(){
     return true;
 });

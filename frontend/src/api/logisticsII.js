@@ -1,4 +1,5 @@
 import { configureEcho } from "@laravel/echo-react"
+import Echo from "laravel-echo";
 
 
 //here lies config for logistics II backend
@@ -18,7 +19,7 @@ const backendUri = `http://localhost:${backendPort}`;
 export const logisticsII = {
     reverb: {
         ...echoConfig,
-        config: ()=>configureEcho(echoConfig),
+        config: ()=>configureEcho(echoConfig)
     },
 
     backend: {

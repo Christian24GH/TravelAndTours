@@ -7,17 +7,18 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DispatchUpdates
+class DispatchUpdates implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    private $record;
+    public $record;
 
     public function __construct($record)
     {
@@ -32,7 +33,7 @@ class DispatchUpdates
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('dispatchChannel'),
+            new Channel('dispatchChannel'),
         ];
     }
 }
