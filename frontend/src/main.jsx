@@ -7,9 +7,10 @@ import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './layout/GuestRoute';
 import { Layout } from './layout/ProtectedLayout';
 import LoginPage from './main/login';
-import Dashboard from './logisticsII/dashboard'
-import Fleet from './logisticsII/fleet'
-import Reservation from './logisticsII/reservation';
+import LogisticsIIDashboard from './logisticsII/dashboard'
+import LogisticsIIFleet from './logisticsII/fleet'
+import LogisticsIIReservation from './logisticsII/reservation';
+import LogisticsIIDispatchPage from './logisticsII/dispatch';
 
 
 createRoot(document.getElementById('root')).render(
@@ -24,10 +25,14 @@ createRoot(document.getElementById('root')).render(
 
           {/**LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
-            <Route index element={<Dashboard/>}/>
-            <Route path='fleet' element={<Fleet/>}/>
-            <Route path='reservation' element={<Reservation/>}/>
+            <Route index element={<LogisticsIIDashboard/>}/>
+            <Route path='vehicles' element={<LogisticsIIFleet/>}/>
+            <Route path='reservation' element={<LogisticsIIReservation/>}/>
+            <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           </Route>
+
+
+          
         </Routes>
       </AuthProvider>
     </BrowserRouter>

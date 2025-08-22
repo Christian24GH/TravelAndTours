@@ -35,6 +35,7 @@ export const logisticsII = {
             approveReservation: `${backendUri}/api/reserve/approve`,
             cancelReservation: `${backendUri}/api/reserve/cancel`,
             drivers: `${backendUri}/api/drivers`,
+            dispatches: `${backendUri}/api/dispatches`,
         },
     }
 }

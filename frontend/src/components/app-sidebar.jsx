@@ -58,7 +58,7 @@ const data = {
         NavItems: [
           {
             title: "Vehicles",
-            url: '/logisticsII/fleet',
+            url: '/logisticsII/vehicles',
             icon: Car,
           },
           {
@@ -85,7 +85,7 @@ const data = {
           },
           {
             title: "Dispatch Orders",
-            url: '#',
+            url: '/logisticsII/dispatch',
             icon: TagsIcon,
           },
         ],
@@ -134,7 +134,7 @@ export function AppSidebar({...props}) {
   }
 
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="floating" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

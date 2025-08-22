@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Dispatches;
 use App\Http\Controllers\Drivers;
 use App\Http\Controllers\Reservations;
 use App\Http\Controllers\Vehicles;
@@ -21,3 +22,6 @@ Route::put('/reserve/cancel', [Reservations::class, 'cancelRequest']);
 
 //Driver
 Route::get('/drivers', [Drivers::class, 'show']);
+
+//Dispatch
+Route::get('/dispatches', [Dispatches::class, 'show']);

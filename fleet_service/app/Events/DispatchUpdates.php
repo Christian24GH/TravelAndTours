@@ -33,7 +33,7 @@ class DispatchUpdates implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('dispatchChannel'),
+            new Channel('dispatch_channel'),
         ];
     }
 }
