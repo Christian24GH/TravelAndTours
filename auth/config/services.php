@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'employee_api' => [
+        'url' => env('EMPLOYEE_API_URL', null),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
@@ -35,4 +39,7 @@ return [
         ],
     ],
 
+        'employee_api' => [
+            'url' => env('EMPLOYEE_API_URL', null),
+        ],
 ];

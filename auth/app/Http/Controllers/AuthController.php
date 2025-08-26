@@ -16,7 +16,7 @@ class AuthController extends Controller
             'name'      => ['required', 'min:6'],
             'email'     => ['required', 'email', 'unique:users,email'],
             'password'  => ['required', 'min:6'],
-            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee'])],
+            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1', 'HR2 Admin'])],
         ]);
         try{
             User::create([

@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
+import { NavLink } from "react-router-dom"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -109,6 +110,25 @@ const data = {
       }
     }
   ],
+  HRINav: [
+    {
+      NavGroup: {
+        NavLabel: 'Human Resources',
+        NavItems: [
+          {
+            title: "hr2",
+            url: '/hr2',
+            icon: Gauge,
+          },
+          {
+            title: "ESS",
+            url: '/hr2/ess',
+            icon: BookOpenCheckIcon,
+          },
+        ],
+      }
+    }
+  ],
   navSecondary: [
     {
       title: "Support",
@@ -134,50 +154,36 @@ export function AppSidebar({...props}) {
   }
 
   return (
-    <Sidebar variant="floating" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div
-                  className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Travel and Tours</span>
-                  <span className="truncate text-xs">
-                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "Logistics" : ''}
-                  </span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent className="flex flex-col gap-2">
-        
-        {loading ? (
-            // Skeleton Placeholder while loading
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-            </div>
-          ) : (
-            <>
-              {user.role === "LogisticsII Admin" ? 
-              (<NavMain data={data.logisticsIINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
-              : null}
-            </>
-          )
-        }
-      </SidebarContent>
-      <SidebarFooter>
-        {loading ? 
-          (<Skeleton className="w-full h-full"/>) : (<NavUser user={user} logout={logout} />)
-        }
-      </SidebarFooter>
-    </Sidebar>
-  );
+    <Sidebar variant="inset" {...props}>
+    <SidebarHeader>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" asChild>
+            <a href="#">
+              <div
+                className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
+              >
+                <Command className="size-4" />
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">Travel and Tours</span>
+                <span className="truncate text-xs">
+                  {user.role == "logisticsII Admin" && "Logistics"}
+                  {user.role == "HR2 Admin" && "Human Resource"}
+                </span>
+              </div>
+            </a>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarHeader>
+    <SidebarContent className="flex flex-col gap-2">
+      {/* HR 2 */}
+      {user.role == "HR2 Admin" && (<NavLink data={data.HRINav} />)}
+    </SidebarContent>
+    <SidebarFooter>
+      <NavUser user={user} logout={logout} />
+    </SidebarFooter>
+  </Sidebar>
+);
 }

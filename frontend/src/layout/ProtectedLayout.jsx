@@ -16,7 +16,7 @@ import { useNavigate } from "react-router"
 import AuthContext from "../context/AuthProvider"
 import Breadcrumps from "../components/bread-crumbs"
 
-export function Layout({allowedRoles}) {
+export default function ProtectedLayout({allowedRoles = []}) {
   const {auth, loading, logout} = useContext(AuthContext)
   const navigate = useNavigate()
   const [authorized, setAuthorized] = useState(null)
@@ -24,12 +24,16 @@ export function Layout({allowedRoles}) {
   useEffect(() => {
     if (!loading) {
       if (!auth) {
+        console.log("ProtectedLayout: User is not authenticated. Redirecting to login.");
         setAuthorized(false)
         const timer = setTimeout(() => {
           navigate("/login")
         }, 2500)
         return () => clearTimeout(timer)
-      } else if (!allowedRoles.includes(auth.role)) {
+      } else if (!auth || !auth.role || !allowedRoles.includes(auth.role)) {
+        console.log("ProtectedLayout: Auth object:", auth);
+        console.log("ProtectedLayout: Auth role:", auth?.role);
+        console.log("ProtectedLayout: Allowed roles:", allowedRoles);
         setAuthorized(false)
         toast.error("Unauthorized User! Redirecting to login...", {
           position: "top-center",

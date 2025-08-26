@@ -123,4 +123,63 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Autoloaded Service Providers
+    |--------------------------------------------------------------------------
+    |
+    | The service providers listed here will be automatically loaded on the
+    | request to your application. Feel free to add your own services to
+    | this array to grant them access to the framework.
+    |
+    */
+
+    'providers' => [
+
+    /*
+     * Laravel Framework Service Providers...
+     */
+    Illuminate\Encryption\EncryptionServiceProvider::class,
+    Illuminate\Cookie\CookieServiceProvider::class,
+    Illuminate\Auth\AuthServiceProvider::class,
+    Illuminate\Broadcasting\BroadcastServiceProvider::class,
+    Illuminate\Bus\BusServiceProvider::class,
+    Illuminate\Cache\CacheServiceProvider::class,
+    Illuminate\Database\DatabaseServiceProvider::class,
+    Illuminate\Foundation\Providers\ConsoleSupportServiceProvider::class,
+    Illuminate\Foundation\Providers\FoundationServiceProvider::class,
+    Illuminate\Hashing\HashServiceProvider::class,
+    Illuminate\Mail\MailServiceProvider::class,
+    Illuminate\Notifications\NotificationServiceProvider::class,
+    Illuminate\Pagination\PaginationServiceProvider::class,
+    Illuminate\Pipeline\PipelineServiceProvider::class,
+    Illuminate\Queue\QueueServiceProvider::class,
+    Illuminate\Redis\RedisServiceProvider::class,
+    Illuminate\Session\SessionServiceProvider::class,
+    Illuminate\Translation\TranslationServiceProvider::class,
+    Illuminate\Validation\ValidationServiceProvider::class,
+    Illuminate\View\ViewServiceProvider::class,
+    Illuminate\Filesystem\FilesystemServiceProvider::class,
+    Tighten\Ziggy\ZiggyServiceProvider::class,
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Class Aliases
+    |--------------------------------------------------------------------------
+    |
+    | This array of class aliases will be registered when this application
+    | is started. However, feel free to register as many as you wish as
+    | the aliases are "lazy" loaded.
+    |
+    */
+
+
+    'aliases' => [
+        // 'Alias' => Illuminate\Support\Facades\Alias::class,
+        'Storage' => Illuminate\Support\Facades\Storage::class,
+        'DB' => Illuminate\Support\Facades\DB::class,
+    ],
+
 ];
