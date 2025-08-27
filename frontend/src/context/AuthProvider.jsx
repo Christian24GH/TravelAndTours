@@ -31,7 +31,7 @@ export const AuthProvider = ({children})=>{
             await axios.get('/sanctum/csrf-cookie')
     
             // Attempt login
-            const response = await axios.post('/api/login', data)
+            const response = await axios.post('/api/login', data, { withCredentials: true })
     
             if (response.status === 200) {
                 const user = response.data?.user
@@ -68,9 +68,9 @@ export const AuthProvider = ({children})=>{
             case 'Employee':
                 navigate('/logisticsII/');
                 break;
-            case 'HR Admin':
+            case 'HR4 Admin':
             case 'Payroll Specialist':
-                navigate('/HRIV/');
+                navigate('/HR4/');
                 break;
             default:
                 navigate('/login');

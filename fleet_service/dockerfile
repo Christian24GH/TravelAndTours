@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     git unzip curl default-mysql-client libpng-dev libonig-dev libxml2-dev zip \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# Enable Apache mod_rewrite
+# Enable Apache mod_rewrite                                                                                             
 RUN a2enmod rewrite
 
 # Install Composer

@@ -1,0 +1,36 @@
+
+services:
+  hr4:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: human_resource4
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8099:80"  # Access Laravel on localhost:8099
+    command: php artisan serve --host=0.0.0.0 --port=80
+    networks:
+      - laravel
+
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hr4_reverb
+    working_dir: /var/www/html
+    command: >
+      php artisan reverb:start --host=0.0.0.0 --port=6001
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - hr4
+    ports:
+      - "6001:6001"
+    restart: unless-stopped
+    networks:
+      - laravel
+
+networks:
+  laravel:
