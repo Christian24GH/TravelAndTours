@@ -22,6 +22,8 @@ Route::put('/reserve/cancel', [Reservations::class, 'cancelRequest']);
 
 //Driver
 Route::get('/drivers', [Drivers::class, 'show']);
+Route::get('/drivers/getDrivers', [Drivers::class, 'get']);
 
 //Dispatch
 Route::get('/dispatches', [Dispatches::class, 'show']);
+Route::get('/dispatches/driver', [Dispatches::class, 'showToDriver']);
