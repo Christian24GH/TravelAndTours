@@ -13,7 +13,7 @@
 - auth          - Authentication Service, uses Laravel Sanctum for tokens
 - fleet_service - Logistics II, uses Laravel Reverb (Websocket)
 
-# waiting for other groups
+* waiting for other groups
 
 [Frontend]
     - frontend      - Unified frontend folder for the whole section
