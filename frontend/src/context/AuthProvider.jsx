@@ -61,12 +61,15 @@ export const AuthProvider = ({children})=>{
     const roleAccess = (user, navigate) => {
         switch (user.role) {
             case 'Super Admin':
-                navigate('/login');
+                navigate('/');
                 break;
             case 'LogisticsII Admin':
             case 'Driver':
             case 'Employee':
                 navigate('/logisticsII/');
+                break;
+            case 'HR3 Manager':
+                navigate('/hr3/');
                 break;
             default:
                 navigate('/login');

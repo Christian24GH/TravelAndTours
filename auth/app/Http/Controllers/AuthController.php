@@ -16,13 +16,13 @@ class AuthController extends Controller
             'name'      => ['required', 'min:6'],
             'email'     => ['required', 'email', 'unique:users,email'],
             'password'  => ['required', 'min:6'],
-            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee'])],
+            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee','HR3 Manager'])],
         ]);
         try{
             User::create([
                 'name'     => $validated->name,
                 'email'    => $validated->email,
-                'password' => $validated->password,
+                'password' => bcrypt($validated->password),
                 'role'     => $validated->role,
             ]);
         }catch(Exception $e){
@@ -40,7 +40,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated->email)->first();
 
-        if (!$user || $validated->password != $user->password) {
+        if (!$user || !password_verify($validated->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
