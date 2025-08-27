@@ -84,6 +84,11 @@ const data = {
             icon: BookOpenCheckIcon,
           },
           {
+            title: "Make Reservation",
+            url: '/logisticsII/reservation/make',
+            icon: MapPinIcon,
+          },
+          {
             title: "Dispatch Orders",
             url: '/logisticsII/dispatch',
             icon: TagsIcon,
