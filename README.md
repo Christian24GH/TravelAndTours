@@ -28,12 +28,21 @@
     ```
 
 ##  Commands
-1. Migrate Database
+1. Backend Setup
+- cd <Backendfolder ex. auth>
+- composer i
+- cp .env.example .env
+- php artisan key:generate
+- php artisan migrate
+
+2. Frontend
+- npm i
+3. Migrate Database
 
 ```bash
     php artisan migrate
 ```
-2. Start Laravel Reverb
+4. Start Laravel Reverb
 
 ```bash
     php artisan reverb:start
