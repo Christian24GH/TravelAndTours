@@ -29,7 +29,7 @@
 
 ##  Commands
 1. Backend Setup
-- cd <Backendfolder ex. auth>
+- cd (Backendfolder example. auth)
 - composer i
 - cp .env.example .env
 - php artisan key:generate
