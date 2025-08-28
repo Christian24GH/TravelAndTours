@@ -11,6 +11,12 @@ import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
+import Hr1Dashboard from './hr1/dashboard';
+import Hr1ApplicantPage from "./hr1/applicant";
+import Hr1Recruitment from "./hr1/recruitment";
+import Hr1Onboarding from "./hr1/onboarding";
+import Hr1Performance from "./hr1/performance";
+import Hr1Recognition from "./hr1/recognition";
 
 
 createRoot(document.getElementById('root')).render(
@@ -23,7 +29,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/login" index element={<LoginPage/>}/>
           </Route>
 
-          {/**LogisticsII */}
+          {/** LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
             <Route index element={<LogisticsIIDashboard/>}/>
             <Route path='vehicles' element={<LogisticsIIFleet/>}/>
@@ -31,8 +37,16 @@ createRoot(document.getElementById('root')).render(
             <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           </Route>
 
+          {/** HR1 */}
+          <Route path="/hr1" element={<Layout allowedRoles={['HR1 Admin', 'Super Admin']}/>}>
+            <Route index element={<Hr1Dashboard/>}/> 
+            <Route path='applicants' element={<Hr1ApplicantPage/>}/>
+            <Route path='recruitment' element={<Hr1Recruitment/>}/>
+            <Route path='onboarding' element={<Hr1Onboarding/>}/>
+            <Route path='performance' element={<Hr1Performance/>}/>
+            <Route path='recognition' element={<Hr1Recognition/>}/>
+          </Route>
 
-          
         </Routes>
       </AuthProvider>
     </BrowserRouter>

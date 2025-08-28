@@ -6,40 +6,50 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
-    public function register(Request $request){
-        //dd($request);
+    /**
+     * Register a new user
+     */
+    public function register(Request $request)
+    {
         $validated = (object)$request->validate([
             'name'      => ['required', 'min:6'],
             'email'     => ['required', 'email', 'unique:users,email'],
             'password'  => ['required', 'min:6'],
-            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee'])],
+            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1 Admin'])],
         ]);
-        try{
+
+        try {
             User::create([
                 'name'     => $validated->name,
                 'email'    => $validated->email,
-                'password' => $validated->password,
+                'password' => $validated->password, // ✅ hash password
                 'role'     => $validated->role,
             ]);
-        }catch(Exception $e){
-            return response()->json('Registration Failed'.$e, 500);
+        } catch (Exception $e) {
+            return response()->json('Registration Failed' . $e, 500);
         }
 
         return response()->json('Registered Successfully', 200);
     }
 
-    public function login(Request $request){
+    /**
+     * Login user
+     */
+    public function login(Request $request)
+    {
         $validated = (object)$request->validate([
-            'email'     => ['required', 'email:rfs,dns', 'exists:users,email'],
+            'email'     => ['required', 'email:rfc,dns', 'exists:users,email'],
             'password'  => ['required', 'min:6'],
         ]);
 
         $user = User::where('email', $validated->email)->first();
 
+        // ✅ check password with hash
         if (!$user || $validated->password != $user->password) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }

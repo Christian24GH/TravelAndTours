@@ -1,6 +1,10 @@
 import {
   Car,
   Command,
+  Calendar,
+  FileText,
+  Tag,
+  BookOpen,
   LifeBuoy,
   PieChartIcon,
   Send,
@@ -84,6 +88,11 @@ const data = {
             icon: BookOpenCheckIcon,
           },
           {
+            title: "Make Reservation",
+            url: '/logisticsII/reservation/make',
+            icon: MapPinIcon,
+          },
+          {
             title: "Dispatch Orders",
             url: '/logisticsII/dispatch',
             icon: TagsIcon,
@@ -109,6 +118,65 @@ const data = {
       }
     }
   ],
+
+  HR1Nav: [
+  {
+    NavGroup: {
+      NavLabel: 'Analytics',
+      NavItems: [
+        { title: "Dashboard", url: '/hr1', icon: Gauge },
+      ],
+    },
+  },
+  {
+    NavGroup: {
+      NavLabel: 'Applicant Management',
+      NavItems: [
+        { title: "Applicant List", url: '/hr1/applicants', icon: User },
+        { title: "Interview Scheduling", url: '/hr1/applicants/interviews', icon: Calendar },
+        { title: "Application Status", url: '/hr1/applicants/status', icon: Calendar },
+      ],
+    },
+  },
+  {
+    NavGroup: {
+      NavLabel: 'Recruitment Management',
+      NavItems: [
+        { title: "Job Postings", url: '/hr1/recruitment/jobs', icon: FileText },
+        { title: "Offer Management", url: '/hr1/recruitment/offers', icon: Tag },
+      ],
+    },
+  },
+  {
+    NavGroup: {
+      NavLabel: 'New Hire Onboarding',
+      NavItems: [
+        { title: "Onboarding Checklist", url: '/hr1/onboarding/checklist', icon: BookOpen },
+        { title: "Orientation Schedule", url: '/hr1/onboarding/orientation', icon: Calendar },
+      ],
+    },
+  },
+  {
+    NavGroup: {
+      NavLabel: 'Initial Performance Management',
+      NavItems: [
+        { title: "Performance Reviews", url: '/hr1/performance/reviews', icon: BookOpen },
+        { title: "Feedback & Coaching", url: '/hr1/performance/feedback', icon: LifeBuoy },
+      ],
+    },
+  },
+  {
+    NavGroup: {
+      NavLabel: 'Social Recognition',
+      NavItems: [
+        { title: "Awards & Badges", url: '/hr1/recognition/awards', icon: Tag },
+        { title: "Team Recognition", url: '/hr1/recognition/team', icon: Calendar },
+      ],
+    },
+  },
+],
+
+
   navSecondary: [
     {
       title: "Support",
@@ -121,8 +189,8 @@ const data = {
       icon: Send,
     },
   ],
-  
 }
+
 
 export function AppSidebar({...props}) {
   const { auth, logout, loading } = useContext(AuthContext)
@@ -168,6 +236,9 @@ export function AppSidebar({...props}) {
             <>
               {user.role === "LogisticsII Admin" ? 
               (<NavMain data={data.logisticsIINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
+              : null}
+              {user.role === "HR1 Admin" ? 
+              (<NavMain data={data.HR1Nav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
               : null}
             </>
           )
