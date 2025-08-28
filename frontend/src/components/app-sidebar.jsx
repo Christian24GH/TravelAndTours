@@ -137,11 +137,6 @@ const data = {
             url: '/hr3/attendance',
             icon: ClockIcon,
           },
-          {
-            title: "Not Attended",
-            url: '#',
-            icon: ClockAlertIcon,
-          },
         ],
       }
     },
