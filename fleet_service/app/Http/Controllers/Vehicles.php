@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class Vehicles extends Controller
 {
@@ -130,7 +131,7 @@ class Vehicles extends Controller
             'type'            => ['required', 'string'],
             'capacity'        => ['required', 'string'],
             'acqdate'         => ['nullable', 'date'],
-            'status'          => ['required', 'in:available,under_maintenance,retired']
+            'status'          => ['required', Rule::in(['Available', 'Reserved', 'Under Maintenance', 'Retired'])],
         ]);
 
         try {
