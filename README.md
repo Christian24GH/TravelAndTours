@@ -68,7 +68,11 @@ Lahat po ng exposed API na gagamitin ng frontend ay nakastore po sa frontend/src
 
 Dun po namin yan babaguhin once up na yung hosting.
 
+And about po sa mga .env(environment variables), may mga keys po kasi ako dun na private kaya hindi ko maisama sa remote repository. Gusto ko malaman kung may ibang way kami para magupload ng .env files.
+
 Maraming salamat po at pasensya na magulo yung setup.
+
+
 
 
         
