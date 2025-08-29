@@ -1,5 +1,5 @@
-import { ChevronsUpDownIcon, CheckIcon, EyeIcon, MapPin } from "lucide-react";
-import { useEffect, useState, useLayoutEffect, useContext, useRef } from "react";
+import { ChevronsUpDownIcon, CheckIcon, EyeIcon } from "lucide-react";
+import { useEffect, useState, useLayoutEffect, useContext } from "react";
 import AuthContext from '@/context/AuthProvider'
 import { useForm, Controller } from "react-hook-form";
 
@@ -48,7 +48,7 @@ import { Input } from '@/components/ui/input'
 
 import axios from "axios";
 import { logisticsII } from "@/api/logisticsII";
-import DateTimeField from "@/components/logisticsII/data-picker"
+import DateTimeField from "@/components/logisticsII/date-picker"
 const api = logisticsII.backend.api;
 
 export function ViewDialog({item}){
@@ -322,12 +322,12 @@ export function ReservationDialog(){
           <div className="flex flex-col gap-2" >
               <div className="flex items-center justify-between">
               <Label>Vehicle</Label>
-              {errors.vehicle_id && (
-                  <AlertDescription className="text-red-500">{errors.vehicle_id.message}</AlertDescription>
+              {errors.vehicle_ids && (
+                  <AlertDescription className="text-red-500">{errors.vehicle_ids.message}</AlertDescription>
               )}
               </div>
               <Controller
-                name="vehicle_id"
+                name="vehicle_ids"
                 control={control}
                 rules={{required:"Vehicle is required"}}
                 render={({ field }) => (
@@ -366,7 +366,7 @@ export function ReservationDialog(){
                                     field.value === v.id ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                {v.vin} {v.capacity ?? ''}
+                                {v.type} {v.capacity ?? ''}
                               </CommandItem>
                             ))}
                           </CommandGroup>

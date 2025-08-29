@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label"
 export default function DateTimeField({ control, name, label, min, max, className, rules }) {
   return (
     <div className={cn("flex flex-col gap-2 mb-3", className)}>
-      <Label htmlFor={name}>{label}</Label>
+      <Label htmlFor={name} className="font-normal text-secondary-foreground">{label}</Label>
       <Controller
         name={name}
         rules={rules}

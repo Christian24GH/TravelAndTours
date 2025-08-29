@@ -32,9 +32,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='reservation/make' element={<LogisticsIIMakeReservationPage/>}/>
             <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           </Route>
-
-
-          
+  
         </Routes>
       </AuthProvider>
     </BrowserRouter>

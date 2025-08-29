@@ -25,7 +25,6 @@ export const AuthProvider = ({children})=>{
     }, [])
 
     const login = async (data) => {
-        await axios.get("/sanctum/csrf-cookie"); // get CSRF cookie
         try {
             // Ensure CSRF cookie is set first
             await axios.get('/sanctum/csrf-cookie')
