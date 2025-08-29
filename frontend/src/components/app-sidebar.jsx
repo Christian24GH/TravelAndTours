@@ -116,14 +116,19 @@ const data = {
         NavLabel: 'Human Resources',
         NavItems: [
           {
-            title: "hr2",
-            url: '/hr2',
-            icon: Gauge,
+            title: "Talent Development",
+            url: '/hr2m',
+            icon: ChartSpline,
           },
           {
-            title: "ESS",
-            url: '/hr2/ess',
-            icon: BookOpenCheckIcon,
+            title: "Employees Profile",
+            url: '/hr2e',
+            icon: User,
+          },
+          {
+            title: "HR Admin",
+            url: '/hr2a',
+            icon: User,
           },
         ],
       }
@@ -169,7 +174,8 @@ export function AppSidebar({...props}) {
                 <span className="truncate font-medium">Travel and Tours</span>
                 <span className="truncate text-xs">
                   {user.role == "logisticsII Admin" && "Logistics"}
-                  {user.role == "HR2 Admin" && "Human Resource"}
+                  {user.role == "HR2 Admin" && "Human Resources"}
+                  {user.role == "Employee" && "Employee"}
                 </span>
               </div>
             </a>

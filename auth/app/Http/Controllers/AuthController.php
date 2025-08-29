@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Employee;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,25 +14,63 @@ use Illuminate\Validation\Rule;
 class AuthController extends Controller
 {
     public function register(Request $request){
-        //dd($request);
-        $validated = (object)$request->validate([
+        $validator = Validator::make($request->all(), [
             'name'      => ['required', 'min:6'],
             'email'     => ['required', 'email', 'unique:users,email'],
             'password'  => ['required', 'min:6'],
             'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1', 'HR2 Admin'])],
         ]);
-        try{
-            User::create([
-                'name'     => $validated->name,
-                'email'    => $validated->email,
-                'password' => $validated->password,
-                'role'     => $validated->role,
-            ]);
-        }catch(Exception $e){
-            return response()->json('Registration Failed'.$e, 500);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation Failed',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
-        return response()->json('Registered Successfully', 200);
+        try{
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'password' => Hash::make($request->password), // Use Hash::make()
+                'role'     => $request->role,
+            ]);
+
+            $user->employee_id = $this->generateEmployeeId();
+            $user->save();
+            
+            Employee::create([
+                'id' => $user->employee_id,
+                'first_name' => explode(' ', $user->name, 2)[0] ?? '',
+                'last_name' => explode(' ', $user->name, 2)[1] ?? '',
+                'email' => $user->email,
+                'department' => 'Not Assigned',
+                'position' => 'Not Assigned',
+                'hire_date' => now()->toDateString(),
+            ]);
+
+        }catch(Exception $e){
+            // Return a more specific error message
+            return response()->json('Registration Failed: ' . $e->getMessage(), 500);
+        }
+
+        return response()->json([
+            'message' => 'Registered Successfully', 
+            'id' => $user->employee_id, 
+            'email' => $user->email,
+        ], 200);
+    }
+    
+    /**
+     * Generate a unique 3-4 digit numerical ID.
+     */
+    private function generateEmployeeId()
+    {
+        do {
+            $id = mt_rand(1000, 9999);
+        } while (User::where('employee_id', $id)->exists());
+        
+        return $id;
     }
 
     public function login(Request $request){
@@ -40,16 +81,14 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated->email)->first();
 
-        if (!$user || $validated->password != $user->password) {
+        if (!$user || !Hash::check($validated->password, $user->password)) { // Use Hash::check() for login
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
         Auth::login($user);
 
-        // Revoke old tokens if you want single login
         $user->tokens()->delete();
 
-        // regenerate session to prevent fixation
         $request->session()->regenerate();
 
         return response()->json([
@@ -60,7 +99,7 @@ class AuthController extends Controller
     }
     
     public function otp(Request $request){
-
+        // Your existing otp function
     }
 
     public function user(Request $request){
@@ -69,12 +108,10 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout(); // log out the user
+        Auth::guard('web')->logout();
 
-        // invalidate the session
         $request->session()->invalidate();
 
-        // regenerate CSRF token avoid misuse
         $request->session()->regenerateToken();
 
         return response()->json([

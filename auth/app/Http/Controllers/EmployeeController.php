@@ -1,128 +1,240 @@
 <?php
 
 namespace App\Http\Controllers;
+    use App\Models\Employee;
+    use App\Models\User;
+    use Illuminate\Http\JsonResponse;
+    use Illuminate\Http\Request;
+    use Illuminate\Validation\ValidationException;
+    use Exception;
+    use Illuminate\Support\Facades\DB;
 
-use Carbon\Carbon;
+    class EmployeeController extends Controller
+    {
+        /**
+         * Upload and update the employee's profile photo.
+         * @param Request $request
+         * @param int $id
+         * @return JsonResponse
+         */
+        public function uploadPhoto(Request $request, int $id): JsonResponse
+        {
+            try {
+                $employee = Employee::find($id);
+                if (!$employee) {
+                    return response()->json(['error' => 'Employee not found'], 404);
+                }
 
-use Illuminate\Http\JsonResponse;
+                $request->validate([
+                    'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+                ]);
 
-class EmployeeController extends Controller
-{
-    // Simulated employee data (in-memory for demo)
-    private $employees = [
-        [
-            'id' => 1,
-            'first_name' => 'Jane',
-            'middle_name' => 'Marie',
-            'last_name' => 'Doe',
-            'suffix' => '',
-            'department' => 'Engineering',
-            'position' => 'Software Engineer',
-            'email' => 'jane.doe@example.com',
-            'phone' => '+1 555-1001',
-            'address' => '123 Main St, City',
-            'birthday' => '1990-05-10',
-            'civil_status' => 'Single',
-            'emergency_contact' => 'John Doe (+1 555-2001)',
-            'hire_date' => '2022-06-01',
-            'manager' => 'Sarah Lee',
-            'employee_status' => 'Active',
-            'profile_photo_url' => null,
-        ],
-        [
-            'id' => 2,
-            'first_name' => 'John',
-            'middle_name' => 'Paul',
-            'last_name' => 'Smith',
-            'suffix' => 'Jr.',
-            'department' => 'Operations',
-            'position' => 'Fleet Supervisor',
-            'email' => 'john.smith@example.com',
-            'phone' => '+1 555-1002',
-            'address' => '456 Oak Ave, City',
-            'birthday' => '1985-11-22',
-            'civil_status' => 'Married',
-            'emergency_contact' => 'Mary Smith (+1 555-2002)',
-            'hire_date' => '2024-01-15',
-            'manager' => 'Sarah Lee',
-            'employee_status' => 'Active',
-            'profile_photo_url' => null,
-        ],
-        [
-            'id' => 3,
-            'first_name' => 'Amara',
-            'middle_name' => '',
-            'last_name' => 'Lee',
-            'suffix' => '',
-            'department' => 'Quality',
-            'position' => 'QA Specialist',
-            'email' => 'amara.lee@example.com',
-            'phone' => '+1 555-1003',
-            'address' => '789 Pine Rd, City',
-            'birthday' => '1992-03-18',
-            'civil_status' => 'Single',
-            'emergency_contact' => 'Ken Lee (+1 555-2003)',
-            'hire_date' => '2023-03-10',
-            'manager' => 'Carlos Santos',
-            'employee_status' => 'On Leave',
-            'profile_photo_url' => null,
-        ],
-        [
-            'id' => 4,
-            'first_name' => 'Carlos',
-            'middle_name' => '',
-            'last_name' => 'Santos',
-            'suffix' => '',
-            'department' => 'Safety',
-            'position' => 'Safety Officer',
-            'email' => 'carlos.santos@example.com',
-            'phone' => '+1 555-1004',
-            'address' => '321 Cedar Blvd, City',
-            'birthday' => '1988-09-30',
-            'civil_status' => 'Married',
-            'emergency_contact' => 'Ana Santos (+1 555-2004)',
-            'hire_date' => '2025-01-01',
-            'manager' => 'Sarah Lee',
-            'employee_status' => 'Terminated',
-            'profile_photo_url' => null,
-        ],
-    ];
+                $file = $request->file('photo');
+                $filename = 'profile_' . $employee->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('public/profile_photos', $filename);
+                $url = url('storage/profile_photos/' . $filename);
 
+                $employee->profile_photo_url = $url;
+                $employee->save();
+
+                return response()->json(['profile_photo_url' => $url, 'employee' => $employee]);
+            } catch (ValidationException $e) {
+                return response()->json([
+                    'message' => 'Validation Failed',
+                    'errors' => $e->errors()
+                ], 422);
+            } catch (Exception $e) {
+                return response()->json([
+                    'message' => 'Failed to upload photo.',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
     /**
-     * Return a mock list of employees as JSON for testing.
+     * Return a list of all employees from the database.
+     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        return response()->json($this->employees);
+        try {
+            $employees = Employee::all();
+            return response()->json($employees);
+        } catch (Exception $e) {
+            // Log the error for debugging purposes
+            // \Log::error('Failed to retrieve employee list: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to retrieve employee list.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
      * Return a single employee profile by ID.
+     * @param int $id
+     * @return JsonResponse
      */
-    public function show($id): JsonResponse
+    public function show(int $id): JsonResponse
     {
-        $emp = collect($this->employees)->firstWhere('id', (int)$id);
-        if (!$emp) {
-            return response()->json(['error' => 'Employee not found'], 404);
+        try {
+            $employee = Employee::find($id);
+
+            if (!$employee) {
+                return response()->json(['error' => 'Employee not found'], 404);
+            }
+
+            return response()->json($employee);
+        } catch (Exception $e) {
+            // Log the error for debugging purposes
+            // \Log::error('Failed to retrieve employee profile: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to retrieve employee profile.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        return response()->json($emp);
     }
 
     /**
-     * Update an employee profile (mock, does not persist).
+     * Remove the specified employee and associated user from the database.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function update($id): JsonResponse
+    public function destroy(int $id)
     {
-        // In a real app, validate and update DB here
-        $data = request()->all();
-        $emp = collect($this->employees)->firstWhere('id', (int)$id);
-        if (!$emp) {
-            return response()->json(['error' => 'Employee not found'], 404);
+        // Use a database transaction to ensure both deletions are successful, or neither is.
+        \DB::transaction(function () use ($id) {
+
+            // Find the employee by their ID
+            $employee = Employee::find($id);
+
+            if (!$employee) {
+                // Return early if no employee is found
+                return;
+            }
+
+            // Find the user associated with the employee's email
+            $user = User::where('email', $employee->email)->first();
+
+            // If a user exists, delete it first
+            if ($user) {
+                $user->delete();
+            }
+
+            // Then delete the employee record
+            $employee->delete();
+        });
+
+        return response()->json(['message' => 'Employee and associated user deleted successfully'], 200);
+    }
+
+    /**
+     * Add a new employee to the database.
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            // New validation rules for the simplified form
+            $validatedData = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|string|min:6',
+                'role' => 'nullable|string',
+            ]);
+
+            // Split the full name into first and last
+            $nameParts = explode(' ', $validatedData['name'], 2);
+            $firstName = $nameParts[0];
+            $lastName = count($nameParts) > 1 ? $nameParts[1] : '';
+
+            \DB::beginTransaction();
+
+            // 1. Create the User account
+            $user = User::create([
+                'email' => $validatedData['email'],
+                'password' => bcrypt($validatedData['password']),
+                'name' => $validatedData['name'],
+                'role' => $request->input('role', 'Employee'),
+            ]);
+
+            // 2. Create the Employee profile linked to the new user with default/placeholder values
+            $employee = Employee::create([
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $validatedData['email'],
+                'user_id' => $user->id,
+                'department' => 'Not Assigned',
+                'position' => 'Not Assigned',
+                'hire_date' => now(), // Set a default hire date
+            ]);
+
+            \DB::commit();
+
+            return response()->json([
+                'message' => 'Employee account created successfully.',
+                'user' => $user,
+                'employee' => $employee,
+            ], 201);
+
+        } catch (ValidationException $e) {
+            \DB::rollBack();
+            return response()->json(['message' => 'Validation Failed', 'errors' => $e->errors()], 422);
+        } catch (Exception $e) {
+            \DB::rollBack();
+            return response()->json(['message' => 'Failed to add employee.', 'error' => $e->getMessage()], 500);
         }
-        // Simulate update (merge fields)
-        $updated = array_merge($emp, $data);
-        return response()->json($updated);
+    }
+
+    /**
+     * Update an existing employee profile in the database.
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        try {
+            $employee = Employee::find($id);
+
+            if (!$employee) {
+                return response()->json(['error' => 'Employee not found'], 404);
+            }
+
+            // The 'sometimes' rule ensures validation runs only if the field is present.
+            $validatedData = $request->validate([
+                'first_name' => 'sometimes|nullable|string|max:255',
+                'middle_name' => 'sometimes|nullable|string|max:255',
+                'last_name' => 'sometimes|nullable|string|max:255',
+                'suffix' => 'sometimes|nullable|string|max:255',
+                'department' => 'sometimes|nullable|string|max:255',
+                'position' => 'sometimes|nullable|string|max:255',
+                'email' => 'sometimes|nullable|email|unique:employees,email,' . $employee->id,
+                'phone' => 'sometimes|nullable|string|max:255',
+                'address' => 'sometimes|nullable|string|max:255',
+                'birthday' => 'sometimes|nullable|date',
+                'civil_status' => 'sometimes|nullable|string|max:255',
+                'emergency_contact' => 'sometimes|nullable|string|max:255',
+                'hire_date' => 'sometimes|nullable|date',
+                'manager' => 'sometimes|nullable|string|max:255',
+                'employee_status' => 'sometimes|nullable|string|max:255',
+            ]);
+
+            $employee->update($validatedData);
+
+            return response()->json($employee);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update employee.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
-
-

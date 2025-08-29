@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CompetencyController;
@@ -15,6 +16,11 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Authenticated routes (protected by Sanctum middleware)
 Route::middleware('auth:sanctum')->group(function () {
+    // Moved the csrf-token route inside the authenticated group
+    Route::get('/csrf-token', function (Request $request) {
+        return response()->json(['csrfToken' => csrf_token()]);
+    });
+    
     Route::get('/user', [AuthController::class, 'user'])->name('user');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -25,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
     Route::get('/employees/{id}', [EmployeeController::class, 'show'])->name('employees.show');
     Route::patch('/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::post('/employees/{id}/photo', [EmployeeController::class, 'uploadPhoto'])->name('employees.uploadPhoto');
     Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
     Route::get('/learning', [LearningController::class, 'index'])->name('learning.index');
     Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
@@ -37,4 +44,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/self/trainings', [SelfServiceController::class, 'requestTraining'])->name('self.trainings.request');
     Route::get('/self/work-progress', [SelfServiceController::class, 'workProgress'])->name('self.work_progress');
     Route::get('/self/awards', [SelfServiceController::class, 'awards'])->name('self.awards');
+    Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
 });

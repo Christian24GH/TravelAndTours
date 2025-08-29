@@ -12,8 +12,9 @@ import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
-import DashboardHR2 from './hr2/mainhr2';
-import ESS from './hr2/ess';
+import HR2Main from './hr2/hr2main';
+import HR2Admin from './hr2/hr2admin'; 
+import HR2ESS from './hr2.ess/hr2ess';
 import { HelmetProvider } from 'react-helmet-async';
 
 
@@ -37,8 +38,9 @@ createRoot(document.getElementById('root')).render(
             </Route>
 
             {/**HR2 */}
-            <Route path="/hr2" element={<DashboardHR2/>}/>
-            <Route path="/hr2/ess" element={<ESS/>}/>
+            <Route path="/hr2m" element={<HR2Main/>}/>
+            <Route path="/hr2a" element={<HR2Admin/>}/>
+            <Route path="/hr2e" element={<HR2ESS/>}/>
 
 
             

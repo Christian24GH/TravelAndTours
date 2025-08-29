@@ -43,18 +43,18 @@ function CmsSection() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-  const res = await fetch(hr2.backend.api.competencyIndex, {
-  credentials: 'include',
-  headers: { Accept: "application/json" }
-  });
-  if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-  const data = await res.json();
-  setEmployees(Array.isArray(data) ? data : []);
+        const res = await fetch(hr2.backend.api.competencyIndex, {
+          credentials: 'include',
+          headers: { Accept: "application/json" }
+        });
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+        const data = await res.json();
+        setEmployees(Array.isArray(data) ? data : []);
 
-  const wp = await fetch(hr2.backend.api.workProgress + '?employee_id=1');
-  const aw = await fetch(hr2.backend.api.awards + '?employee_id=1');
-  if (wp.ok) setWorkProgress(await wp.json());
-  if (aw.ok) setAwards(await aw.json());
+        const wp = await fetch(hr2.backend.api.workProgress + '?employee_id=1');
+        const aw = await fetch(hr2.backend.api.awards + '?employee_id=1');
+        if (wp.ok) setWorkProgress(await wp.json());
+        if (aw.ok) setAwards(await aw.json());
       } catch (err) {
         setError(err.message || "Failed to load data");
       } finally {
@@ -343,10 +343,13 @@ function LmsSection() {
   useEffect(() => {
     const load = async () => {
       try {
-  const res = await fetch(hr2.backend.api.learningIndex, {
-  credentials: 'include',
-  headers: { Accept: "application/json" }});
+        const res = await fetch(hr2.backend.api.learningIndex, {
+          credentials: 'include',
+          headers: { Accept: "application/json" }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setItems(data);
       } catch (e) {
         setError(e.message);
       } finally {
@@ -444,10 +447,10 @@ function SpsSection() {
   useEffect(() => {
     const load = async () => {
       try {
-  const res = await fetch(hr2.backend.api.successionIndex,{
-  credentials: 'include',
-  headers: { Accept: "application/json" }
-  });
+        const res = await fetch(hr2.backend.api.successionIndex,{
+          credentials: 'include',
+          headers: { Accept: "application/json" }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         setPlans(await res.json());
       } catch (e) {
@@ -542,10 +545,10 @@ function TmsSection() {
   useEffect(() => {
     const load = async () => {
       try {
-  const res = await fetch(hr2.backend.api.trainingIndex, {
-  credentials: 'include',
-  headers: { Accept: "application/json" }
-  });
+        const res = await fetch(hr2.backend.api.trainingIndex, {
+          credentials: 'include',
+          headers: { Accept: "application/json" }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         setData(await res.json());
       } catch (e) {
@@ -677,24 +680,23 @@ export default function Unified() {
     }
   };
 
-  // Use the same sidebar width as the old system (16rem)
   return (
     <SidebarProvider style={{ '--sidebar-width': '12rem' }}>
-      <div className="flex min-h-screen bg-gray-100">
+      <div className="flex flex-1 min-h-screen bg-gray-100" style={{ height: '100vh' }}>
         {/* Sidebar */}
         <AppSidebar style={{ width: '12rem', minWidth: '12rem', maxWidth: '12rem' }} />
         {/* Main Content */}
-  <main className="w-full">
+        <main className="flex-1 flex flex-col h-full m-4 font-semibold">
           <Helmet>
-            <title>HR Dashboard</title>
+            <title>Talent Development</title>
           </Helmet>
           {/* Top bar with hide sidebar button and title */}
-          <div className="flex items-center gap-4 px-4 py-2 bg-white border-b border-gray-200 sticky top-0 z-10">
+          <div className="flex items-center gap-4 px-4 py-2 bg-white border-b border-gray-200 sticky top-0 z-10 -m-4">
             <SidebarTrigger />
             <h1 className="text-small tracking-tight text-gray-800">HR Dashboard</h1>
           </div>
           {/* Tabs */}
-          <div className="mb-4 px-4 pt-4">
+          <div className="mb-4 pt-4">
             <div className="border-b border-gray-200">
               <nav className="-mb-px flex space-x-8" aria-label="Tabs">
                 <Button
@@ -728,7 +730,9 @@ export default function Unified() {
               </nav>
             </div>
           </div>
-          {renderSection()}
+          <div className="flex-1 overflow-y-auto">
+            {renderSection()}
+          </div>
         </main>
       </div>
     </SidebarProvider>

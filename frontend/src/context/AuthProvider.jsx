@@ -29,16 +29,25 @@ export const AuthProvider = ({children})=>{
         try {
             // Ensure CSRF cookie is set first
             await axios.get('/sanctum/csrf-cookie')
-    
+
             // Attempt login
             const response = await axios.post('/api/login', data)
-    
+
             if (response.status === 200) {
                 const user = response.data?.user
-    
+
                 // Save user in your auth state/context
                 setAuth(user)
-    
+
+                // Store user in localStorage for all roles
+                if (user && user.id) {
+                    localStorage.setItem('authUser', JSON.stringify(user));
+                }
+                // Store employeeId in localStorage for Employee role
+                if (user && user.role === 'Employee' && user.id) {
+                    localStorage.setItem('employeeId', user.id);
+                }
+
                 toast.success('Login successful, redirecting...', { position: "top-center" })
 
                 roleAccess(user, navigate)
@@ -63,14 +72,21 @@ export const AuthProvider = ({children})=>{
             case 'Super Admin':
                 navigate('/login');
                 break;
+
             case 'LogisticsII Admin':
             case 'Driver':
-            case 'Employee':
                 navigate('/logisticsII/');
                 break;
+
             case 'HR2 Admin':
-                navigate('/hr2');
+                // Navigate to HR2 Admin dashboard, where links to /hr2a, /hr2m, /hr2e are available
+                navigate('/hr2a');
                 break;
+            case 'Employee':
+                // Navigate to HR2 Employee main page, UI should show links to /hr2m and /hr2e as needed
+                navigate('/hr2m');
+                break;
+
             default:
                 navigate('/login');
         }
