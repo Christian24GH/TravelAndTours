@@ -29,26 +29,46 @@
 
 ##  Commands
 1. Backend Setup
-- cd (Backendfolder example. auth)
-- composer i
-- cp .env.example .env
-- php artisan key:generate
-- php artisan migrate
-
-2. Frontend
-- npm i
-3. Migrate Database
-
 ```bash
+    cd (Backendfolder example. auth)
+    composer i
+    cp .env.example .env
+    php artisan key:generate
     php artisan migrate
 ```
+
+2. Frontend
+```bash
+    npm i
+```
+3. Auth Database
+    Follow Backend setup then run. This will insert the Fleet Manager Account for LogisticsII
+```bash
+    php artisan db:seed
+```
+    Credentials
+    Email: fleetManager@gmail.com
+    Password: 123456
+
 4. Start Laravel Reverb
 
 ```bash
     php artisan reverb:start
+    
 ```
-    
-    
+
+### Notes
+Kahit mauna na ma-deploy yung backend namin sa internet para maaccess namin sa frontend. Yung frontend naman namin separate deployment yan dahil unified frontend na yan buong cluster so isa lang. Yung backend namin, marami po yan dahil microservice ang setup na gusto ng CRAD.
+
+Yung Backend po namin nag-eexpose po yan ng mga APIs na nasa /routes/api.php. Kahit maaccess lang po muna namin yung URI ng backend api sa internet palag na kami. Later nalang po isetup yung frontend kapag fixed na APIs ng backend.
+
+Right now sa localhost. Inaaccess po namin yung mga APIs using ```bash http://localhost:<port>/api/<api_name>``` kapag nirun namin yung php artisan serve. 
+
+Lahat po ng exposed API na gagamitin ng frontend ay nakastore po sa frontend/src/api
+
+Dun po namin yan babaguhin once up na yung hosting.
+
+Maraming salamat po at pasensya na magulo yung setup.
 
 
         
