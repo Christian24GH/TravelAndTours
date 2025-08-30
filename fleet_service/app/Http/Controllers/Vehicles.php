@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class Vehicles extends Controller
 {
@@ -38,10 +39,11 @@ class Vehicles extends Controller
 
         return response()->json(['vehicles' => $vehicles]);
     }
-    public function showAll()
+
+    public function showAll(Request $request)
     {
         $vehicles = DB::table('vehicles')
-            ->get(array_merge($this->rows, ['created_at', 'updated_at']));
+            ->get(array_merge($this->rows, ['id','created_at', 'updated_at']));
 
         return response()->json(['vehicles' => $vehicles]);
     }
@@ -80,7 +82,7 @@ class Vehicles extends Controller
             'model'           => ['required', 'string'],
             'year'            => ['required', 'digits:4'],
             'type'            => ['required', 'string'],
-            'capacity'        => ['nullable', 'integer'],
+            'capacity'        => ['required', 'string'],
             'acqdate'         => ['nullable', 'date'],
         ]);
 
@@ -95,7 +97,7 @@ class Vehicles extends Controller
                     'type'            => $validated->type,
                     'capacity'        => $validated->capacity,
                     'acquisition_date'=> Carbon::parse($validated->acqdate)->format('Y-m-d') ?? '',
-                    'status'          => 'active',
+                    'status'          => 'available',
                     'created_at'      => now(),
                     'updated_at'      => now(),
                 ]);
@@ -127,9 +129,9 @@ class Vehicles extends Controller
             'model'           => ['required', 'string'],
             'year'            => ['required', 'digits:4'],
             'type'            => ['required', 'string'],
-            'capacity'        => ['nullable', 'integer'],
+            'capacity'        => ['required', 'string'],
             'acqdate'         => ['nullable', 'date'],
-            'status'          => ['required', 'in:active,under_maintenance,retired']
+            'status'          => ['required', Rule::in(['Available', 'Reserved', 'Under Maintenance', 'Retired'])],
         ]);
 
         try {

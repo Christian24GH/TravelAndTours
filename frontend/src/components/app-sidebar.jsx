@@ -12,11 +12,15 @@ import {
   TagsIcon,
   HistoryIcon,
   LogsIcon,
+<<<<<<< HEAD
   ClockIcon,
   ClockAlertIcon,
   FileIcon,
   FileCheckIcon,
   CalendarCheckIcon,
+=======
+  MapPinIcon
+>>>>>>> 596cd5b3a672e807b98fb2e95e2818fc79a6c0bf
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -62,7 +66,7 @@ const data = {
         NavItems: [
           {
             title: "Vehicles",
-            url: '/logisticsII/fleet',
+            url: '/logisticsII/vehicles',
             icon: Car,
           },
           {
@@ -84,12 +88,12 @@ const data = {
         NavItems: [
           {
             title: "Reservations",
-            url: '#',
+            url: '/logisticsII/reservation',
             icon: BookOpenCheckIcon,
           },
           {
             title: "Dispatch Orders",
-            url: '#',
+            url: '/logisticsII/dispatch',
             icon: TagsIcon,
           },
         ],
@@ -240,7 +244,7 @@ export function AppSidebar({...props}) {
   }
 
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="floating" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

@@ -14,6 +14,7 @@ import { Outlet } from "react-router"
 import { useContext, useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 import AuthContext from "../context/AuthProvider"
+import Breadcrumps from "../components/bread-crumbs"
 
 export function Layout({allowedRoles}) {
   const {auth, loading, logout} = useContext(AuthContext)
@@ -85,6 +86,7 @@ export function Layout({allowedRoles}) {
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+            <Breadcrumps/>
           </div>
         </header>
 

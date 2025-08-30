@@ -9,3 +9,11 @@ Broadcast::channel('vehicle_channel', function(){
 Broadcast::channel('maintenance_channel', function(){
     return true;
 });
+
+Broadcast::channel('reservation_channel', function(){
+    return true;
+});
+
+Broadcast::channel('dispatchChannel', function(){
+    return true;
+});

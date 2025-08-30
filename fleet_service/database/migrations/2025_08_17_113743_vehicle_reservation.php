@@ -14,14 +14,23 @@ return new class extends Migration
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
+            $table->string('batch_number', 50);
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+            $table->string('purpose')->nullable();
+            $table->string('pickup');
+            $table->string('dropoff');
+            $table->enum('status', ['Pending', 'Confirmed', 'Cancelled'])->default('Pending');
             $table->timestamps();
             
-            $table->foreignId('vehicle_id')->constrained('vehicles')->onDelete('cascade');
-            $table->unsignedBigInteger('tour_id')->nullable(); 
-            $table->unsignedBigInteger('customer_id')->nullable(); 
+            $table->unsignedBigInteger('employee_id')->nullable();
+        });
+
+        Schema::create('reserved_vehicles', function (Blueprint $table){
+            $table->id();
+            $table->foreignId('reservation_id')->nullable()->constrained('reservations')->nullOnDelete();
+            $table->foreignId('vehicle_id')->nullable()->constrained('vehicles')->nullOnDelete();
+            $table->timestamps();
         });
 
         Schema::create('dispatches', function (Blueprint $table) {
@@ -29,15 +38,14 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->dateTime('dispatch_time');
             $table->dateTime('return_time')->nullable();
-            $table->integer('odometer_start')->nullable();
-            $table->integer('odometer_end')->nullable();
-            $table->enum('status', ['dispatched', 'in_progress', 'returned', 'cancelled'])->default('dispatched');
+            $table->enum('status', ['Dispatched', 'In Progress', 'Returned', 'Cancelled'])->default('Dispatched');
             $table->text('remarks')->nullable();
             $table->timestamps();
-            
-            $table->foreignId('reservation_id')->constrained('reservations')->onDelete('cascade');
-            $table->foreignId('driver_id')->nullable()->constrained('drivers')->onDelete('set null');
+
+            $table->foreignId('reserved_vehicles_id')->nullable()->constrained('reserved_vehicles')->nullOnDelete();
+            $table->foreignId('driver_id')->nullable()->constrained('drivers')->nullOnDelete();
         });
+
     }
 
     /**
@@ -45,7 +53,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reservations');
         Schema::dropIfExists('dispatches');
+        Schema::dropIfExists('reservations');
     }
 };

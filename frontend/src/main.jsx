@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './layout/GuestRoute';
 import { Layout } from './layout/ProtectedLayout';
 import LoginPage from './main/login';
+<<<<<<< HEAD
 import Dashboard from './logisticsII/dashboard'
 import Fleet from './logisticsII/fleet'
 import Dash from './hr3/dashboard'
@@ -15,6 +16,14 @@ import Timesheet from './hr3/timesheet'
 import Schedule from './hr3/schedule'
 import Leave from './hr3/leave'
 import Claims from './hr3/claims'
+=======
+import LogisticsIIDashboard from './logisticsII/dashboard'
+import LogisticsIIFleet from './logisticsII/fleet'
+import LogisticsIIReservation from './logisticsII/reservation';
+import LogisticsIIDispatchPage from './logisticsII/dispatch';
+import LogisticsIIMakeReservationPage from './logisticsII/make-reservation';
+
+>>>>>>> 596cd5b3a672e807b98fb2e95e2818fc79a6c0bf
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -28,9 +37,13 @@ createRoot(document.getElementById('root')).render(
 
           {/**LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
-            <Route index element={<Dashboard/>}/>
-            <Route path='fleet' element={<Fleet/>}/>
+            <Route index element={<LogisticsIIDashboard/>}/>
+            <Route path='vehicles' element={<LogisticsIIFleet/>}/>
+            <Route path='reservation' element={<LogisticsIIReservation/>}/>
+            <Route path='reservation/make' element={<LogisticsIIMakeReservationPage/>}/>
+            <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           </Route>
+<<<<<<< HEAD
 
           {/**HR Management */}
           <Route path="/hr3" element={<Layout allowedRoles={['HR3 Manager', 'Super Admin']}/>}>
@@ -41,6 +54,9 @@ createRoot(document.getElementById('root')).render(
             <Route path='leave' element={<Leave/>}/>
             <Route path='claims' element={<Claims/>}/>
           </Route>
+=======
+  
+>>>>>>> 596cd5b3a672e807b98fb2e95e2818fc79a6c0bf
         </Routes>
       </AuthProvider>
     </BrowserRouter>

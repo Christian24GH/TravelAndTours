@@ -1,21 +1,29 @@
 <?php
 
-use App\Http\Controllers\Maintenance;
+use App\Http\Controllers\Dispatches;
+use App\Http\Controllers\Drivers;
+use App\Http\Controllers\Reservations;
 use App\Http\Controllers\Vehicles;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-
+//Vehicles
 Route::get('/vehicles', [Vehicles::class, 'show']);
-
-Route::get('/hello', function () {
-    return 'Hello World!';
-});
-
 Route::get('/vehicles/search', [Vehicles::class, 'search']);
 Route::get('/vehicles/all', [Vehicles::class, 'showAll']);
 Route::post('/vehicles/register', [Vehicles::class, 'register']);
 Route::put('/vehicles/change', [Vehicles::class, 'update']);
 
-Route::post('/maintenance/add', [Maintenance::class, 'add']);
-Route::put('/maintenance/change', [Maintenance::class, 'update']);
+//Reservations
+Route::get('/reserve', [Reservations::class, 'show']);
+Route::post('/reserve/submit', [Reservations::class, 'makeRequest']);
+Route::put('/reserve/approve', [Reservations::class, 'approveReservation']);
+Route::put('/reserve/cancel', [Reservations::class, 'cancelRequest']);
+
+
+//Driver
+Route::get('/drivers', [Drivers::class, 'show']);
+Route::get('/drivers/getDrivers', [Drivers::class, 'get']);
+
+//Dispatch
+Route::get('/dispatches', [Dispatches::class, 'show']);
+Route::get('/dispatches/driver', [Dispatches::class, 'showToDriver']);
