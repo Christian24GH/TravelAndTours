@@ -23,11 +23,6 @@ createRoot(document.getElementById('root')).render(
             <Route path="/login" index element={<LoginPage/>}/>
           </Route>
 
-         {/**LogisticsI */}
-          <Route path="/logistics1" element={<Layout allowedRoles={['LogisticsI Admin', 'Super Admin']}/>}>
-            <Route index element={<DashboardLog1/>}/>
-            
-          </Route>
 
           {/**LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
