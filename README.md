@@ -23,9 +23,9 @@
     - [Backend]database/migrations - Location ng Database Blueprints namin.
     - [Backend] terminal, kapag na-setup na yung backend, run sa terminal
 
-    ```bash
+```bash
     php artisan migrate
-    ```
+```
 
 ##  Commands
 1. Backend Setup
@@ -42,7 +42,7 @@
     npm i
 ```
 3. Auth Database
-    Follow Backend setup then run. This will insert the Fleet Manager Account for LogisticsII
+Follow Backend setup then run. This will insert the Fleet Manager Account for LogisticsII
 ```bash
     php artisan db:seed
 ```
@@ -62,7 +62,13 @@ Kahit mauna na ma-deploy yung backend namin sa internet para maaccess namin sa f
 
 Yung Backend po namin nag-eexpose po yan ng mga APIs na nasa /routes/api.php. Kahit maaccess lang po muna namin yung URI ng backend api sa internet palag na kami. Later nalang po isetup yung frontend kapag fixed na APIs ng backend.
 
-Right now sa localhost. Inaaccess po namin yung mga APIs using ```bash http://localhost:<port>/api/<api_name>``` kapag nirun namin yung php artisan serve. 
+Right now sa localhost. Inaaccess po namin yung mga APIs using 
+
+```bash 
+    http://localhost:<port>/api/<api_name>
+
+``` 
+kapag nirun namin yung php artisan serve. 
 
 Lahat po ng exposed API na gagamitin ng frontend ay nakastore po sa frontend/src/api
 
