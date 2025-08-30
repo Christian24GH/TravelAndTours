@@ -11,6 +11,7 @@ import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
+import DashboardLog1 from './logistics1/dashboard';
 
 
 createRoot(document.getElementById('root')).render(
@@ -21,6 +22,12 @@ createRoot(document.getElementById('root')).render(
           {/** Main Routes */}
           <Route element={<GuestRoute/>}>
             <Route path="/login" index element={<LoginPage/>}/>
+          </Route>
+
+         {/**LogisticsI */}
+          <Route path="/logistics1" element={<Layout allowedRoles={['LogisticsI Admin', 'Super Admin']}/>}>
+            <Route index element={<DashboardLog1/>}/>
+            
           </Route>
 
           {/**LogisticsII */}
