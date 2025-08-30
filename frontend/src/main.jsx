@@ -11,7 +11,6 @@ import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
-import DashboardLog1 from './logistics1/dashboard';
 
 
 createRoot(document.getElementById('root')).render(
@@ -35,11 +34,10 @@ createRoot(document.getElementById('root')).render(
             <Route index element={<LogisticsIIDashboard/>}/>
             <Route path='vehicles' element={<LogisticsIIFleet/>}/>
             <Route path='reservation' element={<LogisticsIIReservation/>}/>
+            <Route path='reservation/make' element={<LogisticsIIMakeReservationPage/>}/>
             <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           </Route>
-
-
-          
+  
         </Routes>
       </AuthProvider>
     </BrowserRouter>

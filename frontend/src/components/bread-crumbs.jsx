@@ -1,3 +1,4 @@
+import { Home, HomeIcon } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,29 +16,29 @@ const location = useLocation()
 
     // Split pathname into segments
     const pathnames = curLocation.split("/").filter(Boolean)
-    console.log(pathnames)
+    
     return (
         <Breadcrumb>
-        <BreadcrumbList>
-            {pathnames.map((segment, index) => {
-            // Build the URL up to this segment
-            const to = "/" + pathnames.slice(0, index + 1).join("/")
-            console.log(to)
-            // Capitalize segment
-            const label = segment.charAt(0).toUpperCase() + segment.slice(1)
-            
-            console.log(label)
-            return (
-                <React.Fragment key={to}>
-                    <BreadcrumbItem>
+            <BreadcrumbList>
+                {pathnames.map((segment, index) => {
+                // Build the URL up to this segment
+                const to = "/" + pathnames.slice(0, index + 1).join("/")
+                
+                // Capitalize segment
+                const label = segment.charAt(0).toUpperCase() + segment.slice(1)
+                return (
+                    <BreadcrumbItem key={to}>
                         {index === pathnames.length - 1 ? (
-                            <span className="font-medium">{label}</span> // last item not a link
-                        ) : index === pathnames[0] ? (
-                            <BreadcrumbLink asChild>
-                                <Link to={to}>
-                                    {label}
-                                </Link>
-                            </BreadcrumbLink>
+                            <span className="font-medium">{label == 'LogisticsII' ? 'Home' : label}</span> // last item not a link
+                        ) : index === 0 ? (
+                            <>
+                                <BreadcrumbLink asChild>
+                                    <Link to={to}>
+                                        Home
+                                    </Link>
+                                </BreadcrumbLink>
+                                <BreadcrumbSeparator/>
+                            </>
                         ): (
                             <>
                                 <BreadcrumbLink asChild>
@@ -49,10 +50,9 @@ const location = useLocation()
                             </>
                         )}
                     </BreadcrumbItem>
-                </React.Fragment>
-            )
-            })}
-        </BreadcrumbList>
+                )
+                })}
+            </BreadcrumbList>
         </Breadcrumb>
     )
 }

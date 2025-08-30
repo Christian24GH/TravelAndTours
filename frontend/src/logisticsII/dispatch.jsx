@@ -6,11 +6,11 @@ import { toast } from "sonner";
 import {motion} from 'motion/react'
 
 import { useEchoPublic } from "@laravel/echo-react";
-import { logisticsII } from "../api/logisticsII";
-import PaginationComponent from "../components/logisticsII/pagination";
-import TableComponent from "../components/logisticsII/table";
+import { logisticsII } from "@/api/logisticsII";
+import PaginationComponent from "@/components/logisticsII/pagination";
+import TableComponent from "@/components/logisticsII/table";
 
-import { ViewDialog } from "../components/logisticsII/reservations";
+import { ViewDialog } from "@/components/logisticsII/reservation/modals";
 
 const api = logisticsII.backend.api;
 const reverb = logisticsII.reverb;
