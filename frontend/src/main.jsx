@@ -8,12 +8,16 @@ import { GuestRoute } from './layout/GuestRoute';
 import { Layout } from './layout/ProtectedLayout';
 import LoginPage from './main/login';
 import Landing from './main/landing';
+// hr3
 import Dash from './hr3/dashboard'
 import Attendance from './hr3/attendance'
 import Timesheet from './hr3/timesheet'
 import Schedule from './hr3/schedule'
 import Leave from './hr3/leave'
 import Claims from './hr3/claims'
+// logisticsI
+import LogisticsIDashboard from './logistics1/dashboard'
+// logisticsII
 import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
@@ -33,7 +37,10 @@ createRoot(document.getElementById('root')).render(
             <Route path="/login" index element={<LoginPage/>}/>
           </Route>
 
-
+          {/**LogisticsI */}
+          <Route path="/logisticsI" element={<Layout allowedRoles={['LogisticI Admin', 'Super Admin']}/>}>
+            <Route index element={<LogisticsIDashboard/>}/>
+          </Route>
 
           {/**LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
@@ -44,7 +51,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           </Route>
 
-          {/**HR Management */}
+          {/**HR3 */}
           <Route path="/hr3" element={<Layout allowedRoles={['HR3 Manager', 'Super Admin']}/>}>
             <Route index element={<Dash/>}/>
             <Route path='attendance' element={<Attendance/>}/>

@@ -361,7 +361,7 @@ export function AppSidebar({...props}) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href={ user.role === "LogisticsII Admin" ? "/logisticsII" : user.role === "HR3 Manager" ? "/hr3" : "/"}>
+              <a href={ user.role === "LogisticsII Admin" ? "/logisticsII" : user.role === "HR3 Manager" ? "/hr3" : user.role === "LogisticsI Admin" ? "/logistics1" : "/"}>
                 <div
                   className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Command className="size-4" />
