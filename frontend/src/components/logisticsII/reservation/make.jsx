@@ -216,7 +216,7 @@ export function BatchReservation(){
     useEffect(() => {
         const fetchAvailableVehicles = async () => {
         try {
-            const response = await axios.get();
+            const response = await axios.get(api.fetchAvailableVehicles);
             if (response.status === 200) {
                 setVehicles(response.data?.vehicles || []);
             }
@@ -246,6 +246,7 @@ export function BatchReservation(){
         
     };
 
+    console.log(errors.reservations)
     return(
         <div className='px-1'>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -320,7 +321,8 @@ export function BatchReservation(){
                                 )}
                             </div>
                         ))}
-
+                        
+                        
                         <Button
                             type="button"
                             variant="secondary"

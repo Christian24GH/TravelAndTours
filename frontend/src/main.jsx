@@ -18,7 +18,7 @@ import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
-import LogisticsIIMakeReservationPage from './logisticsII/make-reservation';
+import LogisticsIIMakeReservationPage from './logisticsII/make-reservation'
 
 
 createRoot(document.getElementById('root')).render(
@@ -32,6 +32,8 @@ createRoot(document.getElementById('root')).render(
           <Route element={<GuestRoute/>}>
             <Route path="/login" index element={<LoginPage/>}/>
           </Route>
+
+
 
           {/**LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>

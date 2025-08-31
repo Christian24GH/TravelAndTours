@@ -37,6 +37,122 @@ import AuthContext from "../context/AuthProvider"
 import { useContext } from "react"
 
 const data = {
+
+  /** Logistics 1 NavItems */
+  logisticsINav: [
+    {
+      NavGroup: {
+        NavLabel: 'Smart Warehousing System',
+        NavItems: [
+          {
+            title: "Inventory Management",
+            url: '/logistics1/inventory-management',
+            icon: Gauge,
+          },
+          {
+            title: "Storage Organization",
+            url: '/logisticsI/storage-organization',
+            icon: PieChartIcon,
+          },
+          {
+            title: "Stock Monitoring",
+            url: '/logisticsI/stock-monitoring',
+            icon: ChartSpline,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Procurement & Sourcing Management',
+        NavItems: [
+          {
+            title: "Supplier Management",
+            url: '/logistic1/supplier-management',
+            icon: User,
+          },
+          {
+            title: "Purchase Processing",
+            url: '/logistic1/purchase-processing',
+            icon: WrenchIcon,
+          },
+          {
+            title: "Expense Records",
+            url: '/logistic1/expense-records',
+            icon: LifeBuoy,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Project Logistic Tracker',
+        NavItems: [
+          {
+            title: "Equipment Scheduling",
+            url: '/logistic1/equipment-scheduling',
+            icon: BookOpenCheckIcon,
+          },
+          {
+            title: "Delivery & Transport Tracking",
+            url: '/logistic1/delivery-transport-tracking',
+            icon: TagsIcon,
+          },
+          {
+            title: "Tour Reports",
+            url: '/logistic1/tour-reports',
+            icon: HistoryIcon,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Asset Lifecycle & Maintenance',
+        NavItems: [
+          {
+            title: "Asset Registration & QR Tagging",
+            url: '/logistic1/asset-registration',
+            icon: User,
+          },
+          {
+            title: "Predictive Maintenance",
+            url: '/logistic1/predictive-maintenance',
+            icon: WrenchIcon,
+          },
+          {
+            title: "Maintenance History",
+            url: '/logistic1/maintenance-history',
+            icon: LogsIcon,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Document Tracking & Logistics Records',
+        NavItems: [
+          {
+            title: "Delivery Receipts",
+            url: '/logistic1/delivery-receipts',
+            icon: BookOpenCheckIcon,
+          },
+          {
+            title: "Check-In/Check-Out Logs",
+            url: '/logistic1/check-in-out-logs',
+            icon: LifeBuoy,
+          },
+          {
+            title: "Logistics Reports",
+            url: '/logistic1/logistics-reports',
+            icon: HistoryIcon,
+          },
+        ],
+      }
+    },
+  ],
+
+
   /** Logistics 2 NavItems */
   logisticsIINav: [
     {
@@ -253,7 +369,7 @@ export function AppSidebar({...props}) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "Logistics" : '' || user.role == "HR3 Manager" ? "Human Resources 3" : ''}
+                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "Logistics" : '' || user.role == "HR3 Manager" ? "HR3" : '' || user.role == "LogisticsI Admin" ? "Logistics I" : ''}
                   </span>
                 </div>
               </a>
@@ -272,8 +388,11 @@ export function AppSidebar({...props}) {
             </div>
           ) : (
             <>
-              {user.role === "LogisticsII Admin" ? 
-              (<NavMain data={data.logisticsIINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
+              {user.role === "LogisticsII Admin" ?  
+              (<NavMain data={data.logisticsIINav}/>) 
+              : null}
+              {user.role === "LogisticsI Admin" ? 
+              (<NavMain data={data.logisticsINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
               : null}
               {user.role === "HR3 Manager" ? 
               (<NavMain data={data.hr3Nav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
