@@ -76,7 +76,7 @@ export default function Attendance() {
       <div>
         <h1 className="text-2xl font-bold">Attendance</h1><hr />
         <div className="mt-3">
-          <div className="grid grid-cols-6 gap-4 h-[10rem] text-center pl-2">
+          <div className="grid grid-cols-6 gap-5 h-[10rem] text-center pl-2">
             <div className="col-span-1 rounded-md shadow-sm inline-shadow-sm grid grid-cols-3">
               <div className="col-span-2 bg-gray-200 text-wrap text-start text-2xl font-bold items-center flex p-2">Total Employees</div>
               <div className="text-3xl font-bold items-center flex justify-center p-2">{totalEmployees}</div>
@@ -135,7 +135,7 @@ export default function Attendance() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-[100%] h-[40px] col-span-4 rounded-full"
           />
-          <Button className="items-center w-fit rounded-full"><Search className="h-5 w-5" /></Button>
+          <Button className="items-center w-fit rounded-full" variant="outline"><Search className="h-5 w-5" /></Button>
         </div>
       </div>
 

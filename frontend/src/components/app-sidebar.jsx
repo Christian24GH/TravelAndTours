@@ -12,15 +12,11 @@ import {
   TagsIcon,
   HistoryIcon,
   LogsIcon,
-<<<<<<< HEAD
   ClockIcon,
   ClockAlertIcon,
   FileIcon,
   FileCheckIcon,
   CalendarCheckIcon,
-=======
-  MapPinIcon
->>>>>>> 596cd5b3a672e807b98fb2e95e2818fc79a6c0bf
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"

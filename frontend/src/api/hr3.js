@@ -25,9 +25,8 @@ export const hr3 = {
         port: backendPort,
         uri: backendUri,
         api: {
-            vehicles: `${backendUri}/api/vehicles`,
-            register: `${backendUri}/api/vehicles/register`,
-            update: `${backendUri}/api/vehicles/change`,
+            attendance: `${backendUri}/api/attendance`,
+            employees: `${backendUri}/api/employees`
         },
     }
 }

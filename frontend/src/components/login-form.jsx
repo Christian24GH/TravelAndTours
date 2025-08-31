@@ -52,16 +52,6 @@ export function LoginForm({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-<<<<<<< HEAD
-=======
-                  {/*
-                    <a
-                      href="#"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                      Forgot your password?
-                    </a>
-                  */}
->>>>>>> 596cd5b3a672e807b98fb2e95e2818fc79a6c0bf
                 </div>
                 <Input {...register('password', {
                     required: 'Password is required'
@@ -77,15 +67,12 @@ export function LoginForm({
                 </Button>
               </div>
             </div>
-<<<<<<< HEAD
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
               <a href="#" className="underline underline-offset-4 hover:text-blue-600">
                 Sign up
               </a>
             </div>
-=======
->>>>>>> 596cd5b3a672e807b98fb2e95e2818fc79a6c0bf
           </form>
         </CardContent>
       </Card>

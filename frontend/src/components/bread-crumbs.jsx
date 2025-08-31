@@ -23,7 +23,7 @@ const location = useLocation()
                 {pathnames.map((segment, index) => {
                 // Build the URL up to this segment
                 const to = "/" + pathnames.slice(0, index + 1).join("/")
-                
+
                 // Capitalize segment
                 const label = segment.charAt(0).toUpperCase() + segment.slice(1)
                 return (

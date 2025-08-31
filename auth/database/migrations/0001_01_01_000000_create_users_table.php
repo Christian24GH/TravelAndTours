@@ -17,11 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-<<<<<<< HEAD
-            $table->enum('role', ['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee','HR3 Manager'])->default('Employee');
-=======
-            $table->enum('role', ['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1'])->default('Employee');
->>>>>>> 596cd5b3a672e807b98fb2e95e2818fc79a6c0bf
+            $table->enum('role', ['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee','HR3 Manager','HR1'])->default('Employee');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -40,13 +36,6 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
-
-        Schema::insert('users', [
-            'name' => 'hr',
-            'email' => 'hr@example.com',
-            'password' => bcrypt('password'),
-            'role' => 'HR3 Manager',
-        ]);
     }
 
     /**
