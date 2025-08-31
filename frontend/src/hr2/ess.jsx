@@ -6,8 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import {
     Dialog,
     DialogContent,
@@ -383,41 +381,36 @@ function ESS() {
     };
 
     return (
-        <SidebarProvider style={{ '--sidebar-width': '12rem' }}>
-            <div className="flex flex-1 min-h-screen bg-gray-100" style={{ height: '100vh' }}>
-                <AppSidebar style={{ width: '12rem', minWidth: '12rem', maxWidth: '12rem' }} />
-                <main className="flex-1 flex flex-col h-full m-4">
-                    <Helmet>
-                        <title>Employees Profile</title>
-                    </Helmet>
-                    <div className="flex items-center gap-4 px-4 py-2 bg-white border-b border-gray-200 sticky top-0 z-10 -m-4">
-                        <SidebarTrigger />
-                        <h1 className="text-large tracking-tight font-semibold text-gray-800">Employees Profile</h1>
-                    </div>
-                    <div className="flex-1 overflow-y-auto pt-4">
-
-                        <header className="mb-6">
-                            <h1 className="text-xl md:text-3xl font-bold text-gray-800">
-                                {isHR2Admin ? '' : isEmployee ? '' : 'Loading...'}
-                            </h1>
-                        </header>
-
-                        {loading && <div>Loading...</div>}
-                        {!loading && (
-                            profile ? (
-                                <div className="flex justify-center w-full mt-8">
-                                    <Card className="max-w-full w-full max-h-full">
-                                        <CardHeader>
-                                            <CardTitle>Your Profile</CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <div className="flex flex-col md:flex-row gap-6 items-start py-1">
-                                                <div className="flex flex-col items-center">
-                                                    <img
-                                                        src={form.profile_photo_url || "https://img.icons8.com/?size=100&id=LREuj015njcj&format=png&color=000000"}
-                                                        alt="Profile"
-                                                        className="w-32 h-32 rounded-full object-scale-down border"
-                                                    />
+        <div className="flex flex-1 min-h-screen bg-gray-100" style={{ height: '100vh' }}>
+            <main className="flex-1 flex flex-col h-full m-4">
+                <Helmet>
+                    <title>Employees Profile</title>
+                </Helmet>
+                <div className="flex items-center gap-4 px-4 py-2 bg-white border-b border-gray-200 sticky top-0 z-10 -m-4">
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">Your Profile</h1>
+                </div>
+                <div className="flex-1 overflow-y-auto pt-4">
+                    <header className="mb-6">
+                        <h1 className="text-xl md:text-3xl font-bold text-gray-800">
+                            {isHR2Admin ? '' : isEmployee ? '' : 'Loading...'}
+                        </h1>
+                    </header>
+                    {loading && <div>Loading...</div>}
+                    {!loading && (
+                        profile ? (
+                            <div className="flex justify-center w-full mt-8">
+                                <Card className="max-w-full w-full max-h-full">
+                                    <CardHeader>
+                                        <CardTitle>Your Profile</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex flex-col md:flex-row gap-6 items-start py-1">
+                                            <div className="flex flex-col items-center">
+                                                <img
+                                                    src={form.profile_photo_url || "https://img.icons8.com/?size=100&id=LREuj015njcj&format=png&color=000000"}
+                                                    alt="Profile"
+                                                    className="w-32 h-32 rounded-full object-scale-down border"
+                                                />
                                                     {isEmployee && editableFields.includes("profile_photo_url") && (
                                                         <>
                                                             <Button
@@ -525,7 +518,6 @@ function ESS() {
                     <ToastContainer position="bottom-right" />
                 </main>
             </div>
-        </SidebarProvider>
     );
 }
 

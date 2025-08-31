@@ -32,6 +32,23 @@ class SuccessionController extends Controller
 
         return response()->json($plans);
     }
+    public function candidates()
+    {
+        return response()->json([
+            [
+                'fullname' => 'John Smith',
+                'current_Position' => 'Operations Supervisor',
+                'years_in_company' => 5,
+                'readiness_Level' => 'Ready',
+            ],
+            [
+                'fullname' => 'Jane Doe',
+                'current_Position' => 'Quality Lead',
+                'years_in_company' => 3,
+                'readiness_Level' => '6-12 months',
+            ],
+        ]);
+    }
 }
 
 

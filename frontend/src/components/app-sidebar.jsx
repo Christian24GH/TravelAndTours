@@ -31,7 +31,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 
 import AuthContext from "../context/AuthProvider"
-import { useContext } from "react"
+import { useContext, useState } from "react"
 
 const data = {
   /** Logistics 2 NavItems */
@@ -110,29 +110,57 @@ const data = {
       }
     }
   ],
+  /** HR2 NavItems */
   HRINav: [
     {
       NavGroup: {
-        NavLabel: 'Human Resources',
+        NavLabel: 'Human Resources 2',
         NavItems: [
           {
-            title: "Talent Development",
-            url: '/hr2m',
-            icon: ChartSpline,
+            title: "Dashboard",
+            url: '/hr2/db',
+            icon: Command,
           },
           {
-            title: "Employees Profile",
-            url: '/hr2e',
+            type: 'collapsible',
+            title: 'Talent & Career',
+            icon: LogsIcon,
+            children: [
+              {
+                title: "Competency",
+                url: '/hr2/cms',
+                icon: PieChartIcon,
+              },
+              {
+                title: "Learning",
+                url: '/hr2/lms',
+                icon: BookOpenCheckIcon,
+              },
+              {
+                title: "Training",
+                url: '/hr2/tms',
+                icon: Gauge,
+              },
+              {
+                title: "Succession",
+                url: '/hr2/sps',
+                icon: ChartSpline,
+              },
+            ]
+          },
+          {
+            title: "Employee Self-Service",
+            url: '/hr2/ess',
             icon: User,
           },
           {
-            title: "HR Admin",
-            url: '/hr2a',
+            title: "HRAdmin (ForData)",
+            url: '/hr2/admin',
             icon: User,
           },
         ],
       }
-    }
+    },
   ],
   navSecondary: [
     {
@@ -158,38 +186,96 @@ export function AppSidebar({...props}) {
     email: auth?.email
   }
 
+  const renderNavGroups = (navArray, openTalentGroup, toggleTalentGroup) => (
+    navArray.map((group, idx) => (
+      <div key={idx} className="mb-2">
+        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          {group.NavGroup.NavLabel}
+        </div>
+        <SidebarMenu>
+          {group.NavGroup.NavItems.map((item, i) => (
+            item.type === 'collapsible' ? (
+              <SidebarMenuItem key={i}>
+                <SidebarMenuButton asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-gray-100 rounded justify-between"
+                    onClick={toggleTalentGroup}
+                  >
+                    <span className="flex items-center gap-2">
+                      {item.icon && <item.icon className="size-4" />}
+                      <span>{item.title}</span>
+                    </span>
+                    <span>{openTalentGroup ? '▾' : '▸'}</span>
+                  </button>
+                </SidebarMenuButton>
+                {openTalentGroup && item.children && (
+                  <SidebarMenu className="ml-4 border-l border-gray-200">
+                    {item.children.map((child, j) => (
+                      <SidebarMenuItem key={j}>
+                        <SidebarMenuButton asChild>
+                          <a href={child.url} className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded">
+                            {child.icon && <child.icon className="size-4" />}
+                            <span>{child.title}</span>
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                )}
+              </SidebarMenuItem>
+            ) : (
+              <SidebarMenuItem key={i}>
+                <SidebarMenuButton asChild>
+                  <a href={item.url} className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded">
+                    {item.icon && <item.icon className="size-4" />}
+                    <span>{item.title}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          ))}
+        </SidebarMenu>
+      </div>
+    ))
+  )
+
+  // Collapsible state for HR2 Talent group
+  const [openTalentGroup, setOpenTalentGroup] = useState(true);
+  const toggleTalentGroup = () => setOpenTalentGroup((v) => !v);
+
   return (
     <Sidebar variant="inset" {...props}>
-    <SidebarHeader>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton size="lg" asChild>
-            <a href="#">
-              <div
-                className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
-              >
-                <Command className="size-4" />
-              </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Travel and Tours</span>
-                <span className="truncate text-xs">
-                  {user.role == "logisticsII Admin" && "Logistics"}
-                  {user.role == "HR2 Admin" && "Human Resources"}
-                  {user.role == "Employee" && "Employee"}
-                </span>
-              </div>
-            </a>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarHeader>
-    <SidebarContent className="flex flex-col gap-2">
-      {/* HR 2 */}
-      {user.role == "HR2 Admin" && (<NavLink data={data.HRINav} />)}
-    </SidebarContent>
-    <SidebarFooter>
-      <NavUser user={user} logout={logout} />
-    </SidebarFooter>
-  </Sidebar>
-);
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div
+                  className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
+                >
+                  <Command className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">Travel and Tours</span>
+                  <span className="truncate text-xs">
+                    {user.role === "logisticsII Admin" && "Logistics"}
+                    {user.role === "HR2 Admin" && "Human Resources"}
+                    {user.role === "Employee" && "Employee"}
+                  </span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent className="flex flex-col gap-2">
+        {user.role === "HR2 Admin" && renderNavGroups(data.HRINav, openTalentGroup, toggleTalentGroup)}
+        {user.role === "logisticsII Admin" && renderNavGroups(data.logisticsIINav)}
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={user} logout={logout} />
+      </SidebarFooter>
+    </Sidebar>
+  );
 }

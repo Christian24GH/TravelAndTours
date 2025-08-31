@@ -12,13 +12,12 @@ export const AuthProvider = ({children})=>{
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                // Sanctum ensures session is tied to HttpOnly cookie
-                const response = await axios.get("/api/user", { withCredentials: true })
-                setAuth(response.data) // user object returned by Laravel
+                const response = await axios.get("/api/user")
+                setAuth(response.data)
             } catch (error) {
-                setAuth(null) // not logged in
+                setAuth(null)
             }finally {
-                setLoading(false); // check complete
+                setLoading(false);
             }
         }
         checkAuth()
@@ -46,6 +45,11 @@ export const AuthProvider = ({children})=>{
                 // Store employeeId in localStorage for Employee role
                 if (user && user.role === 'Employee' && user.id) {
                     localStorage.setItem('employeeId', user.id);
+                }
+
+                // Store user for HR2 dashboard compatibility
+                if (user) {
+                    localStorage.setItem('currentUser', JSON.stringify(user));
                 }
 
                 toast.success('Login successful, redirecting...', { position: "top-center" })
@@ -79,12 +83,8 @@ export const AuthProvider = ({children})=>{
                 break;
 
             case 'HR2 Admin':
-                // Navigate to HR2 Admin dashboard, where links to /hr2a, /hr2m, /hr2e are available
-                navigate('/hr2a');
-                break;
             case 'Employee':
-                // Navigate to HR2 Employee main page, UI should show links to /hr2m and /hr2e as needed
-                navigate('/hr2m');
+                navigate('/hr2/db');
                 break;
 
             default:

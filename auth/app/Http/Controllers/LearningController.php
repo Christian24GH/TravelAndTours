@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-
+use App\Models\Course;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class LearningController extends Controller
 {
@@ -47,6 +48,14 @@ class LearningController extends Controller
         ];
 
         return response()->json($items);
+    }
+
+    public function courses(Request $request)
+    {
+        $employeeId = $request->query('employee_id');
+        // Fetch courses for the employee. Replace with your actual logic:
+        $courses = Course::where('employee_id', $employeeId)->get();
+        return response()->json($courses);
     }
 }
 

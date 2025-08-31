@@ -20,7 +20,7 @@ class AuthController extends Controller
             'password'  => ['required', 'min:6'],
             'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1', 'HR2 Admin'])],
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation Failed',
@@ -28,19 +28,17 @@ class AuthController extends Controller
             ], 422);
         }
 
-        try{
+        try {
+            \DB::beginTransaction();
+
             $user = User::create([
                 'name'     => $request->name,
                 'email'    => $request->email,
-                'password' => Hash::make($request->password), // Use Hash::make()
+                'password' => Hash::make($request->password),
                 'role'     => $request->role,
             ]);
 
-            $user->employee_id = $this->generateEmployeeId();
-            $user->save();
-            
-            Employee::create([
-                'id' => $user->employee_id,
+            $employee = Employee::create([
                 'first_name' => explode(' ', $user->name, 2)[0] ?? '',
                 'last_name' => explode(' ', $user->name, 2)[1] ?? '',
                 'email' => $user->email,
@@ -49,21 +47,22 @@ class AuthController extends Controller
                 'hire_date' => now()->toDateString(),
             ]);
 
-        }catch(Exception $e){
-            // Return a more specific error message
+            $user->employee_id = $employee->id;
+            $user->save();
+
+            \DB::commit();
+        } catch(Exception $e) {
+            \DB::rollBack();
             return response()->json('Registration Failed: ' . $e->getMessage(), 500);
         }
 
         return response()->json([
-            'message' => 'Registered Successfully', 
-            'id' => $user->employee_id, 
+            'message' => 'Registered Successfully',
+            'id' => $user->employee_id,
             'email' => $user->email,
         ], 200);
     }
     
-    /**
-     * Generate a unique 3-4 digit numerical ID.
-     */
     private function generateEmployeeId()
     {
         do {
@@ -81,7 +80,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $validated->email)->first();
 
-        if (!$user || !Hash::check($validated->password, $user->password)) { // Use Hash::check() for login
+        if (!$user || !Hash::check($validated->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
@@ -99,7 +98,6 @@ class AuthController extends Controller
     }
     
     public function otp(Request $request){
-        // Your existing otp function
     }
 
     public function user(Request $request){
