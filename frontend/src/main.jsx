@@ -11,8 +11,11 @@ import Landing from './main/landing';
 // hr3
 import Dash from './hr3/dashboard'
 import Attendance from './hr3/attendance'
+import Clocking from './hr3/employeeclocking'
+import AttendanceRequest from './hr3/attendancerequest'
 import Timesheet from './hr3/timesheet'
 import Schedule from './hr3/schedule'
+import ShiftSwap from './hr3/schedulepublishing'
 import Leave from './hr3/leave'
 import Claims from './hr3/claims'
 // logisticsI
@@ -55,8 +58,11 @@ createRoot(document.getElementById('root')).render(
           <Route path="/hr3" element={<Layout allowedRoles={['HR3 Manager', 'Super Admin']}/>}>
             <Route index element={<Dash/>}/>
             <Route path='attendance' element={<Attendance/>}/>
+            <Route path='employee-clocking' element={<Clocking/>}/>
+            <Route path='attendance-requests' element={<AttendanceRequest/>}/>
             <Route path='timesheet' element={<Timesheet/>}/>
             <Route path='schedule' element={<Schedule/>}/>
+            <Route path='schedulepublishing' element={<ShiftSwap/>}/>
             <Route path='leave' element={<Leave/>}/>
             <Route path='claims' element={<Claims/>}/>
           </Route>

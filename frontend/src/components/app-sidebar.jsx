@@ -253,6 +253,16 @@ const data = {
             url: '/hr3/attendance',
             icon: ClockIcon,
           },
+          {
+            title: "Employee Clocking",
+            url: '/hr3/employee-clocking',
+            icon: ClockIcon,
+          },
+          {
+            title: "Attendance Requests",
+            url: '/hr3/attendance-requests',
+            icon: FileIcon,
+          },
         ],
       }
     },
@@ -288,8 +298,8 @@ const data = {
             icon: CalendarCheckIcon,
           },
           {
-            title: "Trip Logs",
-            url: '#',
+            title: "Schedule Publishing",
+            url: '/hr3/schedulepublishing',
             icon: LogsIcon,
           },
         ],

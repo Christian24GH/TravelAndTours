@@ -79,12 +79,12 @@ export default function Timesheet() {
                   <Button 
                     variant="outline" 
                     size="sm"
-                    // onClick={() => {
-                    //   setSelectedEmployee(row);
-                    //   setOpenDialog(!openDialog);
-                    //   setCurrentEmployee(row);
-                    //   setShowAllRecords(true);
-                    // }}
+                    onClick={() => {
+                      setSelectedEmployee(row);
+                      setOpenDialog(true);
+                      setCurrentEmployee(row);
+                      setShowAllRecords(true);
+                    }}
                   >
                     View
                   </Button>
