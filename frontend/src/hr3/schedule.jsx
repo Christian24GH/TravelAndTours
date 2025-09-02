@@ -288,7 +288,6 @@ export default function Schedule() {
               value={entry.employee}
               onChange={(e) => handleGroupDataChange(index, e.target.value)}
               className="border rounded p-1 w-full mb-2"
-              required
             >
               <option value="">Select Employee</option>
               {(selectedDept

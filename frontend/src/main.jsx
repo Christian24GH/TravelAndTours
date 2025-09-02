@@ -17,6 +17,7 @@ import Timesheet from './hr3/timesheet'
 import Schedule from './hr3/schedule'
 import ShiftSwap from './hr3/schedulepublishing'
 import Leave from './hr3/leave'
+import ApprovedLeaves from './hr3/approveleaves'
 import Claims from './hr3/claims'
 // logisticsI
 import LogisticsIDashboard from './logistics1/dashboard'
@@ -64,6 +65,7 @@ createRoot(document.getElementById('root')).render(
             <Route path='schedule' element={<Schedule/>}/>
             <Route path='schedulepublishing' element={<ShiftSwap/>}/>
             <Route path='leave' element={<Leave/>}/>
+            <Route path='approvedleaves' element={<ApprovedLeaves/>}/>
             <Route path='claims' element={<Claims/>}/>
           </Route>
   

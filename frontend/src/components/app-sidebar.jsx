@@ -315,8 +315,8 @@ const data = {
             icon: HistoryIcon,
           },
           {
-            title: "Trip Logs",
-            url: '#',
+            title: "Approved Leaves",
+            url: '/hr3/approvedleaves',
             icon: LogsIcon,
           },
         ],
@@ -330,11 +330,6 @@ const data = {
             title: "Claims Management",
             url: '/hr3/claims',
             icon: HistoryIcon,
-          },
-          {
-            title: "Trip Logs",
-            url: '#',
-            icon: LogsIcon,
           },
         ],
       }
