@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Cross-Origin Resource Sharing (CORS) Configuration
@@ -15,14 +14,13 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],  
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
     //SPECIFY ALLOWED ORIGINS HERE
     'allowed_origins' => [
-        'https://travelandtours-c9xk.onrender.com', #Render.com frontend
-        'http://localhost:5173',                    #localhost
+        'https://travelandtours-c9xk.onrender.com', #Render.com frontend,                    #localhost
     ],
 
     'allowed_origins_patterns' => [],
