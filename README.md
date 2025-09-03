@@ -1,4 +1,6 @@
 # Instructions as of 8/27/2025
+# SETUP
+Single Page Application + Cross Site Request
 
 ##  Teck stack
     - Xampp
@@ -12,6 +14,7 @@
 [Backend]
 - auth          - Authentication Service, uses Laravel Sanctum for tokens
 - fleet_service - Logistics II, uses Laravel Reverb (Websocket)
+- logisticsI    - Logistics 1 backend uses laravel
 
 * waiting for other groups
 
@@ -37,10 +40,34 @@
     php artisan migrate
 ```
 
-2. Frontend
+modify .env
 ```bash
-    npm i
+    #CONFIGURE FOR DEPLOYMENT
+    APP_NAME=Laravel
+    APP_ENV=production #set to production
+    APP_KEY=    # run php artisan serve
+    APP_DEBUG=true #set to false in production
+    APP_URL=http://localhost #url
+    SERVER_PORT=8091    #configure
+    SANCTUM_STATEFUL_DOMAINS=localhost:5173   # add frontend domain here to allow csrf-tokens
+
+    #Choose only one and disable the other
+    #SESSION_DOMAIN=.onrender.com #For Render.com or any backend platform
+    SESSION_DOMAIN= #for localhost 
+    SESSION_DRIVER=cookie
+    SESSION_SAME_SITE=none
+    SESSION_PARTITIONED_COOKIE=false
 ```
+
+2. Frontend
+install node_modules
+```bash
+    npm install
+    npm run build
+```
+This will create the dist folder. Inside is index.html, yan dapat yung iseserve.
+Then for navigation, add/create redirect and rewrite rules, all request should point at dist/index.html
+
 3. Auth Database
 Follow Backend setup then run. This will insert the Fleet Manager Account for LogisticsII
 ```bash
@@ -50,16 +77,24 @@ Follow Backend setup then run. This will insert the Fleet Manager Account for Lo
     Email: fleetManager@gmail.com
     Password: 123456
 
-4. Start Laravel Reverb
+4. Setup auth/config/cors.php
+add frontend domain and other allowed origins in this array
+```bash
+    'allowed_origins' => ['http://localhost:5173',] 
+    
+```
+
+5. Start Laravel Reverb on Supported Backends
 
 ```bash
     php artisan reverb:start
     
 ```
 
-### Notes
-Kahit mauna na ma-deploy yung backend namin sa internet para maaccess namin sa frontend. Yung frontend naman namin separate deployment yan dahil unified frontend na yan buong cluster so isa lang. Yung backend namin, marami po yan dahil microservice ang setup na gusto ng CRAD.
+# Issues
+    cors issue (Need Dedicated domain)
 
+### Notes
 Yung Backend po namin nag-eexpose po yan ng mga APIs na nasa /routes/api.php. Kahit maaccess lang po muna namin yung URI ng backend api sa internet palag na kami. Later nalang po isetup yung frontend kapag fixed na APIs ng backend.
 
 Right now sa localhost. Inaaccess po namin yung mga APIs using 
@@ -76,7 +111,10 @@ Dun po namin yan babaguhin once up na yung hosting.
 
 And about po sa mga .env(environment variables), may mga keys po kasi ako dun na private kaya hindi ko maisama sa remote repository. Gusto ko malaman kung may ibang way kami para magupload ng .env files.
 
+
 Maraming salamat po at pasensya na magulo yung setup.
+
+
 
 
 

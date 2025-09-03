@@ -12,31 +12,32 @@ import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
 import LogisticsIIMakeReservationPage from './logisticsII/make-reservation'
-
+import LogisticsIIReservationDetails from './logisticsII/details-reservation'
+import LogisticsIIDrivers from './logisticsII/drivers'
 
 createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          {/** Main Routes */}
-          <Route element={<GuestRoute/>}>
-            <Route path="/login" index element={<LoginPage/>}/>
+  <BrowserRouter>
+    <AuthProvider>
+      <Routes>
+        {/** Main Routes */}
+        <Route element={<GuestRoute/>}>
+          <Route path="/login" element={<LoginPage/>}/>
+        </Route>
+
+        {/**LogisticsII */}
+        <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
+          <Route index element={<LogisticsIIDashboard/>}/>
+          <Route path='vehicles' element={<LogisticsIIFleet/>}/>
+          <Route path='reservation'>
+            <Route index element={<LogisticsIIReservation/>}/>
+            <Route path='make' element={<LogisticsIIMakeReservationPage/>}/>
+            <Route path=':batch_number' element={<LogisticsIIReservationDetails/>}/>
           </Route>
+          <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
+          <Route path='drivers' element={<LogisticsIIDrivers/>}/>
+        </Route>
 
-
-
-          {/**LogisticsII */}
-          <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
-            <Route index element={<LogisticsIIDashboard/>}/>
-            <Route path='vehicles' element={<LogisticsIIFleet/>}/>
-            <Route path='reservation' element={<LogisticsIIReservation/>}/>
-            <Route path='reservation/make' element={<LogisticsIIMakeReservationPage/>}/>
-            <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
-          </Route>
-  
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+      </Routes>
+    </AuthProvider>
+  </BrowserRouter>
 )

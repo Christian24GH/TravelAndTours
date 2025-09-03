@@ -54,6 +54,7 @@ export const AuthProvider = ({children})=>{
             } else {
                 toast.error('Network error. Please check your connection.', { position: "top-center" })
             }
+            console.log(error)
         }
     }
     
