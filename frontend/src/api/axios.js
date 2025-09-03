@@ -1,13 +1,7 @@
 import axios from 'axios'
 
 export default axios.create({
-  baseURL: "https://auth-backend-v20b.onrender.com", // auth backend on port 8091
-  //baseURL: "http://localhost:8091/", // auth backend on port 8091
+  //baseURL: "https://auth-backend-v20b.onrender.com",
+  baseURL: "http://localhost:8091", // auth backend on port 8091
   withCredentials: true, // important for Sanctum
-  headers: {
-    'X-Requested-With': 'XMLHttpRequest',
-  },
-  // Tell Axios how to handle CSRF
-  xsrfCookieName: "XSRF-TOKEN",
-  xsrfHeaderName: "X-XSRF-TOKEN",
 });

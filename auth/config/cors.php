@@ -19,9 +19,7 @@ return [
     'allowed_methods' => ['*'],
 
     //SPECIFY ALLOWED ORIGINS HERE
-    'allowed_origins' => [
-        'https://travelandtours-c9xk.onrender.com', #Render.com frontend,                    #localhost
-    ],
+    'allowed_origins' => ['http://localhost:5173', 'https://travelandtours-c9xk.onrender.com'],
 
     'allowed_origins_patterns' => [],
 
