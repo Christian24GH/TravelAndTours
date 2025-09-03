@@ -24,8 +24,6 @@ createRoot(document.getElementById('root')).render(
           <Route path="/login" element={<LoginPage/>}/>
         </Route>
 
-
-
         {/**LogisticsII */}
         <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
           <Route index element={<LogisticsIIDashboard/>}/>
