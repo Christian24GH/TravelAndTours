@@ -9,7 +9,7 @@ COPY auth/composer.json auth/composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Copy the rest of Laravel project
-COPY auth/ ./
+COPY . .
 
 # ---------------------------------------------
 # Stage 2 – Runtime (Apache + PHP)
