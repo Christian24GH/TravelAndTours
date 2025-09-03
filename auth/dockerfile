@@ -1,62 +1,48 @@
 # ---------------------------------------------
-# Stage 1 – Composer dependencies
+# Stage 1 – Composer build
 # ---------------------------------------------
-FROM composer:2 AS build
+FROM composer:2-bullseye AS build
+
 WORKDIR /app
 
-# Install system dependencies needed by some PHP extensions
-RUN apt-get update && apt-get install -y zip unzip git curl libzip-dev libxml2-dev
-
-# Copy only composer files for caching
-COPY composer.json composer.lock ./
-
-# Disable scripts during build to avoid artisan errors
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --no-scripts
-
-# Copy the rest of Laravel project
+# Copy all files
 COPY . .
 
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
 # ---------------------------------------------
-# Stage 2 – Runtime (Apache + PHP)
+# Stage 2 – Runtime (PHP + Apache)
 # ---------------------------------------------
 FROM php:8.2-apache
 
 WORKDIR /var/www/html
 
-# Install system dependencies + PHP extensions
+# Install system dependencies & PHP extensions
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip unzip git curl libzip-dev \
+    zip unzip git curl libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql gd mbstring exif pcntl bcmath xml zip \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd xml zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
 # Copy Laravel app from build stage
-COPY --from=build /app ./
+COPY --from=build /app /var/www/html
 
-# Set Apache document root to Laravel public/
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Set Apache document root
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf \
-    && sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf \
+    && sed -ri -e "s!/var/www/!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Set permissions for Laravel storage and cache
-RUN chown -R www-data:www-data storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
-
-# Run Laravel post-install scripts (now that .env & storage exist)
-RUN php artisan config:clear || true
-RUN php artisan cache:clear || true
-RUN composer dump-autoload
-
-# Expose port 80
 EXPOSE 80
 
-# Start Apache
 CMD ["apache2-foreground"]
