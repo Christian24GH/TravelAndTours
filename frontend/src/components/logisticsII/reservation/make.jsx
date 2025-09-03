@@ -15,7 +15,7 @@ import { AlertDescription } from '@/components/ui/alert'
 import AuthContext from '@/context/AuthProvider'
 import axios from "axios";
 import { cn } from '@/lib/utils'
-import {Skeleton} from '@/components/ui/Skeleton'
+import {Skeleton} from '@/components/ui/skeleton'
 const api = logisticsII.backend.api;
 
 export function SingleReservation(){
