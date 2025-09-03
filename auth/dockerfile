@@ -1,28 +1,50 @@
-# Use PHP 8.2 with Apache as the base image
+# ---------------------------------------------
+# Stage 1 – Composer dependencies
+# ---------------------------------------------
+FROM composer:2 AS build
+WORKDIR /app
+
+# Copy only composer files first for caching
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Copy the rest of Laravel project
+COPY . .
+
+# ---------------------------------------------
+# Stage 2 – Runtime (Apache + PHP)
+# ---------------------------------------------
 FROM php:8.2-apache
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    git \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
 
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
-COPY . /var/www/html/
+# Install system dependencies + PHP extensions
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip unzip git curl \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql gd mbstring exif pcntl bcmath xml \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Enable Apache modules
+RUN a2enmod rewrite
+
+# Copy Laravel app from build stage
+COPY --from=build /app ./
+
+# Set Apache document root to Laravel public/
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf \
+    && sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Set permissions for storage and cache
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
 # Expose port 80
 EXPOSE 80
