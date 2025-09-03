@@ -21,7 +21,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         {/** Main Routes */}
         <Route element={<GuestRoute/>}>
-          <Route path="/login" index element={<LoginPage/>}/>
+          <Route path="/login" element={<LoginPage/>}/>
         </Route>
 
 
