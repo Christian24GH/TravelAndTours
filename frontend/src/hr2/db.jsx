@@ -1,13 +1,14 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Gauge, BookOpenCheckIcon, ChartSpline, PieChartIcon } from "lucide-react";
 
 const summaryData = [
-	{ label: "Competency", value: 82, icon: PieChartIcon, color: "#6366f1" },
-	{ label: "Learning", value: 67, icon: BookOpenCheckIcon, color: "#10b981" },
-	{ label: "Training", value: 74, icon: Gauge, color: "#f59e42" },
-	{ label: "Succession", value: 59, icon: ChartSpline, color: "#f43f5e" },
+	{ label: "Competency", value: 82, icon: PieChartIcon, color: "#6366f1", link: "/hr2/cms" },
+	{ label: "Learning", value: 67, icon: BookOpenCheckIcon, color: "#10b981", link: "/hr2/lms" },
+	{ label: "Training", value: 74, icon: Gauge, color: "#f59e42", link: "/hr2/tms" },
+	{ label: "Succession", value: 59, icon: ChartSpline, color: "#f43f5e", link: "/hr2/sps" },
 ];
 
 const pieData = [
@@ -23,16 +24,18 @@ export default function HR2Dashboard() {
 			<h1 className="text-3xl font-bold text-gray-800 mb-4">HR2 Dashboard</h1>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 				{summaryData.map((item) => (
-					<Card key={item.label} className="shadow-sm">
-						<CardHeader className="flex flex-row items-center gap-3 pb-2">
-							<item.icon className="size-6" style={{ color: item.color }} />
-							<CardTitle className="text-lg font-semibold text-gray-700">{item.label}</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<div className="text-3xl font-bold text-gray-900">{item.value}%</div>
-							<div className="text-xs text-gray-500 mt-1">Avg. Completion</div>
-						</CardContent>
-					</Card>
+					<Link to={item.link} key={item.label} className="group">
+						<Card className="shadow-sm transition-transform group-hover:scale-105 group-hover:shadow-lg cursor-pointer">
+							<CardHeader className="flex flex-row items-center gap-3 pb-2">
+								<item.icon className="size-6" style={{ color: item.color }} />
+								<CardTitle className="text-lg font-semibold text-gray-700">{item.label}</CardTitle>
+							</CardHeader>
+							<CardContent>
+								<div className="text-3xl font-bold text-gray-900">{item.value}%</div>
+								<div className="text-xs text-gray-500 mt-1">Avg. Completion</div>
+							</CardContent>
+						</Card>
+					</Link>
 				))}
 			</div>
 
@@ -66,14 +69,11 @@ export default function HR2Dashboard() {
 
 				<Card className="shadow-sm">
 					<CardHeader>
-						<CardTitle>Quick Links</CardTitle>
+						<CardTitle>Reserved</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="flex flex-col gap-3">
-							<a href="/hr2/cms" className="text-blue-600 hover:underline">Go to Competency Management</a>
-							<a href="/hr2/lms" className="text-blue-600 hover:underline">Go to Learning Management</a>
-							<a href="/hr2/tms" className="text-blue-600 hover:underline">Go to Training Management</a>
-							<a href="/hr2/sps" className="text-blue-600 hover:underline">Go to Succession Planning</a>
+							<a>111 222 333</a>
 						</div>
 					</CardContent>
 				</Card>

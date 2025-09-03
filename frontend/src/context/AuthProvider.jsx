@@ -24,30 +24,24 @@ export const AuthProvider = ({children})=>{
     }, [])
 
     const login = async (data) => {
-        await axios.get("/sanctum/csrf-cookie"); // get CSRF cookie
+        await axios.get("/sanctum/csrf-cookie");
         try {
-            // Ensure CSRF cookie is set first
             await axios.get('/sanctum/csrf-cookie')
 
-            // Attempt login
             const response = await axios.post('/api/login', data)
 
             if (response.status === 200) {
                 const user = response.data?.user
 
-                // Save user in your auth state/context
                 setAuth(user)
 
-                // Store user in localStorage for all roles
                 if (user && user.id) {
                     localStorage.setItem('authUser', JSON.stringify(user));
                 }
-                // Store employeeId in localStorage for Employee role
                 if (user && user.role === 'Employee' && user.id) {
                     localStorage.setItem('employeeId', user.id);
                 }
 
-                // Store user for HR2 dashboard compatibility
                 if (user) {
                     localStorage.setItem('currentUser', JSON.stringify(user));
                 }
@@ -87,6 +81,10 @@ export const AuthProvider = ({children})=>{
                 navigate('/hr2/db');
                 break;
 
+            case 'Guest':
+                navigate('/main/maintenance');
+                break;
+
             default:
                 navigate('/login');
         }
@@ -94,7 +92,10 @@ export const AuthProvider = ({children})=>{
 
     const logout = () => {
         axios.post("/api/logout");
-        navigate('/login') // back to login
+        localStorage.removeItem('authUser');
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('employeeId');
+        navigate('/login');
         setAuth(null);
     }
 

@@ -3,75 +3,174 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class TrainingController extends Controller
 {
     /**
-     * Return a mock list of available trainings for the logged-in user.
+     * Return trainings based on employee's current status with the system
      */
-    public function available(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        // In a real app, filter by logged-in user
-        $trainings = [
+        $employeeId = $request->get('employee_id') ?: Auth::id();
+        
+        // Mock data - replace with your database queries
+        $allTrainings = [
             [
-                'id' => 201,
-                'title' => 'Workplace Safety',
-                'trainer' => 'Jane Trainer',
-                'apply_url' => 'https://example.com/apply/201',
+                'id' => 1,
+                'title' => 'Workplace Safety Training',
+                'description' => 'Essential safety protocols and procedures for all employees',
+                'duration' => '4 hours',
+                'type' => 'Online',
+                'status' => 'available',
+                'progress' => 0,
+                'due_date' => null,
+                'completion_date' => null,
+                'score' => null,
+                'created_at' => '2025-01-01',
             ],
             [
-                'id' => 202,
-                'title' => 'Customer Service',
-                'trainer' => 'John Coach',
-                'apply_email' => 'trainings@example.com',
+                'id' => 2,
+                'title' => 'Customer Service Excellence',
+                'description' => 'Advanced customer service techniques and best practices',
+                'duration' => '6 hours',
+                'type' => 'In-person',
+                'status' => 'available',
+                'progress' => 0,
+                'due_date' => null,
+                'completion_date' => null,
+                'score' => null,
+                'created_at' => '2025-01-15',
+            ],
+            [
+                'id' => 3,
+                'title' => 'Data Privacy & Security',
+                'description' => 'Understanding GDPR compliance and data protection measures',
+                'duration' => '3 hours',
+                'type' => 'Online',
+                'status' => 'applied',
+                'progress' => 65,
+                'due_date' => '2025-09-15',
+                'completion_date' => null,
+                'score' => null,
+                'created_at' => '2025-02-01',
+            ],
+            [
+                'id' => 4,
+                'title' => 'Leadership Fundamentals',
+                'description' => 'Core leadership skills for emerging managers',
+                'duration' => '8 hours',
+                'type' => 'Hybrid',
+                'status' => 'applied',
+                'progress' => 25,
+                'due_date' => '2025-10-01',
+                'completion_date' => null,
+                'score' => null,
+                'created_at' => '2025-02-15',
+            ],
+            [
+                'id' => 5,
+                'title' => 'First Aid Certification',
+                'description' => 'Basic first aid and emergency response training',
+                'duration' => '1 day',
+                'type' => 'In-person',
+                'status' => 'completed',
+                'progress' => 100,
+                'due_date' => '2025-08-01',
+                'completion_date' => '2025-07-28',
+                'score' => 92,
+                'created_at' => '2025-03-01',
+            ],
+            [
+                'id' => 6,
+                'title' => 'Project Management Basics',
+                'description' => 'Introduction to project management methodologies',
+                'duration' => '5 hours',
+                'type' => 'Online',
+                'status' => 'completed',
+                'progress' => 100,
+                'due_date' => '2025-07-15',
+                'completion_date' => '2025-07-10',
+                'score' => 88,
+                'created_at' => '2025-03-15',
             ],
         ];
-        return response()->json($trainings);
+
+        return response()->json($allTrainings);
     }
 
     /**
-     * Return a mock list of completed trainings for the logged-in user.
+     * Apply for a training course
      */
-    public function done(): JsonResponse
+    public function apply(Request $request): JsonResponse
     {
-        // In a real app, filter by logged-in user
-        $done = [
-            [
-                'id' => 301,
-                'title' => 'Fire Drill',
-                'trainer' => 'Safety Officer',
-                'completionDATE' => '2025-07-01',
-                'file_url' => 'https://example.com/certificates/301.pdf',
-            ],
-            [
-                'id' => 302,
-                'title' => 'First Aid',
-                'trainer' => 'Red Cross',
-                'completionDATE' => '2025-06-15',
-                'file_url' => null,
-            ],
-        ];
-        return response()->json($done);
+        $request->validate([
+            'training_id' => 'required|integer',
+        ]);
+
+        $trainingId = $request->training_id;
+        $employeeId = Auth::id();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully applied for training',
+            'training_id' => $trainingId,
+            'employee_id' => $employeeId,
+            'status' => 'applied',
+            'due_date' => Carbon::now()->addDays(30)->toDateString(),
+        ]);
     }
+
     /**
-     * Return a mock list of available trainings and employee enrollments.
+     * Create a new training course (HR2 Admin only)
      */
-    public function index(): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $trainings = [
-            ['id' => 101, 'title' => 'Forklift Safety', 'type' => 'Safety', 'provider' => 'OSHA', 'duration_hours' => 4],
-            ['id' => 102, 'title' => 'Lean Basics', 'type' => 'Operations', 'provider' => 'Internal', 'duration_hours' => 6],
-            ['id' => 103, 'title' => 'Advanced Troubleshooting', 'type' => 'Technical', 'provider' => 'Vendor', 'duration_hours' => 8],
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['HR2 Admin', 'hr2_admin']) && $user->user_type !== 'HR2 Admin') {
+            return response()->json(['error' => 'Unauthorized. HR2 Admin access required.'], 403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'duration' => 'required|string|max:100',
+            'type' => 'required|in:Online,In-person,Hybrid,Self-paced',
+        ]);
+        $newTraining = [
+            'id' => rand(1000, 9999),
+            'title' => $request->title,
+            'description' => $request->description,
+            'duration' => $request->duration,
+            'type' => $request->type,
+            'status' => 'available',
+            'progress' => 0,
+            'due_date' => null,
+            'completion_date' => null,
+            'score' => null,
+            'created_at' => Carbon::now()->toDateString(),
         ];
 
-        $enrollments = [
-            ['employee_id' => 1, 'employee_name' => 'Jane Doe', 'training_id' => 101, 'status' => 'Assigned', 'due_at' => Carbon::now()->addDays(10)->toDateString()],
-            ['employee_id' => 2, 'employee_name' => 'John Smith', 'training_id' => 103, 'status' => 'In Progress', 'due_at' => Carbon::now()->addDays(5)->toDateString()],
-        ];
+        return response()->json([
+            'success' => true,
+            'message' => 'Training course created successfully',
+            'training' => $newTraining,
+        ], 201);
+    }
 
-        return response()->json(['trainings' => $trainings, 'enrollments' => $enrollments]);
+    /**
+     * Test endpoint to verify API connectivity
+     */
+    public function test(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Training API is working',
+            'timestamp' => Carbon::now()->toDateTimeString(),
+            'user' => Auth::user() ? Auth::user()->name : 'Not authenticated',
+        ]);
     }
 }
 

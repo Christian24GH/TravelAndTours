@@ -7,6 +7,7 @@ import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './layout/GuestRoute';
 import ProtectedLayout from './layout/ProtectedLayout';
 import LoginPage from './main/login';
+import LandingPage from './main/maintenance';
 import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
@@ -27,9 +28,17 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <HelmetProvider>
           <Routes>
+            {/** Default Route */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            
             {/** Main Routes */}
             <Route element={<GuestRoute/>}>
               <Route path="/login" index element={<LoginPage/>}/>
+            </Route>
+
+            {/** Guest Landing Page */}
+            <Route path="/main" element={<ProtectedLayout allowedRoles={['Guest', 'Super Admin']}/>}>
+              <Route path="maintenance" element={<LandingPage/>}/>
             </Route>
 
             {/**LogisticsII */}

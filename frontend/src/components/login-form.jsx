@@ -18,6 +18,7 @@ import { useContext } from "react"
 
 export function LoginForm({
   className,
+  onShowRegister,
   ...props
 }) {
 
@@ -44,7 +45,7 @@ export function LoginForm({
                 <Label htmlFor='email'>Email</Label>
                 <Input {...register('email', {
                     required: 'Email is required'
-                  })} id="email" type="email" placeholder="m@example.com"/>
+                  })} id="email" type="email" placeholder="juan.delacruz@example.com"/>
                 {errors.email && (
                   <AlertDescription className="text-red-500">{errors.email.message}</AlertDescription>
                 )}
@@ -60,7 +61,7 @@ export function LoginForm({
                 </div>
                 <Input {...register('password', {
                     required: 'Password is required'
-                  })} id="password" type="password"/>
+                  })} id="password" type="password" placeholder="Enter your password"/>
                 {errors.password && (
                   <AlertDescription className="text-red-500">{errors.password.message}</AlertDescription>
                 )}
@@ -73,9 +74,13 @@ export function LoginForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
+              <button 
+                type="button"
+                onClick={onShowRegister}
+                className="underline underline-offset-4 hover:text-primary"
+              >
                 Sign up
-              </a>
+              </button>
             </div>
           </form>
         </CardContent>

@@ -25,6 +25,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/learning', [LearningController::class, 'index'])->name('learning.index');
     Route::get('/learning/courses', [LearningController::class, 'courses']);
     Route::get('/training', [TrainingController::class, 'index'])->name('training.index');
+    Route::get('/training/test', [TrainingController::class, 'test'])->name('training.test');
+    Route::post('/training/apply', [TrainingController::class, 'apply'])->name('training.apply');
+    Route::post('/training/create', [TrainingController::class, 'store'])->name('training.store');
     Route::get('/succession', [SuccessionController::class, 'index'])->name('succession.index');
     Route::get('/succession-candidates', [SuccessionController::class, 'candidates']);
     Route::get('/trainings/available', [TrainingController::class, 'available']);
@@ -43,4 +46,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/employees/{id}', [EmployeeController::class, 'update'])->name('employees.update');
     Route::delete('/employees/{id}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
     Route::get('/work-progress', [WorkProgressController::class, 'index']);
+    Route::get('/ess/profile', [EmployeeController::class, 'index']);
+    Route::get('/ess/profile/{id}', [EmployeeController::class, 'show']);
 });

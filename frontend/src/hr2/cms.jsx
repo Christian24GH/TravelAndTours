@@ -102,12 +102,10 @@ export default function CompetencyManagement() {
     return ["Travel and Tours"];
   }, []);
 
-  // Filter only 'Travel and Tours' employees, search, sort, and paginate
+  // Filter all employees, search, sort, and paginate
   const processedRows = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const filtered = employees.filter((emp) => {
-      const departmentName = (emp.department && String(emp.department).trim()) || "Unassigned";
-      if (departmentName !== "Travel and Tours") return false;
       if (!normalizedQuery) return true;
       const name = (emp.employee_name || `${emp.first_name || ""} ${emp.last_name || ""}`).toLowerCase();
       const idText = String(emp.id ?? "");
@@ -177,7 +175,7 @@ export default function CompetencyManagement() {
               <div className="flex flex-col">
                 <label className="text-sm text-gray-600 mb-1">Rows per page</label>
                 <select className="border rounded px-3 py-2" value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}>
-                  {[10, 20, 50].map((n) => (<option key={n} value={n}>{n}</option>))}
+                  {[10, 20, 30].map((n) => (<option key={n} value={n}>{n}</option>))}
                 </select>
               </div>
             </div>

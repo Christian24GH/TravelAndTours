@@ -27,7 +27,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function ESS() {
     const [employeeId, setEmployeeId] = useState(null);
-    // Try to get the logged-in employee's ID from localStorage (adjust as needed for your app)
     const loggedInEmployeeId = localStorage.getItem('employeeId');
     const [searchId, setSearchId] = useState("");
     const [profile, setProfile] = useState(null);
@@ -112,7 +111,6 @@ function ESS() {
             const profileJson = await res.json();
             setProfile(profileJson);
             setForm(profileJson);
-            // Set employeeId for update
             if (profileJson && profileJson.id) {
                 setEmployeeId(profileJson.id);
             }
@@ -138,18 +136,10 @@ function ESS() {
     // Placeholder function to fetch the user's role
     const fetchUserRole = async () => {
         try {
-            // In a real application, you would make an API call to get the authenticated user's role
-            // const res = await fetch('/api/user-role', { credentials: 'include' });
-            // const data = await res.json();
-            // setUserRole(data.role);
-
-            // For now, we will hardcode the role for testing purposes
-            // Change the string below to 'HR2 Admin' to test the admin view
-            // and 'Employee' to test the employee view.
             setUserRole('Employee');
         } catch (e) {
             console.error("Failed to fetch user role:", e);
-            setUserRole('Employee'); // Default to Employee on error
+            setUserRole('Employee');
         }
     };
 
@@ -270,7 +260,6 @@ function ESS() {
             toast.success('Employee profile updated successfully.');
             await loadAllEmployees();
             await fetchCsrfToken();
-            // Reload profile and re-set employeeId
             await loadProfile(employeeId);
             setDialogOpen(false);
             setIsEditing(false);
@@ -387,7 +376,7 @@ function ESS() {
                     <title>Employees Profile</title>
                 </Helmet>
                 <div className="flex items-center gap-4 px-4 py-2 bg-white border-b border-gray-200 sticky top-0 z-10 -m-4">
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">Your Profile</h1>
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">Employee Self-Service</h1>
                 </div>
                 <div className="flex-1 overflow-y-auto pt-4">
                     <header className="mb-6">

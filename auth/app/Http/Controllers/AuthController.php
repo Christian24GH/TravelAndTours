@@ -15,10 +15,10 @@ class AuthController extends Controller
 {
     public function register(Request $request){
         $validator = Validator::make($request->all(), [
-            'name'      => ['required', 'min:6'],
+            'name'      => ['required', 'min:2'],
             'email'     => ['required', 'email', 'unique:users,email'],
-            'password'  => ['required', 'min:6'],
-            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1', 'HR2 Admin'])],
+            'password'  => ['required', 'min:8', 'confirmed'],
+            'role'      => ['sometimes', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1', 'HR2 Admin', 'Guest'])],
         ]);
 
         if ($validator->fails()) {
@@ -35,7 +35,7 @@ class AuthController extends Controller
                 'name'     => $request->name,
                 'email'    => $request->email,
                 'password' => Hash::make($request->password),
-                'role'     => $request->role,
+                'role'     => $request->role ?? 'Guest',
             ]);
 
             $employee = Employee::create([

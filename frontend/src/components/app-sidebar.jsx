@@ -16,7 +16,6 @@ import {
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavLink } from "react-router-dom"
 import { NavUser } from "@/components/nav-user"
 import {
   Sidebar,
@@ -29,11 +28,126 @@ import {
 } from "@/components/ui/sidebar"
 
 import { Skeleton } from '@/components/ui/skeleton'
-
 import AuthContext from "../context/AuthProvider"
-import { useContext, useState } from "react"
+import { useContext } from "react"
 
 const data = {
+
+  /** Logistics 1 NavItems */
+  logisticsINav: [
+    {
+      NavGroup: {
+        NavLabel: 'Smart Warehousing System',
+        NavItems: [
+          {
+            title: "Inventory Management",
+            url: '/logistics1/inventory-management',
+            icon: Gauge,
+          },
+          {
+            title: "Storage Organization",
+            url: '/logisticsI/storage-organization',
+            icon: PieChartIcon,
+          },
+          {
+            title: "Stock Monitoring",
+            url: '/logisticsI/stock-monitoring',
+            icon: ChartSpline,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Procurement & Sourcing Management',
+        NavItems: [
+          {
+            title: "Supplier Management",
+            url: '/logistic1/supplier-management',
+            icon: User,
+          },
+          {
+            title: "Purchase Processing",
+            url: '/logistic1/purchase-processing',
+            icon: WrenchIcon,
+          },
+          {
+            title: "Expense Records",
+            url: '/logistic1/expense-records',
+            icon: LifeBuoy,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Project Logistic Tracker',
+        NavItems: [
+          {
+            title: "Equipment Scheduling",
+            url: '/logistic1/equipment-scheduling',
+            icon: BookOpenCheckIcon,
+          },
+          {
+            title: "Delivery & Transport Tracking",
+            url: '/logistic1/delivery-transport-tracking',
+            icon: TagsIcon,
+          },
+          {
+            title: "Tour Reports",
+            url: '/logistic1/tour-reports',
+            icon: HistoryIcon,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Asset Lifecycle & Maintenance',
+        NavItems: [
+          {
+            title: "Asset Registration & QR Tagging",
+            url: '/logistic1/asset-registration',
+            icon: User,
+          },
+          {
+            title: "Predictive Maintenance",
+            url: '/logistic1/predictive-maintenance',
+            icon: WrenchIcon,
+          },
+          {
+            title: "Maintenance History",
+            url: '/logistic1/maintenance-history',
+            icon: LogsIcon,
+          },
+        ],
+      }
+    },
+    {
+      NavGroup: {
+        NavLabel: 'Document Tracking & Logistics Records',
+        NavItems: [
+          {
+            title: "Delivery Receipts",
+            url: '/logistic1/delivery-receipts',
+            icon: BookOpenCheckIcon,
+          },
+          {
+            title: "Check-In/Check-Out Logs",
+            url: '/logistic1/check-in-out-logs',
+            icon: LifeBuoy,
+          },
+          {
+            title: "Logistics Reports",
+            url: '/logistic1/logistics-reports',
+            icon: HistoryIcon,
+          },
+        ],
+      }
+    },
+  ],
+
+
   /** Logistics 2 NavItems */
   logisticsIINav: [
     {
@@ -111,7 +225,7 @@ const data = {
     }
   ],
   /** HR2 NavItems */
-  HRINav: [
+  HR2Nav: [
     {
       NavGroup: {
         NavLabel: 'Human Resources 2',
@@ -122,31 +236,24 @@ const data = {
             icon: Command,
           },
           {
-            type: 'collapsible',
-            title: 'Talent & Career',
-            icon: LogsIcon,
-            children: [
-              {
-                title: "Competency",
-                url: '/hr2/cms',
-                icon: PieChartIcon,
-              },
-              {
-                title: "Learning",
-                url: '/hr2/lms',
-                icon: BookOpenCheckIcon,
-              },
-              {
-                title: "Training",
-                url: '/hr2/tms',
-                icon: Gauge,
-              },
-              {
-                title: "Succession",
-                url: '/hr2/sps',
-                icon: ChartSpline,
-              },
-            ]
+            title: "Competency",
+            url: '/hr2/cms',
+            icon: PieChartIcon,
+          },
+          {
+            title: "Learning",
+            url: '/hr2/lms',
+            icon: BookOpenCheckIcon,
+          },
+          {
+            title: "Training",
+            url: '/hr2/tms',
+            icon: Gauge,
+          },
+          {
+            title: "Succession",
+            url: '/hr2/sps',
+            icon: ChartSpline,
           },
           {
             title: "Employee Self-Service",
@@ -154,7 +261,7 @@ const data = {
             icon: User,
           },
           {
-            title: "HRAdmin (ForData)",
+            title: "HRAdmin (SampleData)",
             url: '/hr2/admin',
             icon: User,
           },
@@ -186,82 +293,21 @@ export function AppSidebar({...props}) {
     email: auth?.email
   }
 
-  const renderNavGroups = (navArray, openTalentGroup, toggleTalentGroup) => (
-    navArray.map((group, idx) => (
-      <div key={idx} className="mb-2">
-        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          {group.NavGroup.NavLabel}
-        </div>
-        <SidebarMenu>
-          {group.NavGroup.NavItems.map((item, i) => (
-            item.type === 'collapsible' ? (
-              <SidebarMenuItem key={i}>
-                <SidebarMenuButton asChild>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 px-4 py-2 w-full hover:bg-gray-100 rounded justify-between"
-                    onClick={toggleTalentGroup}
-                  >
-                    <span className="flex items-center gap-2">
-                      {item.icon && <item.icon className="size-4" />}
-                      <span>{item.title}</span>
-                    </span>
-                    <span>{openTalentGroup ? '▾' : '▸'}</span>
-                  </button>
-                </SidebarMenuButton>
-                {openTalentGroup && item.children && (
-                  <SidebarMenu className="ml-4 border-l border-gray-200">
-                    {item.children.map((child, j) => (
-                      <SidebarMenuItem key={j}>
-                        <SidebarMenuButton asChild>
-                          <a href={child.url} className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded">
-                            {child.icon && <child.icon className="size-4" />}
-                            <span>{child.title}</span>
-                          </a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                )}
-              </SidebarMenuItem>
-            ) : (
-              <SidebarMenuItem key={i}>
-                <SidebarMenuButton asChild>
-                  <a href={item.url} className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded">
-                    {item.icon && <item.icon className="size-4" />}
-                    <span>{item.title}</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )
-          ))}
-        </SidebarMenu>
-      </div>
-    ))
-  )
-
-  // Collapsible state for HR2 Talent group
-  const [openTalentGroup, setOpenTalentGroup] = useState(true);
-  const toggleTalentGroup = () => setOpenTalentGroup((v) => !v);
-
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="floating" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div
-                  className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
-                >
+                  className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {user.role === "logisticsII Admin" && "Logistics"}
-                    {user.role === "HR2 Admin" && "Human Resources"}
-                    {user.role === "Employee" && "Employee"}
+                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "LogisticsI Admin" : ''}
                   </span>
                 </div>
               </a>
@@ -270,11 +316,29 @@ export function AppSidebar({...props}) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="flex flex-col gap-2">
-        {user.role === "HR2 Admin" && renderNavGroups(data.HRINav, openTalentGroup, toggleTalentGroup)}
-        {user.role === "logisticsII Admin" && renderNavGroups(data.logisticsIINav)}
+        {loading ? (
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : (
+            <>
+              {user.role === "LogisticsII Admin" ? 
+                (<NavMain data={data.logisticsIINav}/>) 
+              : user.role === "LogisticsI Admin" ? 
+                (<NavMain data={data.logisticsINav}/>)
+              : user.role === "HR2 Admin" ? 
+                (<NavMain data={data.HR2Nav}/>)
+              : null}
+            </>
+          )
+        }
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} logout={logout} />
+        {loading ? 
+          (<Skeleton className="w-full h-full"/>) : (<NavUser user={user} logout={logout} />)
+        }
       </SidebarFooter>
     </Sidebar>
   );
