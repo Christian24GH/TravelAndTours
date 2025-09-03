@@ -5,7 +5,7 @@ FROM composer:2 AS build
 WORKDIR /app
 
 # Copy only composer files first for caching
-COPY auth/composer.json auth/composer.lock ./
+COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Copy the rest of Laravel project
