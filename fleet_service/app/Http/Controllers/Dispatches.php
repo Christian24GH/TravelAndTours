@@ -11,12 +11,15 @@ class Dispatches extends Controller
         $q = $request->input('q');
 
         $table = DB::table('dispatches as d')
-            ->join('reservations as r', 'r.id', '=', 'd.reservation_id');
+            ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
+            ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
+            ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
+            ->leftJoin('drivers as dv', 'dv.id', '=', 'a.driver_id');
 
         if($q) {
             $table->where(function ($query) use ($q) {
                 $query->where('d.uuid', 'like', "%{$q}%")
-                    ->orWhere('r.driver_id', 'like', "%{$q}%");
+                    ->orWhere('a.driver_id', 'like', "%{$q}%");
             });
         }
 
@@ -25,6 +28,12 @@ class Dispatches extends Controller
 
         $dispatch = $table->paginate(15, [
             'd.*',
+            'v.type     as vehicle_type',
+            'v.capacity as vehicle_capacity',
+            'v.status   as vehicle_status',
+            'dv.name     as driver_name',
+            'dv.status   as driver_status',
+            'r.batch_number as batch_number',
         ]);
 
         return response()->json(['dispatch' => $dispatch], 200);

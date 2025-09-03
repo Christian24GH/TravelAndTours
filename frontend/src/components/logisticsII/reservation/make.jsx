@@ -196,14 +196,19 @@ export function BatchReservation(){
     const {auth} = useContext(AuthContext)
     const { control, handleSubmit, watch, register, formState:{errors, isSubmitting}, setValue } = useForm({
         defaultValues: {
-        reservations: [{ vehicle_id: "" }], // start with one select
+            vehicle_ids: [
+                { vehicle_id: '' }
+            ], // start with one select
         },
     });
 
     const { fields, append, remove } = useFieldArray({
         control,
-        name: "reservations",
+        name: "vehicle_ids",
     });
+    
+    console.log(watch('vehicle_ids'))
+    const selected = watch('vehicle_ids').filter(v => v.vehicle_id != '').map(v => v.vehicle_id)
     
     const [vehicles, setVehicles] = useState([]);
     const [open, setOpen] = useState(null); // track which popover is open
@@ -216,7 +221,7 @@ export function BatchReservation(){
     useEffect(() => {
         const fetchAvailableVehicles = async () => {
         try {
-            const response = await axios.get(api.fetchAvailableVehicles);
+            const response = await axios.get(`${api.vehiclesAll}?q=Available`);
             if (response.status === 200) {
                 setVehicles(response.data?.vehicles || []);
             }
@@ -229,10 +234,15 @@ export function BatchReservation(){
 
     const onSubmit = async (data) => {
         // data.reservations is an array of { vehicle_id }
+        if(selected.length === 0) return
+
         const payload = {
             ...data,
-            vehicle_ids: data.reservations.map((r) => r.vehicle_id), // extract IDs
+            vehicle_ids: data.vehicle_ids.map((v) => v.vehicle_id), // extract IDs
+            start_time: new Date(startTime).toISOString(), // ensure UTC format
+            end_time: new Date(endTime).toISOString(),     // ensure UTC format
         };
+        
         console.log(payload)
         
         try {
@@ -246,7 +256,7 @@ export function BatchReservation(){
         
     };
 
-    console.log(errors.reservations)
+    console.log(selected.length)
     return(
         <div className='px-1'>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -257,7 +267,7 @@ export function BatchReservation(){
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex items-center">
                                 <Controller
-                                    name={`reservations.${index}.vehicle_id`}
+                                    name={`vehicle_ids.${index}.vehicle_id`}
                                     control={control}
                                     rules={{ required: "Vehicle is required" }}
                                     render={({ field }) => (
@@ -272,7 +282,7 @@ export function BatchReservation(){
                                             className="flex-1 justify-between"
                                         >
                                             {field.value
-                                            ? vehicles.find((v) => v.id === field.value)?.vin
+                                            ? `${vehicles.find((v) => v.id === field.value)?.type} (${vehicles.find((v) => v.id === field.value)?.capacity})`
                                             : "Select Vehicle..."}
                                             <ChevronsUpDownIcon className="ml-2 h-4 w-4 opacity-50" />
                                         </Button>
@@ -285,6 +295,7 @@ export function BatchReservation(){
                                                     <CommandGroup>
                                                         {vehicles.map((v) => (
                                                         <CommandItem
+                                                            disabled={selected.includes(v.id)}
                                                             key={v.id}
                                                             value={v.id}
                                                             onSelect={() => {
@@ -311,16 +322,19 @@ export function BatchReservation(){
 
                                 {fields.length > 1 && (
                                     <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => remove(index)}
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => remove(index)}
                                     >
                                     <TrashIcon className="h-4 w-4 text-red-500" />
                                     </Button>
                                 )}
                             </div>
+                            
                         ))}
+
+                        {selected.length === 0 && (<AlertDescription variant="destructive">Please select at least 1 vehicle</AlertDescription>)}
                         
                         
                         <Button

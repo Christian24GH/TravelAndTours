@@ -21,36 +21,37 @@ const location = useLocation()
         <Breadcrumb>
             <BreadcrumbList>
                 {pathnames.map((segment, index) => {
-                // Build the URL up to this segment
-                const to = "/" + pathnames.slice(0, index + 1).join("/")
                 
-                // Capitalize segment
-                const label = segment.charAt(0).toUpperCase() + segment.slice(1)
-                return (
-                    <BreadcrumbItem key={to}>
-                        {index === pathnames.length - 1 ? (
-                            <span className="font-medium">{label == 'LogisticsII' ? 'Home' : label}</span> // last item not a link
-                        ) : index === 0 ? (
-                            <>
-                                <BreadcrumbLink asChild>
-                                    <Link to={to}>
-                                        Home
-                                    </Link>
-                                </BreadcrumbLink>
-                                <BreadcrumbSeparator/>
-                            </>
-                        ): (
-                            <>
-                                <BreadcrumbLink asChild>
-                                    <Link to={to}>
-                                        {label}
-                                    </Link>
-                                </BreadcrumbLink>
-                                <BreadcrumbSeparator/>
-                            </>
-                        )}
-                    </BreadcrumbItem>
-                )
+                    const to = "/" + pathnames.slice(0, index + 1).join("/")
+                
+                    const label = segment.charAt(0).toUpperCase() + segment.slice(1)
+                    return (
+                        <React.Fragment key={`${to}-${index}`}>
+                            <BreadcrumbItem>
+                                {index === pathnames.length - 1 ? (
+                                    <span className="font-medium">{label == 'LogisticsII' ? 'Home' : label}</span>
+                                ) : index === 0 ? (
+                                    <>
+                                        <BreadcrumbLink asChild>
+                                            <Link to={to}>
+                                                Home
+                                            </Link>
+                                        </BreadcrumbLink>
+                                        
+                                    </>
+                                ): (
+                                    <>
+                                        <BreadcrumbLink asChild>
+                                            <Link to={to}>
+                                                {label}
+                                            </Link>
+                                        </BreadcrumbLink>                       
+                                    </>
+                                )}
+                            </BreadcrumbItem>
+                        {index !== pathnames.length - 1 && <BreadcrumbSeparator />}
+                        </React.Fragment>
+                    )
                 })}
             </BreadcrumbList>
         </Breadcrumb>

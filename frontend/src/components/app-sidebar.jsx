@@ -184,7 +184,7 @@ const data = {
           },
           {
             title: "Drivers",
-            url: '#',
+            url: '/logisticsII/drivers',
             icon: User,
           },
         ],
@@ -263,7 +263,13 @@ export function AppSidebar({...props}) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "LogisticsI Admin" : ''}
+                    {loading ? (<Skeleton className="w-2/3 h-full"/>) :
+                     user.role == "LogisticsI Admin"  ? 'Logistics I Admin' : //just copy this line
+                     user.role == "LogisticsII Admin" ? 'Logistics II Admin' :
+                     //and place it here
+
+                     null
+                    }
                   </span>
                 </div>
               </a>
@@ -275,10 +281,11 @@ export function AppSidebar({...props}) {
         
         {loading ? (
             // Skeleton Placeholder while loading
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 px-2 h-full">
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
+              <Skeleton className="flex-1 w-full" />
+              <Skeleton className="flex-1 w-full" />
             </div>
           ) : (
             <>

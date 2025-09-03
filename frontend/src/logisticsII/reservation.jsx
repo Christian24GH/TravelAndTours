@@ -1,3 +1,4 @@
+import { ChevronRightIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import axios from "axios";
@@ -25,9 +26,10 @@ const header = [
   { title: "Status", accessor: "status", cellClassName: "h-1" },
   { title: "Created", accessor: "created_at", cellClassName: "h-1"},
   {
-    title: "Actions",
     render: (item)=>(
-      <ViewDialog item={item}/>
+      <Link to={`${item.batch_number}`}>
+        <Button variant="" size="sm"><ChevronRightIcon/></Button>
+      </Link>
     )
   },
 ];
@@ -47,7 +49,7 @@ export default function Reservation() {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       axios
-        .get(`${api.reservations}`, {
+        .get(api.reservations, {
           params: {
             page,
             q: search || undefined,

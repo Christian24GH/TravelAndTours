@@ -47,12 +47,13 @@ import { toast } from "sonner";
 import { Input } from '@/components/ui/input'
 
 import axios from "axios";
-import { logisticsII } from "@/api/logisticsII";
 import DateTimeField from "@/components/logisticsII/date-picker"
+import { logisticsII } from "@/api/logisticsII";
 const api = logisticsII.backend.api;
 
 export function ViewDialog({item}){
   const [openViewDialog, setViewDialog] = useState(false)
+  console.log(item)
   return(
     <Dialog open={openViewDialog} onOpenChange={setViewDialog}>
       <DialogTrigger asChild>
