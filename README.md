@@ -57,6 +57,13 @@ modify .env
     SESSION_DRIVER=cookie
     SESSION_SAME_SITE=none
     SESSION_PARTITIONED_COOKIE=false
+
+    DB_CONNECTION=mariadb
+    DB_HOST=localhost
+    DB_PORT=3306
+    DB_DATABASE=auth
+    DB_USERNAME=root
+    DB_PASSWORD=
 ```
 
 2. Frontend
