@@ -1,17 +1,18 @@
 import axios from 'axios'
 
-export const api = axios.create({
-  //baseURL: "https://auth-backend-v20b.onrender.com",
-  baseURL: "http://localhost:8091/api", // auth backend on port 8091
-  //withCredentials: true, // important for Sanctum
-  //withXSRFToken: true,
+const base = import.meta.env.VITE_AUTH_BACKEND
 
+export const api = axios.create({
+  baseURL: base ?? "http://localhost:8091/api",
   // Switched to token based
   headers: {
     'X-Requested-With': 'XMLHttpRequest',
     'Content-Type': 'application/json',
   },
   
+
+  //withCredentials: true, // important for Sanctum SESSION BASED
+  //withXSRFToken: true,
 });
 
 // Token based auth
