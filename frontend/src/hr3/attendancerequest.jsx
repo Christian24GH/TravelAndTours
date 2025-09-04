@@ -17,8 +17,15 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 function AttendanceRequest() {
   // Sample analytics data
@@ -74,7 +81,6 @@ function AttendanceRequest() {
 
   const handleSubmit = () => {
     if (!selectedRequest) return;
-    // Update the request status based on actionStatus
     setRequests((prev) =>
       prev.map((req) =>
         req.id === selectedRequest.id ? { ...req, status: actionStatus } : req
@@ -83,36 +89,59 @@ function AttendanceRequest() {
     closeModal();
   };
 
+  // Status colors
+  const statusVariant = {
+    Pending: "secondary",
+    Approved: "success",
+    Rejected: "destructive",
+  };
+
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Attendance Requests</h1>
+      <h1 className="text-2xl font-bold mb-6">Attendance Requests</h1>
 
       {/* Analytics Section */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
-        <div className="rounded-md shadow-sm inline-shadow-sm grid grid-cols-3 bg-gray-100 p-4">
-          <div className="col-span-2 text-start text-2xl font-bold flex items-center">Pending</div>
-          <div className="text-3xl font-bold flex justify-center items-center">{analytics.pending}</div>
-        </div>
-        <div className="rounded-md shadow-sm inline-shadow-sm grid grid-cols-3 bg-gray-100 p-4">
-          <div className="col-span-2 text-start text-2xl font-bold flex items-center">Approved Today</div>
-          <div className="text-3xl font-bold flex justify-center items-center">{analytics.approvedToday}</div>
-        </div>
-        <div className="rounded-md shadow-sm inline-shadow-sm grid grid-cols-3 bg-gray-100 p-4">
-          <div className="col-span-2 text-start text-2xl font-bold flex items-center">Rejected Today</div>
-          <div className="text-3xl font-bold flex justify-center items-center">{analytics.rejectedToday}</div>
-        </div>
-        <div className="rounded-md shadow-sm inline-shadow-sm grid grid-cols-3 bg-gray-100 p-4">
-          <div className="col-span-2 text-start text-2xl font-bold flex items-center">Total This Month</div>
-          <div className="text-3xl font-bold flex justify-center items-center">{analytics.totalThisMonth}</div>
-        </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pending</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-bold text-yellow-600">
+            {analytics.pending}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Approved Today</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-bold text-green-600">
+            {analytics.approvedToday}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Rejected Today</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-bold text-red-600">
+            {analytics.rejectedToday}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Total This Month</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-bold text-blue-600">
+            {analytics.totalThisMonth}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Table Section */}
-      <div className="h-[60vh] overflow-auto">
+      <div className="overflow-auto rounded-lg border max-h-[60vh]">
         <Table className="w-full">
           <TableCaption>Attendance Requests</TableCaption>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-gray-100">
               <TableHead className="text-center">#</TableHead>
               <TableHead className="text-center">Name</TableHead>
               <TableHead className="text-center">Date</TableHead>
@@ -124,13 +153,17 @@ function AttendanceRequest() {
           </TableHeader>
           <TableBody>
             {requests.map((req, index) => (
-              <TableRow key={req.id}>
+              <TableRow key={req.id} className="hover:bg-gray-50">
                 <TableCell className="text-center">{index + 1}</TableCell>
                 <TableCell className="text-center">{req.name}</TableCell>
                 <TableCell className="text-center">{req.date}</TableCell>
                 <TableCell className="text-center">{req.type}</TableCell>
                 <TableCell className="text-center">{req.proposed}</TableCell>
-                <TableCell className="text-center">{req.status}</TableCell>
+                <TableCell className="text-center">
+                  <Badge variant={statusVariant[req.status] || "default"}>
+                    {req.status}
+                  </Badge>
+                </TableCell>
                 <TableCell className="text-center">
                   <Button size="sm" onClick={() => openModal(req)}>
                     Update
@@ -149,13 +182,39 @@ function AttendanceRequest() {
             <DialogTitle>Update Attendance Request</DialogTitle>
             <DialogDescription>
               {selectedRequest && (
-                <div className="space-y-2">
-                  <p><strong>Name:</strong> {selectedRequest.name}</p>
-                  <p><strong>Date:</strong> {selectedRequest.date}</p>
-                  <p><strong>Type:</strong> {selectedRequest.type}</p>
-                  <p><strong>Proposed:</strong> {selectedRequest.proposed}</p>
+                <div className="space-y-3">
+                  <p>
+                    <strong>Name:</strong> {selectedRequest.name}
+                  </p>
+                  <p>
+                    <strong>Date:</strong> {selectedRequest.date}
+                  </p>
+                  <p>
+                    <strong>Type:</strong> {selectedRequest.type}
+                  </p>
+                  <p>
+                    <strong>Proposed:</strong> {selectedRequest.proposed}
+                  </p>
+                  <p>
+                    <strong>Reason:</strong> {selectedRequest.reason}
+                  </p>
+                  <p>
+                    <strong>Evidence:</strong>{" "}
+                    {selectedRequest.evidence !== "none" ? (
+                      <a
+                        href="#"
+                        className="text-blue-600 underline"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        {selectedRequest.evidence}
+                      </a>
+                    ) : (
+                      "None"
+                    )}
+                  </p>
+
                   <div className="flex items-center gap-2">
-                    <strong>Current Status:</strong>
+                    <strong>New Status:</strong>
                     <Select value={actionStatus} onValueChange={handleActionChange}>
                       <SelectTrigger className="w-40">
                         <SelectValue placeholder="Select status" />
@@ -168,11 +227,11 @@ function AttendanceRequest() {
                     </Select>
                   </div>
 
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-6 flex justify-end gap-2">
                     <Button onClick={handleSubmit} disabled={!actionStatus}>
                       Save
                     </Button>
-                    <Button variant="ghost" onClick={closeModal} className="ml-2">
+                    <Button variant="ghost" onClick={closeModal}>
                       Cancel
                     </Button>
                   </div>

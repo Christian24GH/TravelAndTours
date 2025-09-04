@@ -7,12 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription} from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+
 import AddAttendance from "@/components/hr3/AddAttendance";
 import ExportData from "@/components/hr3/ExportData";
 import ApproveAdjustments from "@/components/hr3/ApproveAdjustments";
@@ -33,25 +38,11 @@ export default function Attendance() {
   const data = [
     { id: 1, employeeName: 'John Doe', date: '2023-01-01', status: 'Present', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
     { id: 2, employeeName: 'Jane Smith', date: '2023-01-01', status: 'Absent', timeIn: '00:00', breakIn: '00:00', breakOut: '00:00', timeOut: '00:00', total: '00:00' },
-    { id: 3, employeeName: 'Mike Johnson', date: '2023-01-01', status: 'Present', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 4, employeeName: 'Sarah Williams', date: '2023-01-01', status: 'Late', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 5, employeeName: 'David Brown', date: '2023-01-02', status: 'Present', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 6, employeeName: 'Lisa Davis', date: '2023-01-02', status: 'Absent', timeIn: '00:00', breakIn: '00:00', breakOut: '00:00', timeOut: '00:00', total: '00:00' },
-    { id: 7, employeeName: 'James Wilson', date: '2023-01-02', status: 'Leave', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 8, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 9, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 10, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 11, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 12, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 13, employeeName: 'Sarah Williams', date: '2023-01-01', status: 'Late', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 14, employeeName: 'David Brown', date: '2023-01-02', status: 'Present', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 15, employeeName: 'Lisa Davis', date: '2023-01-02', status: 'Absent', timeIn: '00:00', breakIn: '00:00', breakOut: '00:00', timeOut: '00:00', total: '00:00' },
-    { id: 16, employeeName: 'James Wilson', date: '2023-01-02', status: 'Leave', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 17, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 18, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
-    { id: 19, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '08:00', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '8:00' },
+    { id: 4, employeeName: 'Sarah Williams', date: '2023-01-01', status: 'Late', timeIn: '08:30', breakIn: '12:00', breakOut: '13:00', timeOut: '17:00', total: '7:30' },
+    { id: 7, employeeName: 'James Wilson', date: '2023-01-02', status: 'Leave', timeIn: '-', breakIn: '-', breakOut: '-', timeOut: '-', total: '0:00' },
+    { id: 8, employeeName: 'Emily Clark', date: '2023-01-02', status: 'Adjustment', timeIn: '09:00', breakIn: '12:30', breakOut: '13:30', timeOut: '18:00', total: '8:00' },
   ];
-  
+
   // Calculate summary values
   const totalEmployees = data.length;
   const presentCount = data.filter(item => item.status === 'Present').length;
@@ -62,98 +53,113 @@ export default function Attendance() {
 
   const [search, setSearch] = useState('');
 
-  const handleSearch = (e) => {
-    setSearch(e.target.value);
-  }
+  const filteredData = data.filter(item =>
+    item.employeeName.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const filteredData = [...data]
-    .filter(item => item.employeeName.toLowerCase().includes(search.toLowerCase()))
-    .sort((a, b) => b.id - a.id); // Sort by ID descending to show newest first
-  console.log(filteredData);
+  // map statuses to badge colors
+  const statusVariant = {
+    Present: "success",
+    Absent: "destructive",
+    Late: "secondary",
+    Leave: "default",
+    Adjustment: "secondary",
+  };
 
   return (
-    <div className="px-4 h-auto">
-      <div>
-        <h1 className="text-2xl font-bold">Attendance</h1><hr />
-        <div className="mt-3">
-          <div className="grid grid-cols-6 gap-5 h-[10rem] text-center pl-2">
-            <div className="col-span-1 rounded-md shadow-sm inline-shadow-sm grid grid-cols-3">
-              <div className="col-span-2 bg-gray-200 text-wrap text-start text-2xl font-bold items-center flex p-2">Total Employees</div>
-              <div className="text-3xl font-bold items-center flex justify-center p-2">{totalEmployees}</div>
-            </div>
-            <div className="col-span-1 rounded-md shadow-sm inline-shadow-sm grid grid-cols-3">
-              <div className="col-span-2 bg-gray-200 text-wrap text-start text-2xl font-bold items-center flex p-2">Present</div>
-              <div className="text-3xl font-bold items-center flex justify-center p-2">{presentCount}</div>
-            </div>
-            <div className="col-span-1 rounded-md shadow-sm inline-shadow-sm grid grid-cols-3">
-              <div className="col-span-2 bg-gray-200 text-wrap text-start text-2xl font-bold items-center flex p-2">Absent</div>
-              <div className="text-3xl font-bold items-center flex justify-center p-2">{absentCount}</div>
-            </div>
-            <div className="col-span-1 rounded-md shadow-sm inline-shadow-sm grid grid-cols-3">
-              <div className="col-span-2 bg-gray-200 text-wrap text-start text-2xl font-bold items-center flex p-2">Late</div>
-              <div className="text-3xl font-bold items-center flex justify-center p-2">{lateCount}</div>
-            </div>
-            <div className="col-span-1 rounded-md shadow-sm inline-shadow-sm grid grid-cols-3">
-              <div className="col-span-2 bg-gray-200 text-wrap text-start text-2xl font-bold items-center flex p-2">On Leave</div>
-              <div className="text-3xl font-bold items-center flex justify-center p-2">{leaveCount}</div>
-            </div>
-            <div className="col-span-1 rounded-md shadow-sm inline-shadow-s grid grid-cols-3">
-              <div className="col-span-2 bg-gray-200 text-start text-wrap text-2xl font-bold items-center flex justify-center p-2">Pending Adjustments</div>
-              <div className="text-3xl font-bold items-center flex justify-center p-2">{adjustmentsCount}</div>
-            </div>
-          </div>
+    <div className="px-6">
+      <h1 className="text-2xl font-bold mb-4">Attendance</h1>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+        <Card>
+          <CardHeader><CardTitle>Total</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold">{totalEmployees}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Present</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold text-green-600">{presentCount}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Absent</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold text-red-600">{absentCount}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Late</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold text-yellow-600">{lateCount}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>On Leave</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold text-blue-600">{leaveCount}</CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle>Adjustments</CardTitle></CardHeader>
+          <CardContent className="text-3xl font-bold text-purple-600">{adjustmentsCount}</CardContent>
+        </Card>
+      </div>
+
+      {/* Actions + Search */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-4 sticky top-0 bg-white z-10 py-2">
+        <div className="flex gap-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">Add Attendance</Button>
+            </DialogTrigger>
+            <AddAttendance />
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">Export Data</Button>
+            </DialogTrigger>
+            <ExportData />
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">Approve Adjustments</Button>
+            </DialogTrigger>
+            <ApproveAdjustments />
+          </Dialog>
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-3 items-center my-5">
-      <div className="flex gap-2">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Add Attendance</Button>
-          </DialogTrigger>
-          <AddAttendance />
-        </Dialog>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Export Data</Button>
-          </DialogTrigger>
-          <ExportData />
-        </Dialog>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Approve Adjustments</Button>
-          </DialogTrigger>
-          <ApproveAdjustments />
-        </Dialog>
-      </div>
-        
-        <div className="grid grid-cols-5 gap-1">
+        <div className="flex gap-2">
           <Input
-            placeholder="Search..."
+            placeholder="Search employee..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-[100%] h-[40px] col-span-4 rounded-full"
+            className="rounded-full"
           />
-          <Button className="items-center w-fit rounded-full" variant="outline"><Search className="h-5 w-5" /></Button>
+          <Button variant="outline" className="rounded-full">
+            <Search className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 
-      <div className="h-[80%] overflow-auto" style={{ maxHeight: '500px', overflowY: 'auto' }}>
-        <Table className="w-full h-[80%]">
+      {/* Attendance Table */}
+      <div className="overflow-auto rounded-lg border max-h-[500px]">
+        <Table className="w-full">
           <TableCaption>Attendance Records</TableCaption>
           <TableHeader>
-            <TableRow>
+            <TableRow className="bg-gray-100">
               {columns.map((column) => (
                 <TableHead key={column.id}>{column.label}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row) => (
-              <TableRow key={row.id}>
+            {filteredData.map((row) => (
+              <TableRow key={row.id} className="hover:bg-gray-50">
                 {columns.map((column) => (
-                  <TableCell key={column.id}>{row[column.id]}</TableCell>
+                  <TableCell key={column.id}>
+                    {column.id === "status" ? (
+                      <Badge variant={statusVariant[row.status] || "default"}>
+                        {row[column.id]}
+                      </Badge>
+                    ) : (
+                      row[column.id]
+                    )}
+                  </TableCell>
                 ))}
               </TableRow>
             ))}
@@ -161,6 +167,5 @@ export default function Attendance() {
         </Table>
       </div>
     </div>
-
   );
 }
