@@ -19,16 +19,18 @@ return [
     'allowed_methods' => ['*'],
 
     //SPECIFY ALLOWED ORIGINS HERE
-    'allowed_origins' => ['http://localhost:5173', 'https://travelandtours-c9xk.onrender.com'],
+    'allowed_origins' => [
+        env('FRONTEND_URL', 'http://localhost:5173'),
+    ],
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['Content-Type', 'X-Requested-With', 'Authorization'],
 
     'exposed_headers' => [],
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false, // true if sessionbased
 
 ];

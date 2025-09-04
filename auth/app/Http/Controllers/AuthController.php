@@ -36,6 +36,7 @@ class AuthController extends Controller
         $validated = (object)$request->validate([
             'email'     => ['required', 'email', 'exists:users,email'],
             'password'  => ['required', 'min:6'],
+            'device_name' => 'sometimes|string', // Token based only
         ]);
 
         $user = User::where('email', $validated->email)->first();
@@ -44,17 +45,25 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        
+        /*
         Auth::login($user);
-
         // Revoke old tokens if you want single login
         $user->tokens()->delete();
 
         // regenerate session to prevent fixation
         $request->session()->regenerate();
+        */
+
+        /**Switched to Token Based */
+        $device = $data['device_name'] ?? $request->header('User-Agent') ?? 'spa';
+        $token = $user->createToken($device)->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
-            'user'   => Auth::user()
+            //'user'   => Auth::user()
+            'token' => $token,
+            'user'  => $user,
         ], 200);
 
     }
@@ -64,11 +73,13 @@ class AuthController extends Controller
     }
 
     public function user(Request $request){
-        return $request->user();
+        //return $request->user();
+        return response()->json($request->user());
     }
 
     public function logout(Request $request)
     {
+        /* SESSION BASED
         Auth::guard('web')->logout(); // log out the user
 
         // invalidate the session
@@ -80,5 +91,18 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully'
         ], 200);
+        */
+
+        // Token Based
+        // if bearer token present, revoke current access token
+        if ($request->user() && $request->user()->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
+
+        // optionally revoke all tokens:
+        // $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logged out']);
+    
     }
 }

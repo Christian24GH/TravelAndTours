@@ -1,4 +1,4 @@
-# Instructions as of 8/27/2025
+# Instructions as of 9/4/2025
 # SETUP
 Single Page Application + Cross Site Request
 
@@ -43,18 +43,13 @@ Single Page Application + Cross Site Request
 modify .env
 ```bash
     #CONFIGURE FOR DEPLOYMENT
-    APP_NAME=Laravel
     APP_ENV=production #set to production
-    APP_KEY=    # run php artisan serve
-    APP_DEBUG=true #set to false in production
+    APP_KEY=    # run php artisan key:generate
+    APP_DEBUG=false #set to false in production
     APP_URL=http://localhost #url
-    SERVER_PORT=8091    #configure
-    SANCTUM_STATEFUL_DOMAINS=localhost:5173   # add frontend domain here to allow csrf-tokens
+    SERVER_PORT=8091    #localhost only
 
-    #Choose only one and disable the other
-    #SESSION_DOMAIN=.onrender.com #For Render.com or any backend platform
-    SESSION_DOMAIN= #for localhost 
-    SESSION_DRIVER=cookie
+    SESSION_DRIVER=database
     SESSION_SAME_SITE=none
     SESSION_PARTITIONED_COOKIE=false
 
@@ -73,7 +68,12 @@ install node_modules
     npm run build
 ```
 This will create the dist folder. Inside is index.html, yan dapat yung iseserve.
-Then for navigation, add/create redirect and rewrite rules, all request should point at dist/index.html
+Then for navigation, add/create redirect and rewrite rules, all request should point at dist/index.html since its an SPA.
+
+Create a .env
+```bash
+VITE_AUTH_BACKEND: https://travelandtours-c9xk.onrender.com #replace with the auth backend url
+```
 
 3. Auth Database
 Follow Backend setup then run. This will insert the Fleet Manager Account for LogisticsII
@@ -85,10 +85,17 @@ Follow Backend setup then run. This will insert the Fleet Manager Account for Lo
     Password: 123456
 
 4. Setup auth/config/cors.php
-add frontend domain and other allowed origins in this array
+add frontend url and other allowed origins in this array. Frontend URL can be placed in frontend/.env
 ```bash
-    'allowed_origins' => ['http://localhost:5173',] 
-    
+    'allowed_origins' => [
+        env('FRONTEND_URL', 'http://localhost:5173'),
+        'new link here'
+    ],
+```
+Or in auth/.env
+
+```bash
+    FRONTEND_URL=https://travelandtours-c9xk.onrender.com
 ```
 
 5. Start Laravel Reverb on Supported Backends
@@ -99,7 +106,8 @@ add frontend domain and other allowed origins in this array
 ```
 
 # Issues
-    cors issue (Need Dedicated domain)
+    cors issue (Need Dedicated domain) -- Fixed, switched to Token Based Auth instead of Session Based
+    
 
 ### Notes
 Yung Backend po namin nag-eexpose po yan ng mga APIs na nasa /routes/api.php. Kahit maaccess lang po muna namin yung URI ng backend api sa internet palag na kami. Later nalang po isetup yung frontend kapag fixed na APIs ng backend.
