@@ -1,0 +1,54 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fleet_service
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8090:80"
+    depends_on:
+      - db
+    networks:
+      - laravel
+
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_reverb
+    working_dir: /var/www/html
+    # override apache CMD
+    command: php artisan reverb:start --host=0.0.0.0 --port=6001
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - app
+    networks:
+      - laravel
+    ports:
+      - "6001:6001"   # expose Reverb server
+
+  db:
+    image: mysql:8
+    container_name: fleet_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: fleet_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "33080:3306"
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  db_data:

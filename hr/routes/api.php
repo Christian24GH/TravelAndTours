@@ -4,7 +4,9 @@ use App\Http\Controllers\Maintenance;
 use App\Http\Controllers\Vehicles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\EmployeeController;
 
+Route::apiResource('employees', EmployeeController::class);
 
 Route::get('/vehicles', [Vehicles::class, 'show']);
 
