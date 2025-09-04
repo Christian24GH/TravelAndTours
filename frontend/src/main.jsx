@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './layout/GuestRoute';
 import { Layout } from './layout/ProtectedLayout';
+import LandingPage from './main/landing'
 import LoginPage from './main/login';
 import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         {/** Main Routes */}
         <Route element={<GuestRoute/>}>
+          <Route path="/" element={<LandingPage/>}/>
           <Route path="/login" element={<LoginPage/>}/>
         </Route>
 
@@ -36,7 +38,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           <Route path='drivers' element={<LogisticsIIDrivers/>}/>
         </Route>
-
+        <Route path='*'/>
       </Routes>
     </AuthProvider>
   </BrowserRouter>

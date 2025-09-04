@@ -3,7 +3,7 @@ import axios from 'axios'
 const base = import.meta.env.VITE_AUTH_BACKEND
 
 export const api = axios.create({
-  baseURL: `${base}/api` ?? "http://localhost:8091/api",
+  baseURL: base ? `${base}/api` : "http://localhost:8091/api",
   // Switched to token based
   headers: {
     'X-Requested-With': 'XMLHttpRequest',

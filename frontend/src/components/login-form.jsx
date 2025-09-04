@@ -44,7 +44,9 @@ export function LoginForm({
                 <Label htmlFor='email'>Email</Label>
                 <Input {...register('email', {
                     required: 'Email is required'
-                  })} id="email" type="email" placeholder="m@example.com"/>
+                  })} id="email" type="email" placeholder="m@example.com"
+                  disabled={isSubmitting}
+                  />
                 {errors.email && (
                   <AlertDescription className="text-red-500">{errors.email.message}</AlertDescription>
                 )}
@@ -62,7 +64,9 @@ export function LoginForm({
                 </div>
                 <Input {...register('password', {
                     required: 'Password is required'
-                  })} id="password" type="password"/>
+                  })} id="password" type="password"
+                  disabled={isSubmitting}
+                  />
                 {errors.password && (
                   <AlertDescription className="text-red-500">{errors.password.message}</AlertDescription>
                 )}
