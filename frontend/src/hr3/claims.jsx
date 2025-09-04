@@ -1,15 +1,23 @@
 import React, { useState } from "react";
-import { Table, TableHeader, TableBody, TableRow, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
   DialogClose,
-    DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -19,298 +27,217 @@ import {
 } from "@/components/ui/select";
 import image from "@/hr3/pics/image.png";
 
+export default function ClaimsModule() {
+  const [claims, setClaims] = useState([
+    {
+      id: 1,
+      employee: "Juan Dela Cruz",
+      type: "Travel",
+      category: "Transportation",
+      amount: 1200,
+      status: "Pending",
+      img: image,
+    },
+    {
+      id: 2,
+      employee: "Maria Santos",
+      type: "Medical",
+      category: "Consultation",
+      amount: 800,
+      status: "Approved",
+      img: "/receipt2.png",
+    },
+  ]);
 
-const dummyClaims = [
-  { id: 1, employee: "John Doe", type: "Claims", category: "Travel", amount: 150,img: image, status: "Pending" },
-  { id: 2, employee: "Jane Smith", type: "Reimbursements", category: "Food", amount: 50,img: image, status: "Pending" },
-  { id: 3, employee: "Alice Johnson", type: "Claims", category: "Medical", amount: 200,img: image, status: "Pending" },
-  { id: 4, employee: "Bob Brown", type: "Claims", category: "Entertainment", amount: 100,img: image, status: "Pending" },
-  { id: 5, employee: "Eve Green", type: "Reimbursements", category: "Travel", amount: 75,img: image, status: "Pending" },
-  { id: 6, employee: "David Lee", type: "Claims", category: "Medical", amount: 300,img: image, status: "Pending" },
-  { id: 7, employee: "Grace Wilson", type: "Claims", category: "Entertainment", amount: 120,img: image, status: "Pending" },
-  { id: 8, employee: "Frank Turner", type: "Reimbursements", category: "Food", amount: 40,img: image, status: "Pending" },
-  { id: 9, employee: "Hannah Baker", type: "Claims", category: "Travel", amount: 90,img: image, status: "Pending" },
-  { id: 10, employee: "Ivy Davis", type: "Claims", category: "Entertainment", amount: 150,img: image, status: "Pending" },
-  { id: 11, employee: "Ivy Davis", type: "Claims", category: "Entertainment", amount: 150,img: image, status: "Pending" },
-];
-
-const initialApprovedClaims = [];
-
-
-export default function Claims() {
-  const [claims, setClaims] = useState(dummyClaims);
-  const [approvedClaim, setApprovedClaim] = useState(initialApprovedClaims);
   const [selectedClaim, setSelectedClaim] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [tempStatus, setTempStatus] = useState("");
-  const [isImageZoomed, setIsImageZoomed] = useState(false);
+  const [tempStatus, setTempStatus] = useState("Pending");
+  const [zoomedImage, setZoomedImage] = useState(null); // ✅ for zoom
+
+  const handleViewClick = (claim) => {
+    setSelectedClaim(claim);
+    setTempStatus(claim.status);
+  };
 
   const handleStatusChange = (value) => {
     setTempStatus(value);
   };
 
   const handleSubmit = () => {
-    if (selectedClaim && tempStatus) {
-      if (tempStatus === "Approved") {
-        // Remove from claims and add to approved claims
-        const updatedClaims = claims.filter(claim => claim.id !== selectedClaim.id);
-        const updatedClaim = { ...selectedClaim, status: tempStatus };
-        
-        setClaims(updatedClaims);
-        setApprovedClaim(prev => [...prev, updatedClaim]);
-      } else if (tempStatus === "Rejected") {
-        // Remove the claim completely when rejected
-        const updatedClaims = claims.filter(claim => claim.id !== selectedClaim.id);
-        setClaims(updatedClaims);
-      } else {
-        // Update status for pending claims
-        const updatedClaims = claims.map((claim) =>
-          claim.id === selectedClaim.id ? { ...claim, status: tempStatus } : claim
-        );
-        setClaims(updatedClaims);
-      }
-      
-      setSelectedClaim(null);
-      setIsDialogOpen(false);
-    }
+    setClaims((prev) =>
+      prev.map((c) =>
+        c.id === selectedClaim.id ? { ...c, status: tempStatus } : c
+      )
+    );
+    setSelectedClaim(null);
   };
-
-  const handleViewClick = (claim) => {
-    setSelectedClaim(claim);
-    setTempStatus(claim.status);
-    setIsDialogOpen(true);
-  };
-
-  const handleImageClick = () => {
-    setIsImageZoomed(!isImageZoomed);
-  };
-
-  const [isApprovedDialogOpen, setIsApprovedDialogOpen] = useState(false);
-const [selectedApprovedClaim, setSelectedApprovedClaim] = useState(null);
-
-// Add new handler for approved claims view
-const handleApprovedViewClick = (claim) => {
-  setSelectedApprovedClaim(claim);
-  setIsApprovedDialogOpen(true);
-};
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Claims and Reimbursements Tracking</h2>
-      <div className="flex gap-2">
-        <Button>Submit New</Button>
-        <Button>Generate Reports</Button>
-      </div>
-      <div className="max-h-[486px] overflow-y-auto mt-4">
-        <Table className="h-full overflow-y-auto">
+    <div className="p-6 space-y-10">
+      {/* ✅ Pending Claims */}
+      <div>
+        <h2 className="text-xl font-bold mb-3">Pending Claims</h2>
+        <Table>
           <TableHeader>
             <TableRow>
-              <TableCell className="font-bold px-10 text-md">Employee</TableCell>
-              <TableCell className="font-bold px-10 text-md">Type</TableCell>
-              <TableCell className="font-bold px-10 text-md">Category</TableCell>
-              <TableCell className="font-bold px-10 text-md">Amount</TableCell>
-              <TableCell className="font-bold px-10 text-md">Status</TableCell>
-              <TableCell className="font-bold px-10 text-md">Action</TableCell>
+              <TableHead className="px-10">Employee</TableHead>
+              <TableHead className="px-10">Type</TableHead>
+              <TableHead className="px-10">Category</TableHead>
+              <TableHead className="px-10">Amount</TableHead>
+              <TableHead className="px-10">Status</TableHead>
+              <TableHead className="px-10">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {claims.map((claim) => (
-              <TableRow key={claim.id}>
-                <TableCell className="text-md px-10">{claim.employee}</TableCell>
-                <TableCell className="text-md px-10">{claim.type}</TableCell>
-                <TableCell className="text-md px-10">{claim.category}</TableCell>
-                <TableCell className="text-md px-10">₱{claim.amount}</TableCell>
-                <TableCell className="text-md px-10">{claim.status}</TableCell>
-                <TableCell className="text-md px-10">
-                  <Button onClick={() => handleViewClick(claim)} disabled={claim.status !== "Pending"}>View</Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {claims
+              .filter((c) => c.status === "Pending")
+              .map((claim) => (
+                <TableRow
+                  key={claim.id}
+                  className="hover:bg-muted/50 transition-colors cursor-pointer"
+                >
+                  <TableCell className="text-md px-10 font-medium">
+                    {claim.employee}
+                  </TableCell>
+                  <TableCell className="text-md px-10">{claim.type}</TableCell>
+                  <TableCell className="text-md px-10">
+                    {claim.category}
+                  </TableCell>
+                  <TableCell className="text-md px-10">
+                    ₱{claim.amount}
+                  </TableCell>
+                  <TableCell className="text-md px-10">
+                    <Badge variant="secondary">{claim.status}</Badge>
+                  </TableCell>
+                  <TableCell className="text-md px-10">
+                    <Button onClick={() => handleViewClick(claim)}>View</Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>
-      <h2 className="text-xl font-bold mt-8 mb-4">Approved Request</h2>
-            <div className="max-h-[500px] overflow-y-auto mt-4">
-              <Table className="h-full">
-                <TableHeader>
-                  <TableRow>
-                    <TableCell className="font-bold text-center text-md ">Employee</TableCell>
-                    <TableCell className="font-bold text-center text-md ">Type</TableCell>
-                    <TableCell className="font-bold text-center text-md ">Category</TableCell>
-                    <TableCell className="font-bold text-center text-md ">Amount</TableCell>
-                    <TableCell className="font-bold text-center text-md ">Status</TableCell>
-                    <TableCell className="font-bold text-center text-md ">Action</TableCell>
-                  </TableRow>
-                </TableHeader>
-                
-                <TableBody>
-                  {approvedClaim.map((approvedclaim) => (
-                    <TableRow key={approvedclaim.id}>
-                      <TableCell className="text-center text-md ">{approvedclaim.employee}</TableCell>
-                      <TableCell className="text-center text-md ">{approvedclaim.type}</TableCell>
-                      <TableCell className="text-center text-md ">{approvedclaim.category}</TableCell>
-                      <TableCell className="text-center text-md ">₱{approvedclaim.amount}</TableCell>
-                      <TableCell className="text-center text-md ">{approvedclaim.status}</TableCell>
-                      <TableCell className="text-center text-md">
-                        <Button onClick={() => handleApprovedViewClick(approvedclaim)}>View</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
 
-              </Table>
-            </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Claim Details</DialogTitle>
-                <DialogDescription>
-                  Review and update the claim status
-                </DialogDescription>
-              </DialogHeader>
-                {selectedClaim && (
-                  <>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-4">
-                        <div>
-                          <label className="font-bold">Employee:</label>
-                          <p>{selectedClaim.employee}</p>
-                        </div>
-                        <div>
-                          <label className="font-bold">Type:</label>
-                  <p>{selectedClaim.type}</p>
-                </div>
-                <div>
-                  <label className="font-bold">Category:</label>
-                  <p>{selectedClaim.category}</p>
-                </div>
-                <div>
-                  <label className="font-bold">Amount:</label>
-                  <p>₱{selectedClaim.amount}</p>
-                </div>
-                  <div>
-                    <label className="font-bold">Status:</label>
-                    <Select value={tempStatus} onValueChange={handleStatusChange}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Pending">Pending</SelectItem>
-                        <SelectItem value="Approved">Approved</SelectItem>
-                        <SelectItem value="Rejected">Rejected</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <p className="font-bold mb-2">Receipt</p>
-                  <div 
-                    onClick={handleImageClick} 
-                    className="cursor-pointer relative hover:opacity-90 transition-opacity"
-                  >
-                    {selectedClaim && (
-                      <img
-                        src={selectedClaim.img}
-                        alt="Receipt"
-                        className="w-full h-auto rounded-lg object-contain max-h-[300px]"
-                        onClick={handleImageClick}  // Add click handler here
-                      />
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 hover:opacity-100">
-                      <span className="text-white bg-black/50 px-2 py-1 rounded text-sm">Click to zoom</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter className="mt-4">
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button onClick={handleSubmit}>Submit</Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* ✅ Approved Claims */}
+      <div>
+        <h2 className="text-xl font-bold mb-3">Approved Claims</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="px-10">Employee</TableHead>
+              <TableHead className="px-10">Type</TableHead>
+              <TableHead className="px-10">Category</TableHead>
+              <TableHead className="px-10">Amount</TableHead>
+              <TableHead className="px-10">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {claims
+              .filter((c) => c.status === "Approved")
+              .map((claim) => (
+                <TableRow key={claim.id} className="hover:bg-muted/50">
+                  <TableCell className="text-md px-10 font-medium">
+                    {claim.employee}
+                  </TableCell>
+                  <TableCell className="text-md px-10">{claim.type}</TableCell>
+                  <TableCell className="text-md px-10">
+                    {claim.category}
+                  </TableCell>
+                  <TableCell className="text-md px-10">
+                    ₱{claim.amount}
+                  </TableCell>
+                  <TableCell className="text-md px-10">
+                    <Badge variant="success">{claim.status}</Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </div>
 
-      {/* Add Image Zoom Dialog */}
-      <Dialog open={isImageZoomed} onOpenChange={setIsImageZoomed}>
-        <DialogContent className="max-w-[90vw] h-[full]">
+      {/* ✅ Claim Details Dialog */}
+      <Dialog open={!!selectedClaim} onOpenChange={() => setSelectedClaim(null)}>
+        <DialogContent className="max-w-2xl rounded-2xl shadow-lg">
           <DialogHeader>
-            <DialogTitle>Receipt Image</DialogTitle>
+            <DialogTitle className="text-lg font-bold">
+              Claim Details
+            </DialogTitle>
             <DialogDescription>
-              Enlarged view of the receipt
+              Review and take action on this claim
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center justify-center h-full p-4">
-            <img
-              src={image}
-              alt="Receipt"
-              className="w-auto max-h-[full] object-contain rounded-lg"
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Approved Claims View Dialog */}
-      <Dialog open={isApprovedDialogOpen} onOpenChange={setIsApprovedDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Approved Claim Details</DialogTitle>
-            <DialogDescription>
-              View approved claim information
-            </DialogDescription>
-          </DialogHeader>
-          {selectedApprovedClaim && (
-            <div className="grid grid-cols-2 gap-4">
+          {selectedClaim && (
+            <div className="grid grid-cols-2 gap-6 mt-4">
+              {/* Left: Claim Info */}
               <div className="space-y-4">
-                <div>
-                  <label className="font-bold">Employee:</label>
-                  <p>{selectedApprovedClaim.employee}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-semibold">Employee:</span>
+                  <span>{selectedClaim.employee}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-semibold">Type:</span>
+                  <span>{selectedClaim.type}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-semibold">Category:</span>
+                  <span>{selectedClaim.category}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-semibold">Amount:</span>
+                  <span>₱{selectedClaim.amount}</span>
                 </div>
                 <div>
-                  <label className="font-bold">Type:</label>
-                  <p>{selectedApprovedClaim.type}</p>
-                </div>
-                <div>
-                  <label className="font-bold">Category:</label>
-                  <p>{selectedApprovedClaim.category}</p>
-                </div>
-                <div>
-                  <label className="font-bold">Amount:</label>
-                  <p>₱{selectedApprovedClaim.amount}</p>
-                </div>
-                <div>
-                  <label className="font-bold">Status:</label>
-                  <p className="text-green-600 font-medium">{selectedApprovedClaim.status}</p>
+                  <label className="font-semibold">Status:</label>
+                  <Select value={tempStatus} onValueChange={handleStatusChange}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Approved">Approved</SelectItem>
+                      <SelectItem value="Rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div className="border rounded-lg p-4">
-                <p className="font-bold mb-2">Receipt</p>
-                <div 
-                  onClick={() => {
-                    setSelectedClaim(selectedApprovedClaim);
-                    setIsImageZoomed(true);
-                  }}
-                  className="cursor-pointer relative hover:opacity-90 transition-opacity"
+
+              {/* Right: Receipt */}
+              <div className="border rounded-xl p-4 bg-muted/30">
+                <p className="font-semibold mb-2">Receipt</p>
+                <div
+                  className="cursor-pointer relative group"
+                  onClick={() => setZoomedImage(selectedClaim.img)} // ✅ set zoom
                 >
                   <img
-                    src={selectedApprovedClaim.img}
+                    src={selectedClaim.img}
                     alt="Receipt"
-                    className="w-full h-auto rounded-lg object-contain max-h-[300px]"
+                    className="w-full h-auto rounded-lg object-contain max-h-[280px]"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 hover:opacity-100">
-                    <span className="text-white bg-black/50 px-2 py-1 rounded text-sm">Click to zoom</span>
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                    <span className="text-white text-sm">Click to Zoom</span>
                   </div>
                 </div>
               </div>
             </div>
           )}
-          <DialogFooter className="mt-4">
+
+          <DialogFooter className="mt-6">
             <DialogClose asChild>
-              <Button variant="outline">Close</Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
+            <Button onClick={handleSubmit}>Submit</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ✅ Zoom Image Dialog */}
+      <Dialog open={!!zoomedImage} onOpenChange={() => setZoomedImage(null)}>
+        <DialogContent className="max-w-4xl p-0 bg-transparent border-0 shadow-none">
+          <img
+            src={zoomedImage || ""}
+            alt="Zoomed Receipt"
+            className="w-full h-auto rounded-lg object-contain max-h-[90vh] mx-auto"
+          />
         </DialogContent>
       </Dialog>
     </div>

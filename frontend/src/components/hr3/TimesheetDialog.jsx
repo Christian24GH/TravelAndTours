@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import {
   Table,
@@ -21,9 +22,12 @@ export function TimesheetDialog({ employee, open, onOpenChange }) {
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[70%]" aria-describedby="dialog-description">
+      <DialogContent className="w-[70%]">
         <DialogHeader>
           <DialogTitle>{employee.employeeName}'s Timesheet Details</DialogTitle>
+          <DialogDescription>
+            View and edit timesheet details, including status, clock-in/out, and total hours.
+          </DialogDescription>
         </DialogHeader>
         <div className="py-4 space-y-4">
           <Table>

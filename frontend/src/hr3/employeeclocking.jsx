@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -15,6 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Coffee, LogIn, LogOut } from "lucide-react";
 
 export default function EmployeeClocking() {
   const clockingData = [
@@ -26,67 +27,88 @@ export default function EmployeeClocking() {
 
   return (
     <Dialog>
-      <div className="shadow-sm inset-shadow-sm rounded-lg h-full">
-        <div className="grid h-full grid-rows-18 p-5 gap-5">
-          <div className="row-span-3 grid grid-cols-3 items-center p-5 gap-9">
-            <div className="shadow-sm inset-shadow-sm rounded-md h-full border text-center flex justify-center items-center gap-3">
-              <h1 className="text-2xl tracking-wider font-bold">Status:</h1>
-              <p className="text-xl tracking-wider text-gray-500">Off-Duty</p>
+      <div className="rounded-2xl shadow-md border bg-white h-full p-6 space-y-6">
+        {/* Top Status Row */}
+        <div className="grid grid-cols-3 gap-6">
+          <div className="flex flex-col items-center justify-center p-4 rounded-xl shadow-sm bg-gray-50">
+            <h1 className="text-lg font-semibold">Status</h1>
+            <Badge variant="secondary" className="mt-2 text-lg px-3 py-1">
+              Off-Duty
+            </Badge>
+          </div>
+          <div className="flex flex-col items-center justify-center p-4 rounded-xl shadow-sm bg-gray-50">
+            <h1 className="text-lg font-semibold">Shift</h1>
+            <p className="text-xl text-gray-700">18:00 – 06:00</p>
+          </div>
+          <div className="flex flex-col items-center justify-center p-4 rounded-xl shadow-sm bg-gray-50">
+            <h1 className="text-lg font-semibold">Department</h1>
+            <p className="text-xl text-gray-700">Human Resources</p>
+          </div>
+        </div>
+
+        {/* Buttons + Info */}
+        <div className="grid grid-rows-2 gap-6">
+          {/* Clocking Buttons */}
+          <div className="grid grid-cols-4 gap-4">
+            <Button className="text-lg rounded-xl flex gap-2 items-center bg-green-600 hover:bg-green-700">
+              <LogIn size={20} /> Clock-In
+            </Button>
+            <Button className="text-lg rounded-xl flex gap-2 items-center bg-yellow-600 hover:bg-yellow-700">
+              <Coffee size={20} /> Break-In
+            </Button>
+            <Button className="text-lg rounded-xl flex gap-2 items-center bg-orange-600 hover:bg-orange-700">
+              <Coffee size={20} /> Break-Out
+            </Button>
+            <Button className="text-lg rounded-xl flex gap-2 items-center bg-red-600 hover:bg-red-700">
+              <LogOut size={20} /> Clock-Out
+            </Button>
+          </div>
+
+          {/* Device Info */}
+          <div className="grid grid-cols-2 gap-4 text-lg">
+            <div className="flex gap-2">
+              <span className="font-semibold">Device:</span>
+              <span className="text-gray-600">Web Browser</span>
             </div>
-            <div className="shadow-sm inset-shadow-sm rounded-md h-full border text-center flex justify-center items-center gap-3">
-              <h1 className="text-xl tracking-wider font-bold">NameShift:</h1>
-              <p className="text-xl tracking-wider text-gray-500">18:00-6:00</p>
-            </div>
-            <div className="shadow-sm inset-shadow-sm rounded-md h-full border text-center flex justify-center items-center gap-3">
-              <h1 className="text-xl tracking-wider font-bold">Department:</h1>
-              <p className="text-xl tracking-wider text-gray-500">Human Resources</p>
+            <div className="flex gap-2">
+              <span className="font-semibold">IP Address:</span>
+              <span className="text-gray-600">192.168.1.100</span>
             </div>
           </div>
-          <div className="row-span-6 h-full shadow-sm inset-shadow-sm p-5 grid rounded-md grid-rows-2 gap-6">
-            <div className="h-full grid grid-cols-4 gap-8 mt-3">
-              <div className="flex justify-center items-center"> <Button className="text-xl bg-black hover:bg-gray-700 hover:shadow-2xl">Clock-In</Button></div>
-              <div className="flex justify-center items-center"> <Button className="text-xl bg-black hover:bg-gray-700 hover:shadow-2xl">Break-In</Button></div>
-              <div className="flex justify-center items-center"> <Button className="text-xl bg-black hover:bg-gray-700 hover:shadow-2xl">Break-Out</Button></div>
-              <div className="flex justify-center items-center"> <Button className="text-xl bg-black hover:bg-gray-700 hover:shadow-2xl">Clock-Out</Button></div>
-            </div>
-            <div className="h-full grid grid-cols-4 gap-8">
-              <div className="flex justify-center items-center">
-                <h1 className="text-xl tracking-wider font-bold mr-3">Device:</h1>
-                <p className="text-xl tracking-wider text-gray-500">Web Browser</p>
-              </div>
-              <div className="flex justify-center items-center">
-                <h1 className="text-xl tracking-wider font-bold mr-3">Ip Address:</h1>
-                <p className="text-xl tracking-wider text-gray-500">192.168.1.100</p>
-              </div>
-              <div className="flex justify-center items-center"></div>
-              <div className="flex justify-center items-center"></div>
-            </div>
-          </div>
-          <div className="row-span-9 shadow-sm inset-shadow-sm h-full">
-            <DialogTitle className="p-3">Today's Logs</DialogTitle>
-            <Table className="w-full text-center h-69">
-              <TableHeader className="border-t">
-                <TableRow>
-                  <TableHead className="text-center">#</TableHead>
-                  <TableHead className="text-center">Time</TableHead>
-                  <TableHead className="text-center">Type</TableHead>
-                  <TableHead className="text-center">Device</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
+        </div>
+
+        {/* Logs */}
+        <div className="rounded-xl border shadow-sm">
+          <DialogHeader>
+            <DialogTitle className="px-4 py-3 text-lg">Today's Logs</DialogTitle>
+          </DialogHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-center">#</TableHead>
+                <TableHead className="text-center">Time</TableHead>
+                <TableHead className="text-center">Type</TableHead>
+                <TableHead className="text-center">Device</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {clockingData.map((entry, i) => (
+                <TableRow
+                  key={entry.id}
+                  className={i % 2 === 0 ? "bg-gray-50 hover:bg-gray-100" : "hover:bg-gray-100"}
+                >
+                  <TableCell className="text-center">{entry.id}</TableCell>
+                  <TableCell className="text-center">{entry.time}</TableCell>
+                  <TableCell className="text-center">{entry.type}</TableCell>
+                  <TableCell className="text-center">{entry.device}</TableCell>
+                  <TableCell className="text-center">
+                    <Badge variant="success">{entry.status}</Badge>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {clockingData.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell>{entry.id}</TableCell>
-                    <TableCell>{entry.time}</TableCell>
-                    <TableCell>{entry.type}</TableCell>
-                    <TableCell>{entry.device}</TableCell>
-                    <TableCell>{entry.status}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </Dialog>
