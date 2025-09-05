@@ -24,7 +24,7 @@ export function NavMain({
   data
 }) {
   const curLocation = location.pathname
-  console.log(curLocation)
+  
   return (
     <SidebarGroup> 
       <SidebarGroupContent className="flex flex-col gap-2">

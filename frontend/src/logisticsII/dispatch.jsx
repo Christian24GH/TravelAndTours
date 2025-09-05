@@ -6,11 +6,11 @@ import { toast } from "sonner";
 import {motion} from 'motion/react'
 
 import { useEchoPublic } from "@laravel/echo-react";
-import { logisticsII } from "../api/logisticsII";
-import PaginationComponent from "../components/logisticsII/pagination";
-import TableComponent from "../components/logisticsII/table";
+import { logisticsII } from "@/api/logisticsII";
+import PaginationComponent from "@/components/logisticsII/pagination";
+import TableComponent from "@/components/logisticsII/table";
 
-import { ViewDialog } from "../components/logisticsII/reservations";
+import { ViewDialog } from "@/components/logisticsII/reservation/modals";
 
 const api = logisticsII.backend.api;
 const reverb = logisticsII.reverb;
@@ -18,9 +18,11 @@ const reverb = logisticsII.reverb;
 reverb.config();
 
 const header = [
-  { title: "Request", accessor: "uuid", cellClassName: "font-medium h-1"},
-  { title: "VIN", accessor: "vin", cellClassName: "h-1" },
-  { title: "Employee", accessor: "employee_id", cellClassName: "h-1" },
+  { title: "Batch Number", accessor: "batch_number", cellClassName: "font-medium h-1"},
+  { title: "Vehicle", accessor: "vehicle_type", cellClassName: "h-1" },
+  { title: "Capacity", accessor: "vehicle_capacity", cellClassName: "h-1" },
+  { title: "Driver", accessor: "driver_name", cellClassName: "h-1" },
+  { title: "Scheduled Time", accessor: "scheduled_time", cellClassName: "h-1" },
   { title: "Status", accessor: "status", cellClassName: "h-1" },
   { title: "Created", accessor: "created_at", cellClassName: "h-1"},
   {
@@ -53,9 +55,9 @@ export default function DispatchPage(){
             })
 
             .catch(() => {
-            toast.error("Error fetching dispatch records", {
-                position: "top-center",
-            });
+                toast.error("Error fetching dispatch records", {
+                    position: "top-center",
+                });
             });
         }, 300); // debounce API calls by 300ms
 

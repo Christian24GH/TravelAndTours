@@ -44,7 +44,9 @@ export function LoginForm({
                 <Label htmlFor='email'>Email</Label>
                 <Input {...register('email', {
                     required: 'Email is required'
-                  })} id="email" type="email" placeholder="m@example.com"/>
+                  })} id="email" type="email" placeholder="m@example.com"
+                  disabled={isSubmitting}
+                  />
                 {errors.email && (
                   <AlertDescription className="text-red-500">{errors.email.message}</AlertDescription>
                 )}
@@ -52,15 +54,19 @@ export function LoginForm({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                    Forgot your password?
-                  </a>
+                  {/*
+                    <a
+                      href="#"
+                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+                      Forgot your password?
+                    </a>
+                  */}
                 </div>
                 <Input {...register('password', {
                     required: 'Password is required'
-                  })} id="password" type="password"/>
+                  })} id="password" type="password"
+                  disabled={isSubmitting}
+                  />
                 {errors.password && (
                   <AlertDescription className="text-red-500">{errors.password.message}</AlertDescription>
                 )}
@@ -70,12 +76,6 @@ export function LoginForm({
                   Login
                 </Button>
               </div>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
-                Sign up
-              </a>
             </div>
           </form>
         </CardContent>

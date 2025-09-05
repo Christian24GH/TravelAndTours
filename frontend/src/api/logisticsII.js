@@ -31,10 +31,13 @@ export const logisticsII = {
             register: `${backendUri}/api/vehicles/register`,
             update: `${backendUri}/api/vehicles/change`,
             reservations: `${backendUri}/api/reserve`,
+            reservationDetails: `${backendUri}/api/reserve/details`,
             makeReservations: `${backendUri}/api/reserve/submit`,
             approveReservation: `${backendUri}/api/reserve/approve`,
             cancelReservation: `${backendUri}/api/reserve/cancel`,
             drivers: `${backendUri}/api/drivers`,
+            fetchDrivers: `${backendUri}/api/drivers/getDrivers`,
+            dialogDrivers: `${backendUri}/api/drivers/dialogDrivers`,
             dispatches: `${backendUri}/api/dispatches`,
         },
     }

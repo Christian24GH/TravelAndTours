@@ -22,8 +22,10 @@ class DatabaseSeeder extends Seeder
 ]);
         // You can keep the original test user if you like
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name'      => 'Fleet Manager',
+            'email'     => 'fleetManager@gmail.com',
+            'password'  => '123456',
+            'role'      => 'LogisticsII Admin',
         ]);
     }
 }
