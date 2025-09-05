@@ -34,6 +34,18 @@ export const hr1 = {
       employees: `${backendUri}/api/employees`,
       positions: `${backendUri}/api/positions`,
       departments: `${backendUri}/api/departments`,
+
+      // ✅ Add interviews API endpoints
+      interviews: `${backendUri}/api/interviews`,
+      createInterview: `${backendUri}/api/interviews`,
+      updateInterview: (id) => `${backendUri}/api/interviews/${id}`,
+      deleteInterview: (id) => `${backendUri}/api/interviews/${id}`,
+
+      // ✅ Job Postings API endpoints
+      jobPostings: `${backendUri}/api/job-postings`,
+      createJobPosting: `${backendUri}/api/job-postings`,
+      updateJobPosting: (id) => `${backendUri}/api/job-postings/${id}`,
+      deleteJobPosting: (id) => `${backendUri}/api/job-postings/${id}`,
     },
   },
 }

@@ -134,7 +134,6 @@ const data = {
       NavItems: [
         { title: "Applicant List", url: '/hr1/applicants', icon: User },
         { title: "Interview Scheduling", url: '/hr1/applicants/interviews', icon: Calendar },
-        { title: "Application Status", url: '/hr1/applicants/status', icon: Calendar },
       ],
     },
   },
@@ -142,7 +141,7 @@ const data = {
     NavGroup: {
       NavLabel: 'Recruitment Management',
       NavItems: [
-        { title: "Job Postings", url: '/hr1/recruitment/jobs', icon: FileText },
+        { title: "Job Postings", url: '/hr1/jobposting', icon: FileText },
         { title: "Offer Management", url: '/hr1/recruitment/offers', icon: Tag },
       ],
     },
