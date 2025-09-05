@@ -12,7 +12,8 @@ import {
   TagsIcon,
   HistoryIcon,
   LogsIcon,
-  MapPinIcon
+  MapPinIcon,
+  GlobeIcon
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -32,6 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import AuthContext from "../context/AuthProvider"
 import { useContext } from "react"
 
+import logo from '@/assets/finallogo.avif'
 const data = {
 
   /** Logistics 1 NavItems */
@@ -257,11 +259,11 @@ export function AppSidebar({...props}) {
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div
-                  className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+                  className="bg-[var(--vivid-neon-pink)] text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <GlobeIcon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Travel and Tours</span>
+                  <span className="truncate font-medium">JOLI Travel and Tours</span>
                   <span className="truncate text-xs">
                     {loading ? (<Skeleton className="w-2/3 h-full"/>) :
                      user.role == "LogisticsI Admin"  ? 'Logistics I Admin' : //just copy this line

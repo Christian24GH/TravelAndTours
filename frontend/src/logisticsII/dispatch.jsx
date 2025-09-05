@@ -27,9 +27,6 @@ const header = [
   { title: "Created", accessor: "created_at", cellClassName: "h-1"},
   {
     title: "Actions",
-    render: (item)=>(
-      <ViewDialog item={item}/>
-    )
   },
 ];
 export default function DispatchPage(){

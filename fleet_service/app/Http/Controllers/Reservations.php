@@ -255,7 +255,7 @@ class Reservations extends Controller
 
             broadcast(new ReservationUpdates($reservation));
         } catch (Exception $e) {
-            return response()->json(['error' => 'Failed to fetch new data'], 500);
+            //
         }
 
         return response()->json(['success' => true], 200);
@@ -366,7 +366,7 @@ class Reservations extends Controller
 
             broadcast(new ReservationUpdates($reservation));
         } catch (Exception $e) {
-            return response()->json(['error' => 'Failed to fetch new data'], 500);
+            //
         }
         
         return response()->json(['success' => true], 200);

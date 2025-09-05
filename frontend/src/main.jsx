@@ -16,8 +16,12 @@ import LogisticsIIMakeReservationPage from './logisticsII/make-reservation'
 import LogisticsIIReservationDetails from './logisticsII/details-reservation'
 import LogisticsIIDrivers from './logisticsII/drivers'
 
+console.log('app: src/main.jsx loaded'); 
+
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
+  // basename = baseUrl jsut like base value inside vite.config.js
+  // Tells BrowserRouter that this is the base URL
+  <BrowserRouter basename="/TravelAndTour/frontend/dist/">
     <AuthProvider>
       <Routes>
         {/** Main Routes */}

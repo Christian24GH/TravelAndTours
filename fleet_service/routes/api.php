@@ -20,7 +20,6 @@ Route::post('/reserve/submit', [Reservations::class, 'makeRequest']);
 Route::put('/reserve/approve', [Reservations::class, 'approveReservation']);
 Route::put('/reserve/cancel', [Reservations::class, 'cancelRequest']);
 
-
 //Driver
 Route::get('/drivers', [Drivers::class, 'show']);
 Route::get('/drivers/dialogDrivers', [Drivers::class, 'dialogShow']);

@@ -134,7 +134,7 @@ class Vehicles extends Controller
 
             broadcast(new VehicleUpdates($new));
         } catch (Exception $e) {
-            return response()->json('Failed to fetch new data', 500);
+            //return response()->json('Failed to fetch new data', 500);
         }
 
         return response()->json("Vehicle Registered", 200);
@@ -180,7 +180,7 @@ class Vehicles extends Controller
             broadcast(new VehicleUpdates($new));
             
         } catch (Exception $e) {
-            return response()->json($e->getMessage(), 500);
+            //return response()->json($e->getMessage(), 500);
         }
 
         return response()->json("Record Updated Successfully", 200);

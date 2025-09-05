@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DispatchUpdates;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -80,4 +82,66 @@ class Dispatches extends Controller
 
     }
 
+    /**TODO
+     * IMPLEMENT: UPDATE FUNCTIONS
+     * LIVE DRIVER POSITION MONITORING
+     */
+
+    public function updateStatus(Request $request)
+    {
+        $data = $request->validate([
+            'dispatch_id' => 'required|integer|exists:dispatches,id',
+            'status'      => 'required|string',
+            'remarks'     => 'nullable|string',
+        ]);
+
+        $allowed = ['Scheduled', 'Preparing', 'On Route', 'Completed', 'Cancelled', 'Closed'];
+        if (! in_array($data['status'], $allowed)) {
+            return response()->json(['message' => 'Invalid status value'], 422);
+        }
+
+        $now = Carbon::now();
+        $update = [
+            'status' => $data['status'],
+        ];
+
+        // update relevant timestamps depending on status transition
+        switch ($data['status']) {
+            case 'On Route':
+                $update['start_time'] = $now;
+                break;
+            case 'Completed':
+                $update['arrival_time'] = $now;
+                break;
+            case 'Closed':
+                $update['return_time'] = $now;
+                break;
+            case 'Cancelled':
+                // optionally set a cancelled_at timestamp (if you add one)
+                $update['remarks'] = $data['remarks'] ?? null;
+                break;
+            default:
+                // leave other fields untouched
+                break;
+        }
+
+        if (isset($data['remarks'])) {
+            $update['remarks'] = $data['remarks'];
+        }
+
+        DB::table('dispatches')->where('id', $data['dispatch_id'])->update($update);
+
+        $dispatch = DB::table('dispatches')->where('id', $data['dispatch_id'])->first();
+
+        // broadcast event if event class is available (non-fatal)
+        if (class_exists(DispatchUpdates::class)) {
+            try {
+                broadcast(new DispatchUpdates($dispatch));
+            } catch (\Throwable $e) {
+                // don't fail request if broadcasting isn't configured
+            }
+        }
+
+        return response()->json(['dispatch' => $dispatch], 200);
+    }
 }

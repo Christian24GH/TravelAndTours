@@ -61,18 +61,79 @@ modify .env
     DB_PASSWORD=
 ```
 
-2. Frontend
+2. SETUP XAMPP AND FRONTEND FOR SINGLE PAGE APPLICATION
+
 install node_modules
 ```bash
     npm install
+```
+
+Open xampp/apache/conf/httpd.conf
+Enable LoadModule rewrite_module modules/mod_rewrite.so
+```bash
+    LoadModule rewrite_module modules/mod_rewrite.so # Uncommented
+    <Directory "C:/xampp/htdocs">
+        Options Indexes FollowSymLinks Includes ExecCGI
+        AllowOverride All
+        Require all granted
+    </Directory>
+```
+Save and restart Apache Server
+
+Open frontend/vite.config.js and modify base
+```bash
+    # Value depends on frontend serve directory
+    # If app needs to be accessible at http://localhost/TravelAndTour/frontend/ → keep base: '/TravelAndTour/frontend/'.
+    # if directory is htdocs/dist(http://localhost/) (directly from htdocs/dist) → change base: '/' and rebuild.
+    
+    # Sets assets(js/css) url for dist/index.html
+    base: '/TravelAndTour/frontend/dist/'
+```
+
+Open frontend/src/main.jsx and modify basename\
+```bash
+    # basename = baseUrl jsut like base value inside vite.config.js
+    # Tells BrowserRouter that this is the base URL to serve
+    <BrowserRouter basename="/TravelAndTour/frontend/dist/">
+```
+
+Open frontend/public/.htaccess and modify
+```bash
+    <IfModule mod_rewrite.c>
+        RewriteEngine On
+
+        # Folder location, modify if needed
+        RewriteBase /TravelAndTour/Frontend/
+
+        # Serve existing files/directories as-is
+        RewriteCond %{REQUEST_FILENAME} -f [OR]
+        RewriteCond %{REQUEST_FILENAME} -d
+        RewriteRule ^ - [L]
+
+        # Don't rewrite API requests (if proxied through same host)
+        RewriteRule ^api/ - [L]
+
+        # Don't rewrite static asset folders
+        RewriteRule ^(assets|css|js|img|images|static)/ - [L]
+
+        # Fallback to dist/index.html in this directory for SPA routes
+        # Compiled index.html, tells browser to use this index with RewriteRule
+        RewriteRule . dist/index.html [L]
+    </IfModule>
+```
+
+Finally
+```bash
     npm run build
 ```
-This will create the dist folder. Inside is index.html, yan dapat yung iseserve.
-Then for navigation, add/create redirect and rewrite rules, all request should point at dist/index.html since its an SPA.
+
+This will create the dist folder. Inside is index.html, .htaccess, and compiled assets. yan dapat yung iseserve.
+Kapag blank page, may mali sa main.jsx or .htaccess
+If yung js or css ay 404 NOT FOUND, may mali sa vite.config.js
 
 Create a .env
 ```bash
-VITE_AUTH_BACKEND: https://travelandtours-c9xk.onrender.com #replace with the auth backend url
+    VITE_AUTH_BACKEND: https://travelandtours-c9xk.onrender.com #replace with the auth backend url
 ```
 
 3. Auth Database
