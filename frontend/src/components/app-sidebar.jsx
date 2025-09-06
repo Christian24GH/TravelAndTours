@@ -227,6 +227,36 @@ const data = {
       }
     }
   ],
+
+  adminNav: [
+    {
+      //copy mo kung gusto mo pa ng nav group
+      NavGroup: {
+        NavLabel: 'Administration',
+        NavItems: [
+          {
+            title: "Dashbaord",
+            url: '#',
+            icon: Gauge,
+          },
+          {
+            title: "User Management",
+            url: '#',
+            icon: PieChartIcon,
+          },
+          {
+            title: "nav item",
+            url: '#',   //edit mo nalang
+            icon: ChartSpline,
+          },
+        ],
+      }
+
+      //dito mo lagay yung nav items
+    },
+  
+  ],
+
   navSecondary: [
     {
       title: "Support",
@@ -268,6 +298,7 @@ export function AppSidebar({...props}) {
                     {loading ? (<Skeleton className="w-2/3 h-full"/>) :
                      user.role == "LogisticsI Admin"  ? 'Logistics I Admin' : //just copy this line
                      user.role == "LogisticsII Admin" ? 'Logistics II Admin' :
+                     user.role == "Administrative" ? 'Administrative' :
                      //and place it here
 
                      null
@@ -294,7 +325,9 @@ export function AppSidebar({...props}) {
               {user.role === "LogisticsII Admin" ? 
               (<NavMain data={data.logisticsIINav}/>) 
               : user.role === "LogisticsI Admin" ? 
-              (<NavMain data={data.logisticsINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
+              (<NavMain data={data.logisticsINav}/>)
+              : user.role === "Administrative" ? 
+              (<NavMain data={data.adminNav}/>)  // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
               : null}
             </>
           )

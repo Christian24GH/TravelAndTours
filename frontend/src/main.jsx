@@ -16,6 +16,8 @@ import LogisticsIIMakeReservationPage from './logisticsII/make-reservation'
 import LogisticsIIReservationDetails from './logisticsII/details-reservation'
 import LogisticsIIDrivers from './logisticsII/drivers'
 
+import AdminDashboard from './administrative/dashboard';
+
 console.log('app: src/main.jsx loaded'); 
 
 createRoot(document.getElementById('root')).render(
@@ -41,6 +43,11 @@ createRoot(document.getElementById('root')).render(
           </Route>
           <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
           <Route path='drivers' element={<LogisticsIIDrivers/>}/>
+        </Route>
+
+        {/**Administrative */}
+        <Route path="/administrative" element={<Layout allowedRoles={['administrative', 'Super Admin']}/>}>
+          <Route index element={<AdminDashboard/>}/>
         </Route>
         <Route path='*'/>
       </Routes>

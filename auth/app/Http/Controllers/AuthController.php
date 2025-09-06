@@ -10,29 +10,31 @@ use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
-    public function register(Request $request){
+    public function register(Request $request)
+    {
         //dd($request);
         $validated = (object)$request->validate([
             'name'      => ['required', 'min:6'],
             'email'     => ['required', 'email', 'unique:users,email'],
             'password'  => ['required', 'min:6'],
-            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'LogisticsI Admin'])],
+            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'LogisticsI Admin', 'Administrative'])],
         ]);
-        try{
+        try {
             User::create([
                 'name'     => $validated->name,
                 'email'    => $validated->email,
                 'password' => $validated->password,
                 'role'     => $validated->role,
             ]);
-        }catch(Exception $e){
-            return response()->json('Registration Failed'.$e, 500);
+        } catch (Exception $e) {
+            return response()->json('Registration Failed' . $e, 500);
         }
 
         return response()->json('Registered Successfully', 200);
     }
 
-    public function login(Request $request){
+    public function login(Request $request)
+    {
         $validated = (object)$request->validate([
             'email'     => ['required', 'email', 'exists:users,email'],
             'password'  => ['required', 'min:6'],
@@ -45,7 +47,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        
+
         /*
         Auth::login($user);
         // Revoke old tokens if you want single login
@@ -65,14 +67,12 @@ class AuthController extends Controller
             'token' => $token,
             'user'  => $user,
         ], 200);
-
-    }
-    
-    public function otp(Request $request){
-
     }
 
-    public function user(Request $request){
+    public function otp(Request $request) {}
+
+    public function user(Request $request)
+    {
         //return $request->user();
         return response()->json($request->user());
     }
@@ -103,6 +103,5 @@ class AuthController extends Controller
         // $request->user()->tokens()->delete();
 
         return response()->json(['message' => 'Logged out']);
-    
     }
 }
