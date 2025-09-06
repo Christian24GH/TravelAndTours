@@ -5,7 +5,7 @@ Single Page Application + Cross Site Request
 ##  Teck stack
     - Xampp
     - MariaDB (Pwede mabago)
-    - Laravel Framework with Reverb and Sanctum Package (Backend)
+    - Laravel Framework with Reverb and Sanctum Package (Backend). Reverb is optional, we have polling for fetching updates periodically
     - ReactJs (Frontend)
     - Shadcn  (UI Component Template)
     - Tailwind
@@ -15,8 +15,8 @@ Single Page Application + Cross Site Request
     ALL BACKEND REQUEST SHOULD POINT AT [BACKEND]/public/index.html
 
     - auth          - Authentication Service, uses Laravel Sanctum for tokens
-    - fleet_service - Logistics II, uses Laravel Reverb (Websocket)
-    - logisticsI    - Logistics 1 backend uses laravel
+    - fleet_service - Logistics II Laravel
+    - logisticsI    - Logistics 1 Laravel
 
     * waiting for other groups
 
@@ -164,7 +164,7 @@ Or in auth/.env
     FRONTEND_URL=https://travelandtours-c9xk.onrender.com
 ```
 
-5. Start Laravel Reverb on Supported Backends
+5. (OPTIONAL )Start Laravel Reverb on Supported Backends
 
 ```bash
     php artisan reverb:start
