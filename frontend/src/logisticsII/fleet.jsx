@@ -41,24 +41,35 @@ export default function Fleet() {
   const [search, setSearch] = useState("")
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      axios.get(`${api.vehicles}`, {
-          params: {
-            page,
-            q: search || undefined
-          }
-        })
-        .then((response) => {
-          let data = response.data.vehicles;
-          setVehicles(data.data || []);
-          setTotalPage(data.last_page);
-        })
-        .catch(() => {
-          toast.error("Error fetching vehicles", { position: "top-center" })
-        })
-    }, 300) // debounce API calls by 300ms
+    let delayDebounce;
+    let polling;
 
-    return () => clearTimeout(delayDebounce);
+    const fetchVehicles = () => {
+      axios.get(`${api.vehicles}`, {
+        params: {
+          page,
+          q: search || undefined,
+        },
+      })
+      .then((response) => {
+        let data = response.data.vehicles;
+        setVehicles(data.data || []);
+        setTotalPage(data.last_page);
+      })
+      .catch(() => {
+        toast.error("Error fetching vehicles", { position: "top-center" });
+      });
+    };
+
+    delayDebounce = setTimeout(fetchVehicles, 300);
+
+    polling = setInterval(fetchVehicles, 2000);
+
+    return () => {
+      clearTimeout(delayDebounce);
+      clearInterval(polling);
+    };
+    
   }, [page, search]);
 
   useEchoPublic('vehicle_channel', "VehicleUpdates", (e)=>{

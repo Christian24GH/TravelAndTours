@@ -28,3 +28,4 @@ Route::get('/drivers/getDrivers', [Drivers::class, 'get']);
 //Dispatch
 Route::get('/dispatches', [Dispatches::class, 'show']);
 Route::get('/dispatches/driver', [Dispatches::class, 'showToDriver']);
+Route::get('/dispatches/update', [Dispatches::class, 'updateStatus']);

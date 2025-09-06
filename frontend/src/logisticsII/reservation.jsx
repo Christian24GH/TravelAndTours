@@ -47,7 +47,10 @@ export default function Reservation() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+    let delayDebounce
+    let polling
+
+    const fetchRecord = () => {
       axios
         .get(api.reservations, {
           params: {
@@ -66,9 +69,16 @@ export default function Reservation() {
             position: "top-center",
           });
         });
-    }, 300); // debounce API calls by 300ms
+    };
 
-    return () => clearTimeout(delayDebounce);
+    delayDebounce = setTimeout(fetchRecord, 300)
+    polling = setInterval(fetchRecord, 2000)
+
+    return () => {
+      clearTimeout(delayDebounce)
+      clearInterval(polling)
+    }
+    
   }, [page, search]);
 
   useEchoPublic('reservation_channel', "ReservationUpdates", (e)=>{

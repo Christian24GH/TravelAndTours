@@ -32,7 +32,10 @@ export default function Drivers() {
   const [search, setSearch] = useState("")
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+    let delayDebounce
+    let polling
+
+    const fetchRecord = () => {
       axios.get(`${api.drivers}`, {
           params: {
             page,
@@ -47,9 +50,16 @@ export default function Drivers() {
         .catch(() => {
           toast.error("Error fetching drivers", { position: "top-center" })
         })
-    }, 300) // debounce API calls by 300ms
+    } 
+    
+    delayDebounce = setTimeout(fetchRecord, 300)
+    polling = setInterval(fetchRecord, 2000)
 
-    return () => clearTimeout(delayDebounce);
+    return () => {
+      clearTimeout(delayDebounce)
+      clearInterval(polling)
+    }
+    
   }, [page, search]);
 
   const [ fetching, setFetching ] = useState(false)

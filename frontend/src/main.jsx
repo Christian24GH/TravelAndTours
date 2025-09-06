@@ -17,11 +17,12 @@ import LogisticsIIReservationDetails from './logisticsII/details-reservation'
 import LogisticsIIDrivers from './logisticsII/drivers'
 
 console.log('app: src/main.jsx loaded'); 
+const baseUrl = import.meta.env.VITE_BASE_URL
 
 createRoot(document.getElementById('root')).render(
   // basename = baseUrl jsut like base value inside vite.config.js
   // Tells BrowserRouter that this is the base URL
-  <BrowserRouter basename="/TravelAndTour/frontend/dist/">
+  <BrowserRouter basename={baseUrl ? baseUrl : '/'}>
     <AuthProvider>
       <Routes>
         {/** Main Routes */}

@@ -37,16 +37,37 @@ return new class extends Migration
         Schema::create('dispatches', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
+
             $table->dateTime('scheduled_time');
-            $table->dateTime('start_time'); //time of arrival
-            $table->dateTime('arrival_time')->nullable();
-            $table->dateTime('return_time')->nullable();
-            $table->enum('status', ['Scheduled', 'Preparing', 'On Route', 'Completed', 'Cancelled', 'Closed'])->default('Scheduled');
+            $table->dateTime('start_time')->nullable();   // when trip begins
+            $table->dateTime('arrival_time')->nullable(); // arrived at pickup
+            $table->dateTime('return_time')->nullable();  // trip completed
+
+            $table->enum('status', [
+                'Scheduled',
+                'Preparing',
+                'Dispatched',
+                'Arrived at Pickup',
+                'On Route',
+                'Completed',
+                'Cancelled',
+                'Closed',
+            ])->default('Scheduled');
+
             $table->text('remarks')->nullable();
+
+            // Optional audit fields
+            $table->timestamp('cancelled_at')->nullable();
+            $table->timestamp('closed_at')->nullable();
+
             $table->timestamps();
 
-            $table->foreignId('assignment_id')->nullable()->constrained('assignments')->nullOnDelete();
+            $table->foreignId('assignment_id')
+                ->nullable()
+                ->constrained('assignments')
+                ->nullOnDelete();
         });
+
         
         Schema::create('dispatch_locations', function (Blueprint $table) {
             $table->id();
@@ -71,6 +92,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('dispatch_locations');
         Schema::dropIfExists('dispatches');
         Schema::dropIfExists('assignments');
         Schema::dropIfExists('reservations');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\DispatchUpdates;
+use App\Events\TrackingEvent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -46,9 +47,10 @@ class Dispatches extends Controller
         $dispatch_id = $request->input('dispatch_id');
 
         $table = DB::table('dispatches as d')
-            ->join('reservations as r', 'r.id', '=', 'd.reservation_id')
-            ->join('vehicles as v', 'v.id', '=', 'r.vehicle_id')
-            ->join('drivers as dr', 'dr.id', '=', 'd.driver_id');
+            ->join('assignments as a', 'a.id', '=', 'd.id')
+            ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
+            ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
+            ->join('drivers as dr', 'dr.id', '=', 'a.driver_id');
 
         // if dispatch_id is provided → ignore driver_id filter
         if ($dispatch_id) {
@@ -95,53 +97,101 @@ class Dispatches extends Controller
             'remarks'     => 'nullable|string',
         ]);
 
-        $allowed = ['Scheduled', 'Preparing', 'On Route', 'Completed', 'Cancelled', 'Closed'];
-        if (! in_array($data['status'], $allowed)) {
+        // Centralize allowed statuses
+        $allowedStatuses = [
+            'Scheduled',
+            'Preparing',
+            'Dispatched',
+            'Arrived at Pickup',
+            'On Route',
+            'Completed',
+            'Cancelled',
+            'Closed',
+        ];
+
+        if (! in_array($data['status'], $allowedStatuses, true)) {
             return response()->json(['message' => 'Invalid status value'], 422);
         }
 
-        $now = Carbon::now();
+        $now = now();
         $update = [
-            'status' => $data['status'],
+            'status'  => $data['status'],
+            'remarks' => $data['remarks'] ?? null,
         ];
 
-        // update relevant timestamps depending on status transition
         switch ($data['status']) {
+            case 'Arrived at Pickup':
+                $update['arrival_time'] = $now;
+                break;
+
             case 'On Route':
                 $update['start_time'] = $now;
                 break;
+
             case 'Completed':
-                $update['arrival_time'] = $now;
-                break;
             case 'Closed':
                 $update['return_time'] = $now;
+                $update['closed_at'] = $now;
                 break;
+
             case 'Cancelled':
-                // optionally set a cancelled_at timestamp (if you add one)
-                $update['remarks'] = $data['remarks'] ?? null;
-                break;
-            default:
-                // leave other fields untouched
+                $update['cancelled_at'] = $now;
                 break;
         }
 
-        if (isset($data['remarks'])) {
-            $update['remarks'] = $data['remarks'];
-        }
+        DB::table('dispatches')
+            ->where('id', $data['dispatch_id'])
+            ->update($update);
 
-        DB::table('dispatches')->where('id', $data['dispatch_id'])->update($update);
+        $dispatch = DB::table('dispatches')->find($data['dispatch_id']);
 
-        $dispatch = DB::table('dispatches')->where('id', $data['dispatch_id'])->first();
-
-        // broadcast event if event class is available (non-fatal)
         if (class_exists(DispatchUpdates::class)) {
             try {
                 broadcast(new DispatchUpdates($dispatch));
             } catch (\Throwable $e) {
-                // don't fail request if broadcasting isn't configured
+                // silent fail if broadcasting not configured
             }
         }
 
         return response()->json(['dispatch' => $dispatch], 200);
+    }
+
+    public function trackLocation(Request $request)
+    {
+        $data = $request->validate([
+            'dispatch_id' => 'required|integer|exists:dispatches,id',
+            'latitude'    => 'required|numeric|between:-90,90',
+            'longitude'   => 'required|numeric|between:-180,180',
+            'speed'       => 'nullable|numeric',
+            'heading'     => 'nullable|numeric',
+            'recorded_at' => 'nullable|date',
+        ]);
+
+        $location = DB::table('dispatch_locations')->insertGetId([
+            'dispatch_id' => $data['dispatch_id'],
+            'latitude'    => $data['latitude'],
+            'longitude'   => $data['longitude'],
+            'speed'       => $data['speed'] ?? null,
+            'heading'     => $data['heading'] ?? null,
+            'recorded_at' => $data['recorded_at'] ?? Carbon::now(),
+            'created_at'  => Carbon::now(),
+            'updated_at'  => Carbon::now(),
+        ]);
+
+        $saved = DB::table('dispatch_locations')->find($location);
+
+        // Broadcast location update (non-fatal if broadcasting not configured)
+        if (class_exists(TrackingEvent::class)) {
+            try {
+                broadcast(new TrackingEvent($saved));
+            } catch (\Throwable $e) {
+                // log or silently ignore
+            }
+        }
+
+        return response()->json([
+            'message'  => 'Location tracked successfully',
+            'location' => $saved,
+        ], 201);
     }
 }

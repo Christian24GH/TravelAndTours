@@ -29,22 +29,32 @@ export default function ReservationDetails(){
 
     useLayoutEffect(()=>{
         setLoading(true)
+        
+        let polling
+
         if(!batch_number) return
-        axios
-            .get(api.reservationDetails, {
-                params: {
-                    batch_number: batch_number
-                }})
-            .then(response=>{
-                const data = response.data?.reservation
-                console.log(data)
-                setRecord(data)
-            })
-            .catch(errors=>{
-                toast.error('Failed to fetch details', {position:"top-center"})
-            }).finally(()=>{
-                setLoading(false)
-            })
+
+        const fetchRecord = () => {
+            axios
+                .get(api.reservationDetails, {
+                    params: {
+                        batch_number: batch_number
+                    }})
+                .then(response=>{
+                    const data = response.data?.reservation
+                    console.log(data)
+                    setRecord(data)
+                })
+                .catch(errors=>{
+                    toast.error('Failed to fetch details', {position:"top-center"})
+                }).finally(()=>{
+                    setLoading(false)
+                })
+        }
+
+        polling = setInterval(fetchRecord, 2000)
+
+        return () => clearInterval(polling)
     }, [batch_number])
 
     //console.log(record)
