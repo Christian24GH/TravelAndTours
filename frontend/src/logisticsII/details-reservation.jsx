@@ -1,6 +1,6 @@
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router";
-
+import { CheckCircle2Icon, XCircleIcon } from "lucide-react";
 import axios from 'axios'
 import { logisticsII } from "@/api/logisticsII";
 const api = logisticsII.backend.api;
@@ -27,41 +27,42 @@ export default function ReservationDetails(){
     const [record, setRecord] = useState()
     const [loading, setLoading] = useState(false)
 
-    useLayoutEffect(()=>{
-        setLoading(true)
-        
-        let polling
+    const fetchRecord = useCallback(() => {
+        axios
+            .get(api.reservationDetails, {
+                params: {
+                    batch_number: batch_number
+                }})
+            .then(response=>{
+                const data = response.data?.reservation
+                console.log(data)
+                setRecord(prev => {
+                    if (JSON.stringify(prev) === JSON.stringify(data)) {
+                        return prev;
+                    }
+                    return data;
+                });
+            })
+            .catch(errors=>{
+                toast.error('Failed to fetch details', {position:"top-center"})
+            }).finally(()=>{
+                setLoading(false)
+            })
 
-        if(!batch_number) return
-
-        const fetchRecord = () => {
-            axios
-                .get(api.reservationDetails, {
-                    params: {
-                        batch_number: batch_number
-                    }})
-                .then(response=>{
-                    const data = response.data?.reservation
-                    console.log(data)
-                    setRecord(data)
-                })
-                .catch(errors=>{
-                    toast.error('Failed to fetch details', {position:"top-center"})
-                }).finally(()=>{
-                    setLoading(false)
-                })
-        }
-
-        polling = setInterval(fetchRecord, 2000)
-
-        return () => clearInterval(polling)
     }, [batch_number])
+
+    useEffect(()=>{
+        setLoading(true)
+        if(!batch_number) return
+        let polling = setInterval(fetchRecord, 2000)
+        return () => clearInterval(polling)
+    }, [fetchRecord])
 
     //console.log(record)
 
     const [assignments, setAssignments] = useState([])
 
-    const handleAssign = (vehicle_id, driver_id) => {
+    const handleAssign = (vehicle_id, driver_uuid) => {
         setAssignments((prev) => {
             
             const exists = prev.find(a => a.vehicle_id === vehicle_id)
@@ -69,23 +70,26 @@ export default function ReservationDetails(){
             if (exists) {
                 return prev.map(a =>
                     a.vehicle_id === vehicle_id ? 
-                    { ...a, driver_id } : a
+                    { ...a, driver_uuid } : a
                 )
             } else {
-                return [...prev, { vehicle_id, driver_id }]
+                return [...prev, { vehicle_id, driver_uuid }]
             }
         })
     }
 
+    const [approveLoading, setApproveLoading] = useState(false)
+    const [rejectLoading, setRejectLoading] = useState(false)
     const handleSave = () => {
         if (
             !assignments.length || 
-            assignments.some(a => !a.driver_id || !a.vehicle_id)
+            assignments.some(a => !a.driver_uuid || !a.vehicle_id)
         ) {
             toast.error("Please assign both driver and vehicle before saving.", { position: "top-center" });
             return;
         }
         
+        setApproveLoading(true)
         const payload = {
             id: record?.id,
             assignments: assignments
@@ -99,12 +103,13 @@ export default function ReservationDetails(){
             .catch(error=>{
                 console.log(error)
                 toast.error(`Failed to update reservation ${error.response.data.message}`, {position:"top-center"})
-            })
+            }).finally(()=>setApproveLoading(false))
     }
 
     const handleReject = () => {
         if(!record?.id) return
 
+        setRejectLoading(true)
         const payload = {
             id: record?.id
         }
@@ -116,7 +121,7 @@ export default function ReservationDetails(){
             .catch(error=>{
                 console.log(error)
                 toast.error(`Failed to update reservation ${error.response.data.message}`, {position:"top-center"})
-            })
+            }).finally(()=>setRejectLoading(false))
     }
 
     useEchoPublic('reservation_channel', "ReservationUpdates", (e)=>{
@@ -124,7 +129,6 @@ export default function ReservationDetails(){
         setRecord(r)
     })
 
-    
     return(
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 h-full">
             {loading?(
@@ -154,11 +158,16 @@ export default function ReservationDetails(){
                 <div className={"flex flex-col w-1/2"}>
                     <div className="h-1/12 flex justify-between p-2">
                         <Label className="font-semibold text-2xl">RESERVATION {record?.batch_number || null}</Label>
-                        <span className="border rounded-full py-0 px-3 flex items-center">{record?.status || null}</span>
+                        {(record?.status === 'Pending' && record?.assignments?.length > 0) ? (
+                            <div className="flex gap-2">
+                                <Button disabled={approveLoading} className="sm" onClick={handleSave}>{approveLoading ? 'Submitting' : 'Approve'}</Button>
+                                <Button variant="destructive" disabled={rejectLoading} className="sm" onClick={handleReject}>{rejectLoading ? 'Submitting' : 'Reject'}</Button>
+                            </div>
+                        ) : <span className="border rounded-full py-0 px-3 flex items-center">{record?.status || null}</span>}
                     </div>
                     <Separator/>
                     <div className="flex-1 p-2">
-                        <Label className="w-full flex justify-between">Requested By: <span className="font-medium">{record?.employee_id}</span></Label>
+                        <Label className="w-full flex justify-between">Requested By: <span className="font-medium">{record?.requestor_uuid}</span></Label>
                         
                         <div className="my-4 w-full">
                             <Label className="font-semibold">Date and Time</Label>
@@ -185,17 +194,6 @@ export default function ReservationDetails(){
                         <div className="my-4 w-full">
                             <div className="flex w-full justify-between">
                                 <Label className="font-semibold">Vehicles and Drivers</Label>
-                            {(record?.status === 'Pending' && record?.assignments?.length > 0) ? (
-                                    <div className="flex gap-2">
-                                        <Label className="hover:underline cursor-pointer" onClick={handleReject}>
-                                            Reject
-                                        </Label>
-                                        <Label className="hover:underline cursor-pointer" onClick={handleSave}>
-                                            Approve
-                                        </Label>
-                                    </div>
-                                ) : null}
-
                             </div>
                             <Separator className="my-1"/>
                             <div className="flex flex-col gap-2 w-full">
@@ -225,7 +223,7 @@ export default function ReservationDetails(){
                                                         ) : (
                                                             <DriverSelect
                                                                 assignments={assignments}
-                                                                onSelect={(driver) => handleAssign(d.vehicle_id, driver.id)}
+                                                                onSelect={(driver) => handleAssign(d.vehicle_id, driver.uuid)}
                                                                 defaultValue={d.driver_name}
                                                             />
                                                         )
@@ -245,9 +243,10 @@ export default function ReservationDetails(){
                         const dropoff = JSON.parse(record.dropoff)
 
                         return (
-                            <Map 
-                                start_cord={pickup.coordinates} 
-                                end_cord={dropoff.coordinates} 
+                           <Map
+                                key={`${pickup.coordinates}-${dropoff.coordinates}`}
+                                start_cord={pickup.coordinates}
+                                end_cord={dropoff.coordinates}
                             />
                         )
                     })()}

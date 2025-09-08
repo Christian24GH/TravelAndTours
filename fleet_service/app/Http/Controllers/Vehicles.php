@@ -19,27 +19,28 @@ class Vehicles extends Controller
 
    public function show(Request $request)
     {
-        $table = DB::table('vehicles');
         $q = $request->input('q');
 
+        $table = DB::table('vehicles');
+
         if ($request->filled('q')) {
-            try{
-                $table->where('vin', 'like', "%{$q}%")
+            $table->where(function ($query) use ($q) {
+                $query->where('vin', 'like', "%{$q}%")
                     ->orWhere('plate_number', 'like', "%{$q}%")
                     ->orWhere('make', 'like', "%{$q}%")
                     ->orWhere('model', 'like', "%{$q}%")
-                    ->orWhere('status', 'like', "%{$q}%")
-                    ->get(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
-
-            }catch(Exception $e){
-                return response()->json($e, 500);
-            }
+                    ->orWhere('status', 'like', "%{$q}%");
+            });
         }
 
-        $vehicles = $table->paginate(15, array_merge($this->rows, ['id', 'created_at', 'updated_at']));
+        $vehicles = $table->paginate(
+            15,
+            array_merge($this->rows, ['id', 'created_at', 'updated_at'])
+        );
 
         return response()->json(['vehicles' => $vehicles]);
     }
+
 
     /**TODO:
      * Prevent showing available vehicles if its already selected in a reservation request

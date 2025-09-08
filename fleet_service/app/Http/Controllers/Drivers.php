@@ -17,23 +17,24 @@ class Drivers extends Controller
 
         $records = $response['record'] ?? [];
 
+        $data = null;
+
         try {
             DB::transaction(function () use ($records) {
                 $toInsert = is_array($records[0] ?? null) ? $records : [$records];
 
                 foreach ($toInsert as $driver) {
-                    $exists = DB::table('drivers')->where('id', $driver['id'])->exists();
+                    $exists = DB::table('drivers')->where('uuid', $driver['uuid'])->exists();
 
                     if (! $exists) {
                         $data = [
-                            'uuid'   => Str::uuid(),
+                            'uuid'   => $driver['uuid'],
                             'name'   => $driver['name'],
                             'status' => 'Available'
                         ];
 
                         DB::table('drivers')->insert($data);
-
-                        broadcast(new DriverEvent($data));
+                        
                     } else {
                         $data = [
                             'name'   => $driver['name'],
@@ -41,18 +42,18 @@ class Drivers extends Controller
                         ];
 
                         DB::table('drivers')
-                            ->where('id', $driver['id'])
+                            ->where('uuid', $driver['uuid'])
                             ->update($data);
 
-                        $data['id'] = $driver['id']; // add id for frontend clarity
-
-                        broadcast(new DriverEvent($data));
+                        $data['uuid'] = $driver['uuid'];
                     }
                 }
             });
         } catch (Exception $e) {
             return response()->json('Failed to fetch driver records: '.$e->getMessage(), 400);
         }
+
+        if(class_exists(DriverEvent::class && $data != null)) broadcast(new DriverEvent($data));
 
         return response(null, 200);
     }

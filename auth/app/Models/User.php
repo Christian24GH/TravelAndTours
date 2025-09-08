@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'uuid',
     ];
 
     /**
@@ -43,7 +44,6 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-           
         ];
     }
 }

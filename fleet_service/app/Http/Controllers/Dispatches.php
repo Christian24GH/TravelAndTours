@@ -17,12 +17,12 @@ class Dispatches extends Controller
             ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
             ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
             ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
-            ->leftJoin('drivers as dv', 'dv.id', '=', 'a.driver_id');
+            ->leftJoin('drivers as dv', 'dv.uuid', '=', 'a.driver_uuid');
 
         if($q) {
             $table->where(function ($query) use ($q) {
                 $query->where('d.uuid', 'like', "%{$q}%")
-                    ->orWhere('a.driver_id', 'like', "%{$q}%");
+                    ->orWhere('a.driver_uuid', 'like', "%{$q}%");
             });
         }
 
@@ -42,47 +42,63 @@ class Dispatches extends Controller
         return response()->json(['dispatch' => $dispatch], 200);
     }
 
-    public function showToDriver(Request $request){
-        $driver_id   = $request->input('driver_id');
+    public function showToDriver(Request $request)
+    {
+        $driver_uuid = $request->input('driver_uuid');
+        
         $dispatch_id = $request->input('dispatch_id');
-
-        $table = DB::table('dispatches as d')
-            ->join('assignments as a', 'a.id', '=', 'd.id')
-            ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
-            ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
-            ->join('drivers as dr', 'dr.id', '=', 'a.driver_id');
-
-        // if dispatch_id is provided → ignore driver_id filter
-        if ($dispatch_id) {
-            $table->where('d.id', $dispatch_id);
-
-            $table->orderBy('d.status', 'asc')
-            ->orderBy('d.created_at', 'desc');
-
-            $dispatch = $table->first();
-
-            return response()->json(['dispatch' => $dispatch], 200);
+        
+        try{
+            $table = DB::table('dispatches as d')
+                ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
+                ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
+                ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
+                ->join('drivers as dr', 'dr.uuid', '=', 'a.driver_uuid')
+                ->select([
+                    'd.id as dispatch_id',
+                    'd.uuid as dispatch_uuid',
+                    'd.status as dispatch_status',
+                    'd.scheduled_time',
+                    'd.start_time',
+                    'd.return_time',
+                    'r.id as reservation_id',
+                    'r.batch_number',
+                    'r.requestor_uuid', //replace with name later
+                    'r.purpose',
+                    'r.pickup',
+                    'r.dropoff',
+                    'v.id as vehicle_id',
+                    'v.plate_number',
+                    'v.type',
+                    'v.plate_number',
+                    'v.model',
+                    'dr.uuid as driver_uuid',
+                    'dr.name as driver_name',
+                ])
+                ->orderBy('d.status', 'asc')
+                ->orderBy('d.created_at', 'desc');
             
-        } elseif ($driver_id) {
-            $table->where('d.driver_id', 'like', "%{$driver_id}%");
+                if ($dispatch_id) {
+                    $dispatch = $table->where('d.id', $dispatch_id)->first();
+                    return response()->json(['dispatch' => $dispatch], 200);
+                }
+                
+            if ($driver_uuid) {
+                $dispatches = $table->where('a.driver_uuid', $driver_uuid)->get();
+                //dd($dispatches);
+                return response()->json(['dispatch' => $dispatches], 200);
+            }
 
-            $table->orderBy('d.status', 'asc')
-            ->orderBy('d.created_at', 'desc');
+            $dispatches = $table->get();
+            return response()->json(['dispatch' => $dispatches], 200);
 
-            $dispatch = $table->get(['d.uuid', 'd.id', 'd.dispatch_time', 'd.status']);
-
-            return response()->json(['dispatch' => $dispatch], 200);
-
+        }catch (\Throwable $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
 
-        $table->orderBy('d.status', 'asc')
-            ->orderBy('d.created_at', 'desc');
-
-        $dispatch = $table->get();
-
-        return response()->json(['dispatch' => $dispatch], 200);
-
+        
     }
+
 
     /**TODO
      * IMPLEMENT: UPDATE FUNCTIONS

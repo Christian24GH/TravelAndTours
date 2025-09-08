@@ -2,7 +2,7 @@
 import { RegisterDialog } from '@/components/logisticsII/register-dialog'
 
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input"
 
 import { toast } from "sonner";
@@ -40,11 +40,7 @@ export default function Fleet() {
   const [ totalPage, setTotalPage ] = useState()
   const [search, setSearch] = useState("")
 
-  useEffect(() => {
-    let delayDebounce;
-    let polling;
-
-    const fetchVehicles = () => {
+  const fetchVehicles = useCallback(() => {
       axios.get(`${api.vehicles}`, {
         params: {
           page,
@@ -53,25 +49,33 @@ export default function Fleet() {
       })
       .then((response) => {
         let data = response.data.vehicles;
+        //console.log(data)
         setVehicles(data.data || []);
         setTotalPage(data.last_page);
       })
       .catch(() => {
         toast.error("Error fetching vehicles", { position: "top-center" });
       });
-    };
+    }, [page, search])
 
-    delayDebounce = setTimeout(fetchVehicles, 300);
-
-    polling = setInterval(fetchVehicles, 2000);
-
+  useEffect(() => {
+    let delayDebounce = setTimeout(fetchVehicles, 300);
     return () => {
       clearTimeout(delayDebounce);
+    };
+    
+  }, [fetchVehicles]);
+
+  useEffect(() => {
+    let polling = setInterval(fetchVehicles, 3400);
+    return () => {
       clearInterval(polling);
     };
     
-  }, [page, search]);
+  }, [fetchVehicles]);
 
+
+  /*
   useEchoPublic('vehicle_channel', "VehicleUpdates", (e)=>{
     let v = e.vehicles
 
@@ -83,7 +87,7 @@ export default function Fleet() {
 
       return [...prev, v]
     })
-  })
+  })*/
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className='h-full'>

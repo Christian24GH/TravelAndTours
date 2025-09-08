@@ -1,6 +1,7 @@
 import { ChevronsUpDownIcon, CheckIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { useState, useEffect, useContext, useLayoutEffect } from "react";
+import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -16,10 +17,13 @@ import AuthContext from '@/context/AuthProvider'
 import axios from "axios";
 import { cn } from '@/lib/utils'
 import {Skeleton} from '@/components/ui/skeleton'
+
 const api = logisticsII.backend.api;
 
 export function SingleReservation(){
     const {auth} = useContext(AuthContext)
+    const navigate = useNavigate()
+    console.log(auth)
     const {register, 
             watch,
             control, 
@@ -63,6 +67,12 @@ export function SingleReservation(){
         
         if(response.status === 200){
             toast.success('Reservation request submitted', {position: 'top-center'})
+
+            if(auth.role === 'LogisticsII Admin'){
+                navigate(`/logisticsII/reservation/${response.data.batch_number}`)
+            }else{
+                navigate('/logisticsII/success')
+            }
         }else{
             toast.error('Reservation request failed', {position: 'top-center'})
         }
@@ -70,7 +80,7 @@ export function SingleReservation(){
     return(
         <div className='px-1'>
             <form  onSubmit={handleSubmit(formSubmit)}>
-                <input type="hidden" {...register('employee_id')} defaultValue={auth.id}/>
+                <input type="hidden" {...register('requestor_uuid')} defaultValue={auth.uuid}/>
                 <div className="grid gap-4 mb-4">
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center justify-between">
@@ -194,6 +204,7 @@ export function SingleReservation(){
 
 export function BatchReservation(){
     const {auth} = useContext(AuthContext)
+    const navigate = useNavigate()
     const { control, handleSubmit, watch, register, formState:{errors, isSubmitting}, setValue } = useForm({
         defaultValues: {
             vehicle_ids: [
@@ -207,7 +218,7 @@ export function BatchReservation(){
         name: "vehicle_ids",
     });
     
-    console.log(watch('vehicle_ids'))
+    //console.log(watch('vehicle_ids'))
     const selected = watch('vehicle_ids').filter(v => v.vehicle_id != '').map(v => v.vehicle_id)
     
     const [vehicles, setVehicles] = useState([]);
@@ -239,16 +250,20 @@ export function BatchReservation(){
         const payload = {
             ...data,
             vehicle_ids: data.vehicle_ids.map((v) => v.vehicle_id), // extract IDs
-            start_time: new Date(startTime).toISOString(), // ensure UTC format
-            end_time: new Date(endTime).toISOString(),     // ensure UTC format
         };
         
-        console.log(payload)
+        //console.log(payload)
         
         try {
             const response = await axios.post(api.makeReservations, payload);
             if (response.status === 200) {
                 toast.success("Batch reservation submitted!", {position: 'top-center'});
+
+                if(auth.role === 'LogisticsII Admin'){
+                    navigate(`/logisticsII/reservation/${response.data.batch_number}`)
+                }else{
+                    navigate('/logisticsII/success')
+                }
             }
         } catch (err) {
             toast.error("Batch reservation failed", {position: 'top-center'});
@@ -256,11 +271,11 @@ export function BatchReservation(){
         
     };
 
-    console.log(selected.length)
+    //console.log(selected.length)
     return(
         <div className='px-1'>
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                <input type="hidden" {...register('employee_id')} defaultValue={auth.id}/>
+                <input type="hidden" {...register('requestor_uuid')} defaultValue={auth.uuid}/>
                 <div className="grid gap-4">
                     <div className="flex flex-col gap-4 flex-1">
                         <Label className="font-medium">Batch Vehicle Reservation</Label>

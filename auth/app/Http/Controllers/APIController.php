@@ -17,11 +17,11 @@ class APIController extends Controller
         $query = User::where('role', 'Driver');
 
         if ($request->filled('id')) {
-            $driver = $query->where('id', $request->input('id'))->first(['id', 'name']);
+            $driver = $query->where('id', $request->input('id'))->first(['id', 'name', 'uuid']);
             return response()->json(['record' => $driver], 200);
         }
 
-        $drivers = $query->get(['id', 'name']);
+        $drivers = $query->get(['id', 'name', 'uuid']);
         return response()->json(['record' => $drivers], 200);
     }
 }

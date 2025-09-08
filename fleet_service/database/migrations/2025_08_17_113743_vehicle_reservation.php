@@ -22,15 +22,23 @@ return new class extends Migration
             $table->string('dropoff');
             $table->enum('status', ['Pending', 'Confirmed', 'Cancelled'])->default('Pending');
             $table->timestamps();
-            
-            $table->unsignedBigInteger('employee_id')->nullable();
+            $table->uuid('requestor_uuid')->nullable();
         });
 
         Schema::create('assignments', function (Blueprint $table){
             $table->id();
+
+
             $table->foreignId('reservation_id')->nullable()->constrained('reservations')->nullOnDelete();
             $table->foreignId('vehicle_id')->nullable()->constrained('vehicles')->nullOnDelete();
-            $table->foreignId('driver_id')->nullable()->constrained('drivers')->nullOnDelete();
+
+            $table->uuid('driver_uuid')->nullable();
+            $table->foreign('driver_uuid')
+                ->nullable()
+                ->references('uuid')
+                ->on('drivers')
+                ->nullOnDelete();
+
             $table->timestamps();
         });
 

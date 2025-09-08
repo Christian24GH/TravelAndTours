@@ -1,15 +1,20 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import axios from "axios";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
-
-export default function Map({ start_cord, end_cord }) {
+function Map({ start_cord, end_cord }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
 
   useEffect(() => {
     if (!mapContainer.current || !start_cord || !end_cord) return;
+
+    // If map already exists, remove it before creating a new one
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -90,7 +95,26 @@ export default function Map({ start_cord, end_cord }) {
         console.error("Error fetching directions:", error);
       }
     });
+
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
   }, [start_cord, end_cord]);
 
   return <div ref={mapContainer} className="w-full h-full rounded-xl" />;
 }
+
+
+const MemoizedMap = React.memo(Map, (prev, next) => {
+  return (
+    prev.start_cord?.[0] === next.start_cord?.[0] &&
+    prev.start_cord?.[1] === next.start_cord?.[1] &&
+    prev.end_cord?.[0] === next.end_cord?.[0] &&
+    prev.end_cord?.[1] === next.end_cord?.[1]
+  )
+})
+
+export default MemoizedMap
