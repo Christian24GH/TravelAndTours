@@ -17,5 +17,5 @@ export default defineConfig({
       if directory is htdocs/dist(http://localhost/) (directly from htdocs/dist) → change base: '/' and rebuild.
    */
   // Sets assets(js/css) url for dist/index.html
-  base: '/TravelAndTour/frontend/dist/'
+  base: '/'
 })
