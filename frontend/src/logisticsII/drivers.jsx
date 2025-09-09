@@ -2,7 +2,7 @@
 import { RegisterDialog } from '@/components/logisticsII/register-dialog'
 
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input"
 
 import { toast } from "sonner";
@@ -31,26 +31,41 @@ export default function Drivers() {
   const [ totalPage, setTotalPage ] = useState()
   const [search, setSearch] = useState("")
 
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      axios.get(`${api.drivers}`, {
-          params: {
-            page,
-            q: search || undefined
-          }
-        })
-        .then((response) => {
-          let data = response.data.drivers;
-          setRecord(data.data || []);
-          setTotalPage(data.last_page);
-        })
-        .catch(() => {
-          toast.error("Error fetching drivers", { position: "top-center" })
-        })
-    }, 300) // debounce API calls by 300ms
+  const fetchRecord = useCallback(()=> {
+    axios.get(`${api.drivers}`, {
+        params: {
+          page,
+          q: search || undefined
+        }
+      })
+      .then((response) => {
+        let data = response.data.drivers;
+        setRecord(data.data || []);
+        setTotalPage(data.last_page);
+      })
+      .catch(() => {
+        toast.error("Error fetching drivers", { position: "top-center" })
+      })
+  }, [page, search])
 
-    return () => clearTimeout(delayDebounce);
-  }, [page, search]);
+
+  useEffect(() => {
+    let delayDebounce = setTimeout(fetchRecord, 300)
+
+    return () => {
+      clearTimeout(delayDebounce)
+    }
+    
+  }, [fetchRecord]);
+
+  useEffect(() => {
+    let polling = setInterval(fetchRecord, 2000)
+    
+    return () => {
+      clearInterval(polling)
+    }
+    
+  }, [fetchRecord]);
 
   const [ fetching, setFetching ] = useState(false)
 

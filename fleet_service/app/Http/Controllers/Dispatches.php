@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Events\DispatchUpdates;
+use App\Events\TrackingEvent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class Dispatches extends Controller
 {
@@ -16,12 +18,12 @@ class Dispatches extends Controller
             ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
             ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
             ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
-            ->leftJoin('drivers as dv', 'dv.id', '=', 'a.driver_id');
+            ->leftJoin('drivers as dv', 'dv.uuid', '=', 'a.driver_uuid');
 
         if($q) {
             $table->where(function ($query) use ($q) {
                 $query->where('d.uuid', 'like', "%{$q}%")
-                    ->orWhere('a.driver_id', 'like', "%{$q}%");
+                    ->orWhere('a.driver_uuid', 'like', "%{$q}%");
             });
         }
 
@@ -41,46 +43,95 @@ class Dispatches extends Controller
         return response()->json(['dispatch' => $dispatch], 200);
     }
 
-    public function showToDriver(Request $request){
-        $driver_id   = $request->input('driver_id');
-        $dispatch_id = $request->input('dispatch_id');
 
-        $table = DB::table('dispatches as d')
-            ->join('reservations as r', 'r.id', '=', 'd.reservation_id')
-            ->join('vehicles as v', 'v.id', '=', 'r.vehicle_id')
-            ->join('drivers as dr', 'dr.id', '=', 'd.driver_id');
+    public function dispatchDetails(Request $request){
+        $request->validate([
+            'batch_number'=>['required', 'exists:reservation,batch_number'],
+        ]);
 
-        // if dispatch_id is provided → ignore driver_id filter
-        if ($dispatch_id) {
-            $table->where('d.id', $dispatch_id);
+        try{
+            $dispatch = DB::table('dispatches as d')
+                ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
+                ->join('reservation as r', 'r.id', '=', 'a.reservation_id')
+                ->where('r.batch_number', $request['batch_number'])
+                ->first([
+                    'd.id as dispatch_id',
+                    
+                ]);
 
-            $table->orderBy('d.status', 'asc')
-            ->orderBy('d.created_at', 'desc');
 
-            $dispatch = $table->first();
-
-            return response()->json(['dispatch' => $dispatch], 200);
             
-        } elseif ($driver_id) {
-            $table->where('d.driver_id', 'like', "%{$driver_id}%");
+            $dispatch = (array) $dispatch;
 
-            $table->orderBy('d.status', 'asc')
-            ->orderBy('d.created_at', 'desc');
-
-            $dispatch = $table->get(['d.uuid', 'd.id', 'd.dispatch_time', 'd.status']);
-
-            return response()->json(['dispatch' => $dispatch], 200);
-
+            
+        }catch(Throwable $e){
+            return response()->json(['message'=>'Failed to find the requested record'], 500);
         }
 
-        $table->orderBy('d.status', 'asc')
-            ->orderBy('d.created_at', 'desc');
+        return response()->json(
 
-        $dispatch = $table->get();
-
-        return response()->json(['dispatch' => $dispatch], 200);
+        );
 
     }
+
+
+    public function showToDriver(Request $request)
+    {
+        $driver_uuid = $request->input('driver_uuid');
+        
+        $dispatch_id = $request->input('dispatch_id');
+        
+        try{
+            $table = DB::table('dispatches as d')
+                ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
+                ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
+                ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
+                ->join('drivers as dr', 'dr.uuid', '=', 'a.driver_uuid')
+                ->select([
+                    'd.id as dispatch_id',
+                    'd.uuid as dispatch_uuid',
+                    'd.status as dispatch_status',
+                    'd.scheduled_time',
+                    'd.start_time',
+                    'd.return_time',
+                    'r.id as reservation_id',
+                    'r.batch_number',
+                    'r.requestor_uuid', //replace with name later
+                    'r.purpose',
+                    'r.pickup',
+                    'r.dropoff',
+                    'v.id as vehicle_id',
+                    'v.plate_number',
+                    'v.type',
+                    'v.plate_number',
+                    'v.model',
+                    'dr.uuid as driver_uuid',
+                    'dr.name as driver_name',
+                ])
+                ->orderBy('d.status', 'asc')
+                ->orderBy('d.created_at', 'desc');
+            
+                if ($dispatch_id) {
+                    $dispatch = $table->where('d.id', $dispatch_id)->first();
+                    return response()->json(['dispatch' => $dispatch], 200);
+                }
+                
+            if ($driver_uuid) {
+                $dispatches = $table->where('a.driver_uuid', $driver_uuid)->get();
+                //dd($dispatches);
+                return response()->json(['dispatch' => $dispatches], 200);
+            }
+
+            $dispatches = $table->get();
+            return response()->json(['dispatch' => $dispatches], 200);
+
+        }catch (\Throwable $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+
+        
+    }
+
 
     /**TODO
      * IMPLEMENT: UPDATE FUNCTIONS
@@ -95,53 +146,101 @@ class Dispatches extends Controller
             'remarks'     => 'nullable|string',
         ]);
 
-        $allowed = ['Scheduled', 'Preparing', 'On Route', 'Completed', 'Cancelled', 'Closed'];
-        if (! in_array($data['status'], $allowed)) {
+        // Centralize allowed statuses
+        $allowedStatuses = [
+            'Scheduled',
+            'Preparing',
+            'Dispatched',
+            'Arrived at Pickup',
+            'On Route',
+            'Completed',
+            'Cancelled',
+            'Closed',
+        ];
+
+        if (! in_array($data['status'], $allowedStatuses, true)) {
             return response()->json(['message' => 'Invalid status value'], 422);
         }
 
-        $now = Carbon::now();
+        $now = now();
         $update = [
-            'status' => $data['status'],
+            'status'  => $data['status'],
+            'remarks' => $data['remarks'] ?? null,
         ];
 
-        // update relevant timestamps depending on status transition
         switch ($data['status']) {
+            case 'Arrived at Pickup':
+                $update['arrival_time'] = $now;
+                break;
+
             case 'On Route':
                 $update['start_time'] = $now;
                 break;
+
             case 'Completed':
-                $update['arrival_time'] = $now;
-                break;
             case 'Closed':
                 $update['return_time'] = $now;
+                $update['closed_at'] = $now;
                 break;
+
             case 'Cancelled':
-                // optionally set a cancelled_at timestamp (if you add one)
-                $update['remarks'] = $data['remarks'] ?? null;
-                break;
-            default:
-                // leave other fields untouched
+                $update['cancelled_at'] = $now;
                 break;
         }
 
-        if (isset($data['remarks'])) {
-            $update['remarks'] = $data['remarks'];
-        }
+        DB::table('dispatches')
+            ->where('id', $data['dispatch_id'])
+            ->update($update);
 
-        DB::table('dispatches')->where('id', $data['dispatch_id'])->update($update);
+        $dispatch = DB::table('dispatches')->find($data['dispatch_id']);
 
-        $dispatch = DB::table('dispatches')->where('id', $data['dispatch_id'])->first();
-
-        // broadcast event if event class is available (non-fatal)
         if (class_exists(DispatchUpdates::class)) {
             try {
                 broadcast(new DispatchUpdates($dispatch));
             } catch (\Throwable $e) {
-                // don't fail request if broadcasting isn't configured
+                // silent fail if broadcasting not configured
             }
         }
 
         return response()->json(['dispatch' => $dispatch], 200);
+    }
+
+    public function trackLocation(Request $request)
+    {
+        $data = $request->validate([
+            'dispatch_id' => 'required|integer|exists:dispatches,id',
+            'latitude'    => 'required|numeric|between:-90,90',
+            'longitude'   => 'required|numeric|between:-180,180',
+            'speed'       => 'nullable|numeric',
+            'heading'     => 'nullable|numeric',
+            'recorded_at' => 'nullable|date',
+        ]);
+
+        $location = DB::table('dispatch_locations')->insertGetId([
+            'dispatch_id' => $data['dispatch_id'],
+            'latitude'    => $data['latitude'],
+            'longitude'   => $data['longitude'],
+            'speed'       => $data['speed'] ?? null,
+            'heading'     => $data['heading'] ?? null,
+            'recorded_at' => $data['recorded_at'] ?? Carbon::now(),
+            'created_at'  => Carbon::now(),
+            'updated_at'  => Carbon::now(),
+        ]);
+
+        $saved = DB::table('dispatch_locations')->find($location);
+
+        // Broadcast location update (non-fatal if broadcasting not configured)
+        if (class_exists(TrackingEvent::class)) {
+            try {
+                broadcast(new TrackingEvent($saved));
+            } catch (\Throwable $e) {
+                // log or silently ignore
+            }
+        }
+
+        return response()->json([
+            'message'  => 'Location tracked successfully',
+            'location' => $saved,
+        ], 201);
     }
 }
