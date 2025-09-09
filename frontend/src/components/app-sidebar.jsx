@@ -42,7 +42,7 @@ const data = {
         NavItems: [
           {
             title: "Inventory Management",
-            url: '/logistics1/inventory-management',
+            url: '/logistics1/InventoryManagement',
             icon: Gauge,
           },
           {
@@ -263,7 +263,7 @@ export function AppSidebar({...props}) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "LogisticsI Admin" : ''}
+                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "LogisticI Admin" : ''}
                   </span>
                 </div>
               </a>
@@ -284,7 +284,7 @@ export function AppSidebar({...props}) {
             <>
               {user.role === "LogisticsII Admin" ? 
               (<NavMain data={data.logisticsIINav}/>) 
-              : user.role === "LogisticsI Admin" ? 
+              : user.role === "LogisticI Admin" ? 
               (<NavMain data={data.logisticsINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
               : null}
             </>

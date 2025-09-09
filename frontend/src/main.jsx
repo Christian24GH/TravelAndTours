@@ -12,8 +12,8 @@ import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
 import LogisticsIIMakeReservationPage from './logisticsII/make-reservation'
-
-
+import DashboardLog1 from './logistics1/dashboard';
+import InventoryManagement from './logistics1/InventoryManagement';
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -24,7 +24,11 @@ createRoot(document.getElementById('root')).render(
             <Route path="/login" index element={<LoginPage/>}/>
           </Route>
 
-
+         {/**LogisticsI */}
+          <Route path="/logistics1" element={<Layout allowedRoles={['LogisticI Admin', 'Super Admin']}/>}>
+            <Route index element={<DashboardLog1/>}/>
+            <Route path='InventoryManagement' element={<InventoryManagement/>}/>
+          </Route>
 
           {/**LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
