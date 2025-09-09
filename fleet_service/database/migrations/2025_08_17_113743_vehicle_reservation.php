@@ -98,7 +98,6 @@ return new class extends Migration
             $table->decimal('longitude', 10, 7);
             $table->dateTime('recorded_at')->useCurrent();
 
-            // Optional extras
             $table->decimal('speed', 6, 2)->nullable();    // km/h or mph
             $table->decimal('heading', 5, 2)->nullable();  // direction in degrees
             $table->timestamps();

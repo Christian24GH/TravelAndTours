@@ -382,7 +382,7 @@ class Reservations extends Controller
 
             $assignments = DB::table('assignments as a')
                 ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
-                ->leftJoin('drivers as d', 'd.uuid', '=', 'a.driver_uuid') // ✅ fixed
+                ->leftJoin('drivers as d', 'd.uuid', '=', 'a.driver_uuid')
                 ->where('a.reservation_id', $validated['id'])
                 ->get([
                     'v.id as vehicle_id',
@@ -391,7 +391,7 @@ class Reservations extends Controller
                     'v.type',
                     'v.capacity',
                     'v.status as vehicle_status',
-                    'd.uuid as driver_uuid',   // ✅ fixed
+                    'd.uuid as driver_uuid',
                     'd.name as driver_name',
                     'd.status as driver_status'
                 ]);

@@ -13,6 +13,7 @@ import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
+import LogisticsIIDispatchDetails from './logisticsII/details-dispatch'
 import LogisticsIIMakeReservationPage from './logisticsII/make-reservation'
 import LogisticsIIReservationDetails from './logisticsII/details-reservation'
 import LogisticsIISuccessPage from './logisticsII/success-page'
@@ -43,7 +44,10 @@ createRoot(document.getElementById('root')).render(
             <Route path=':batch_number' element={<LogisticsIIReservationDetails/>}/>
           </Route>
           <Route path='success' element={<LogisticsIISuccessPage/>}/>
-          <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
+          <Route path='dispatch'>
+            <Route index element={<LogisticsIIDispatchPage/>}/>
+            <Route path=':id' element={<LogisticsIIDispatchDetails/>}/>
+          </Route>
           <Route path='drivers' element={<LogisticsIIDrivers/>}/>
         </Route>
         

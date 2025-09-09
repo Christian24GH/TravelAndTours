@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { ChevronRightIcon } from 'lucide-react'
+import { useEffect, useState, useCallback } from "react";
 
 import axios from "axios";
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner";
+import { Button } from '@/components/ui/button'
+import { Link } from "react-router";
 import {motion} from 'motion/react'
 
 import { useEchoPublic } from "@laravel/echo-react";
 import { logisticsII } from "@/api/logisticsII";
 import PaginationComponent from "@/components/logisticsII/pagination";
 import TableComponent from "@/components/logisticsII/table";
-
-import { ViewDialog } from "@/components/logisticsII/reservation/modals";
 
 const api = logisticsII.backend.api;
 const reverb = logisticsII.reverb;
@@ -27,6 +28,11 @@ const header = [
   { title: "Created", accessor: "created_at", cellClassName: "h-1"},
   {
     title: "Actions",
+    render: (item)=>(
+        <Link to={`${item.uuid}`}>
+            <Button variant="" size="sm"><ChevronRightIcon/></Button>
+        </Link>
+    )
   },
 ];
 export default function DispatchPage(){
@@ -35,11 +41,7 @@ export default function DispatchPage(){
     const [totalPage, setTotalPage] = useState();
     const [search, setSearch] = useState("");
 
-    useEffect(() => {
-        let delayDebounce
-        let polling
-
-        const fetchRecord = () => {
+    const fetchRecord = useCallback(() => {
         axios
             .get(`${api.dispatches}`, {
             params: {
@@ -59,17 +61,29 @@ export default function DispatchPage(){
                     position: "top-center",
                 });
             });
-        }
+    }, [page, search])
+
+    useEffect(() => {
+        let delayDebounce
 
         delayDebounce = setTimeout(fetchRecord, 300)
-        polling = setInterval(fetchRecord, 2000)
 
         return () => {
             clearTimeout(delayDebounce)
+        }
+    }, [fetchRecord] );
+
+    useEffect(() => {
+        let polling
+
+        polling = setInterval(fetchRecord, 5000)
+
+        return () => {
             clearInterval(polling)
         }
-    }, [page, search]);
+    }, [fetchRecord]);
 
+    /*
     useEchoPublic('dispatch_channel', "DispatchUpdates", (e)=>{
         console.log(e)
         let r = e.record
@@ -81,7 +95,7 @@ export default function DispatchPage(){
 
             return [...prev, r]
         })
-    })
+    })*/
 
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex gap-2 h-full">

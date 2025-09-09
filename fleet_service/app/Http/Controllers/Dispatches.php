@@ -7,6 +7,7 @@ use App\Events\TrackingEvent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class Dispatches extends Controller
 {
@@ -41,6 +42,38 @@ class Dispatches extends Controller
 
         return response()->json(['dispatch' => $dispatch], 200);
     }
+
+
+    public function dispatchDetails(Request $request){
+        $request->validate([
+            'batch_number'=>['required', 'exists:reservation,batch_number'],
+        ]);
+
+        try{
+            $dispatch = DB::table('dispatches as d')
+                ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
+                ->join('reservation as r', 'r.id', '=', 'a.reservation_id')
+                ->where('r.batch_number', $request['batch_number'])
+                ->first([
+                    'd.id as dispatch_id',
+                    
+                ]);
+
+
+            
+            $dispatch = (array) $dispatch;
+
+            
+        }catch(Throwable $e){
+            return response()->json(['message'=>'Failed to find the requested record'], 500);
+        }
+
+        return response()->json(
+
+        );
+
+    }
+
 
     public function showToDriver(Request $request)
     {

@@ -70,7 +70,16 @@ export default function AddressInput({ label, name, register, setValue, errors }
       if (!feature) return;
       console.log(feature)
       const locName = feature.properties?.name || "";
-      const fullAddress = feature.properties?.full_address || feature.properties?.place_formatted || locName;
+
+      let fullAddress = '';
+      if (feature.properties?.name && feature.properties?.full_address) {
+        fullAddress = `${feature.properties.name}, ${feature.properties.full_address}`;
+      } else if (feature.properties?.name) {
+        fullAddress = feature.properties.name;
+      } else {
+        fullAddress = feature.properties?.full_address || '';
+      }
+
       const coordinates = feature.geometry?.coordinates;
 
       // Update input display
