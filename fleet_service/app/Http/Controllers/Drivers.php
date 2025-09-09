@@ -38,7 +38,6 @@ class Drivers extends Controller
                     } else {
                         $data = [
                             'name'   => $driver['name'],
-                            'status' => 'Available'
                         ];
 
                         DB::table('drivers')

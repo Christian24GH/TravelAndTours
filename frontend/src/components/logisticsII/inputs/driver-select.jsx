@@ -21,7 +21,7 @@ export function DriverSelect({ onSelect, assignments, defaultValue }) {
       try {
         const response = await axios.get(`${api.dialogDrivers}?q=Available`)
         if (response.status === 200) {
-          console.log(response)
+          //console.log(response)
           setDrivers(response.data?.drivers || [])
         }
       } catch (error) {

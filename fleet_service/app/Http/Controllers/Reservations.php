@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Exception;
 use App\Events\ReservationUpdates;
+use App\Services\MapboxService;
 
 class Reservations extends Controller
 {
@@ -57,16 +58,22 @@ class Reservations extends Controller
         ]);
 
         $reservation = DB::table('reservations as r')
+            ->leftJoin('trip_data as t', 't.reservation_id', '=', 'r.id')
             ->where('r.batch_number', $request['batch_number'])
             ->first([
                 'r.id',
-                'r.batch_number', 
-                'r.start_time', 
-                'r.end_time', 'r.status', 
-                'r.created_at', 
+                'r.batch_number',
+                'r.start_time',
+                'r.end_time',
+                'r.status',
+                'r.created_at',
                 'r.requestor_uuid',
                 'r.pickup',
-                'r.dropoff'
+                'r.dropoff',
+                't.pretrip_cost',
+                't.pretrip_distance',
+                't.pretrip_duration',
+                't.pretrip_geometry'
             ]);
 
         if (!$reservation) {
@@ -89,7 +96,7 @@ class Reservations extends Controller
                 'd.status as driver_status'
             ]);
 
-
+        
         $reservation = (array) $reservation;
         $reservation['assignments'] = $assignments;
 
@@ -104,33 +111,62 @@ class Reservations extends Controller
     {
         $validated = $request->validate([
             'vehicle_ids'    => 'required|array|min:1',
-            'vehicle_ids.*'  => 'exists:vehicles,id',
+            'vehicle_ids.*'  => 'exists:vehicles,id',   //must be referenced by uuid
             'purpose'        => 'nullable|string',
             'requestor_uuid' => 'required|uuid',
             'start_time'     => 'required|date|after:now',
             'end_time'       => 'required|date|after:start_time',
-            'pickup'         => 'required|string|min:11',
-            'dropoff'        => 'required|string|min:11'
+            'pickup'         => 'required|string|min:11', // JSON string {address, coordinates}
+            'dropoff'        => 'required|string|min:11' // JSON string {address, coordinates}
         ]);
 
         $uuid = (string) Str::uuid();
         $batch_number = strtoupper('BATCH-' . Str::random(8));
 
+        $pickup  = json_decode($validated['pickup'], true);
+        $dropoff = json_decode($validated['dropoff'], true);
+
+        [$startLng, $startLat] = $pickup['coordinates'];
+        [$endLng, $endLat]     = $dropoff['coordinates'];
+
         try {
-            DB::transaction(function () use ($validated, $uuid, $batch_number) {
+            $route = MapboxService::getRoute($startLng, $startLat, $endLng, $endLat);
+
+            $distanceKm   = $route['distance'] / 1000;       // meters → km
+            $durationMins = round($route['duration'] / 60);  // seconds → minutes
+            $geometry     = $route['geometry'];
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+
+        try {
+            DB::transaction(function () use ($validated, $uuid, $batch_number, $distanceKm, $durationMins, $geometry) {
                 // Insert into reservations
                 $reservation_id = DB::table('reservations')->insertGetId([
-                    'uuid'         => $uuid,
-                    'batch_number' => $batch_number,
-                    'purpose'      => $validated['purpose'] ?? null,
-                    'requestor_uuid' => $validated['requestor_uuid'], 
-                    'pickup'       => $validated['pickup'],
-                    'dropoff'      => $validated['dropoff'],
-                    'status'       => 'Pending',
-                    'start_time'   => Carbon::parse($validated['start_time'])->format('Y-m-d H:i:s'),
-                    'end_time'     => Carbon::parse($validated['end_time'])->format('Y-m-d H:i:s'),
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
+                    'uuid'          => $uuid,
+                    'batch_number'  => $batch_number,
+                    'purpose'       => $validated['purpose'] ?? null,
+                    'requestor_uuid'=> $validated['requestor_uuid'], 
+                    'pickup'        => $validated['pickup'],   // stored as JSON string
+                    'dropoff'       => $validated['dropoff'],  // stored as JSON string
+                    'status'        => 'Pending',
+                    'start_time'    => Carbon::parse($validated['start_time'])->format('Y-m-d H:i:s'),
+                    'end_time'      => Carbon::parse($validated['end_time'])->format('Y-m-d H:i:s'),
+                    'created_at'    => now(),
+                    'updated_at'    => now(),
+                ]);
+
+                // Insert into trip_data
+                DB::table('trip_data')->insert([
+                    'uuid'             => (string) Str::uuid(),
+                    'reservation_id'   => $reservation_id,
+                    'pretrip_cost'     => null, // calculate later
+                    'pretrip_distance' => $distanceKm,
+                    'pretrip_duration' => $durationMins,
+                    'pretrip_geometry' => json_encode($geometry),
                 ]);
 
                 // Insert into assignments
@@ -142,6 +178,8 @@ class Reservations extends Controller
                         'created_at'     => now(),
                         'updated_at'     => now(),
                     ]);
+
+                    DB::table('vehicles')->where('id', $vid)->update(['status' => 'Reserved']);
                 }
             });
         } catch (Exception $e) {
@@ -154,10 +192,11 @@ class Reservations extends Controller
         }
 
         return response()->json([
-            'success' => true,
-            'batch_number'  => $batch_number
+            'success'      => true,
+            'batch_number' => $batch_number,
         ], 200);
     }
+
 
 
     public function cancelRequest(Request $request)

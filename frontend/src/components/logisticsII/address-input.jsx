@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import { Input } from "@/components/ui/input";
 import { AlertDescription } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
@@ -9,22 +10,19 @@ import { Loader2 } from "lucide-react";
 
 const ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
-export default function AddressInput({
-  label,
-  name,
-  register,
-  setValue,
-  errors,
-}) {
+export default function AddressInput({ label, name, register, setValue, errors }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [typingTimeout, setTypingTimeout] = useState(null);
   const [selected, setSelected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1); // track keyboard navigation
+  const [activeIndex, setActiveIndex] = useState(-1);
 
-  const fetchResults = async (value) => {
+  // Generate a session token per input session
+  const [sessionToken] = useState(() => uuidv4());
+
+  const fetchSuggestions = async (value) => {
     if (!value || value.length < 3) {
       setResults([]);
       return;
@@ -33,25 +31,60 @@ export default function AddressInput({
     setLoading(true);
     try {
       const res = await axios.get(
-        `https://api.mapbox.com/search/geocode/v6/forward`,
+        "https://api.mapbox.com/search/searchbox/v1/suggest",
         {
           params: {
             q: value,
-            country: "ph",
             access_token: ACCESS_TOKEN,
-            autocomplete: true,
+            session_token: sessionToken,
             limit: 5,
-            types: "address,street,place,neighborhood,locality",
-            proximity: "121.0437,14.6760", // lng,lat (Quezon City proximity)
+            proximity: "121.0437,14.6760", // optional
+            country: "ph",
           },
         }
       );
-      setResults(res.data.features);
+      console.log(res.data.suggestions)
+      setResults(res.data.suggestions || []);
       setActiveIndex(-1);
     } catch (err) {
-      console.error("Mapbox error", err);
+      console.error("Mapbox suggest error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSelect = async (suggestion) => {
+    try {
+      const res = await axios.get(
+        `https://api.mapbox.com/search/searchbox/v1/retrieve/${suggestion.mapbox_id}`,
+        {
+          params: {
+            access_token: ACCESS_TOKEN,
+            session_token: sessionToken,
+          },
+        }
+      );
+      
+      const feature = res.data.features[0];
+
+      if (!feature) return;
+      console.log(feature)
+      const locName = feature.properties?.name || "";
+      const fullAddress = feature.properties?.full_address || feature.properties?.place_formatted || locName;
+      const coordinates = feature.geometry?.coordinates;
+
+      // Update input display
+      setQuery(fullAddress);
+      setResults([]);
+      setSelected(true);
+
+      // Update form value
+      setValue(
+        name,
+        JSON.stringify({ address: fullAddress, coordinates })
+      );
+    } catch (err) {
+      console.error("Mapbox retrieve error:", err);
     }
   };
 
@@ -62,21 +95,7 @@ export default function AddressInput({
     setValue(name, "");
 
     if (typingTimeout) clearTimeout(typingTimeout);
-    setTypingTimeout(setTimeout(() => fetchResults(value), 400));
-  };
-
-  const handleSelect = (feature) => {
-    setQuery(feature.properties.full_address);
-    setResults([]);
-    setSelected(true);
-
-    setValue(
-      name,
-      JSON.stringify({
-        address: feature.properties.full_address,
-        coordinates: feature.geometry.coordinates,
-      })
-    );
+    setTypingTimeout(setTimeout(() => fetchSuggestions(value), 300));
   };
 
   const handleKeyDown = (e) => {
@@ -87,9 +106,7 @@ export default function AddressInput({
       setActiveIndex((prev) => (prev + 1) % results.length);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIndex((prev) =>
-        prev <= 0 ? results.length - 1 : prev - 1
-      );
+      setActiveIndex((prev) => (prev <= 0 ? results.length - 1 : prev - 1));
     } else if (e.key === "Enter" && activeIndex >= 0) {
       e.preventDefault();
       handleSelect(results[activeIndex]);
@@ -98,9 +115,7 @@ export default function AddressInput({
 
   return (
     <div className="relative flex flex-col gap-2">
-      <Label className="font-normal text-secondary-foreground">
-        {label}
-      </Label>
+      <Label className="font-normal text-secondary-foreground">{label}</Label>
       <div className="relative">
         <Input
           {...register(name, { required: "Address is required" })}
@@ -110,7 +125,7 @@ export default function AddressInput({
           onKeyDown={handleKeyDown}
           onFocus={() => {
             setFocused(true);
-            fetchResults(query);
+            fetchSuggestions(query);
           }}
           onBlur={() => setTimeout(() => setFocused(false), 200)}
           autoComplete="off"
@@ -126,48 +141,33 @@ export default function AddressInput({
           Please select a valid address from suggestions
         </AlertDescription>
       )}
+
       {errors[name] && (
         <AlertDescription className="text-red-500 text-xs">
           {errors[name].message}
         </AlertDescription>
       )}
 
-      {focused && (
-        <div
-          className={cn(
-            "absolute top-full left-0 z-10 w-full rounded-md mt-1 max-h-56 bg-white overflow-y-auto",
-            results.length > 0 ? "border shadow-sm" : ""
-          )}
-        >
-          {loading ? (
-            <div className="p-2 space-y-2">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-4 w-3/4" />
-              ))}
-            </div>
-          ) : results.length > 0 ? (
-            <ul>
-              {results.map((feature, i) => (
-                <li
-                  key={feature.id}
-                  className={cn(
-                    "p-2 cursor-pointer text-sm",
-                    "hover:bg-gray-100",
-                    activeIndex === i && "bg-gray-100 font-medium"
-                  )}
-                  onMouseDown={() => handleSelect(feature)} // onMouseDown so blur doesn't fire first
-                >
-                  {feature.properties.full_address}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            query.length >= 3 && (
-              <div className="p-2 text-gray-500 text-sm">
-                No results found
-              </div>
-            )
-          )}
+      {focused && results.length > 0 && (
+        <div className={cn(
+          "absolute top-full left-0 z-10 w-full rounded-md mt-1 max-h-56 bg-white overflow-y-auto border shadow-sm"
+        )}>
+          <ul>
+            {results.map((suggestion, i) => (
+              <li
+                key={suggestion.mapbox_id || i}
+                className={cn(
+                  "p-2 cursor-pointer text-sm hover:bg-gray-100",
+                  activeIndex === i && "bg-gray-100 font-medium"
+                )}
+                onMouseDown={() => handleSelect(suggestion)}
+              >
+                {suggestion.name && suggestion.full_address ? `${suggestion.name}, ${suggestion.full_address}` : 
+                 suggestion.name ? `${suggestion.name}` :  suggestion.full_address
+                }
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

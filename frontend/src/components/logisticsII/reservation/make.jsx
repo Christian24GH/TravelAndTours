@@ -23,7 +23,7 @@ const api = logisticsII.backend.api;
 export function SingleReservation(){
     const {auth} = useContext(AuthContext)
     const navigate = useNavigate()
-    console.log(auth)
+    //console.log(auth)
     const {register, 
             watch,
             control, 

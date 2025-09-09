@@ -22,12 +22,23 @@ return new class extends Migration
             $table->string('dropoff');
             $table->enum('status', ['Pending', 'Confirmed', 'Cancelled'])->default('Pending');
             $table->timestamps();
+
             $table->uuid('requestor_uuid')->nullable();
+        });
+
+        Schema::create('trip_data', function (Blueprint $table){
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->decimal('pretrip_cost', 10, 2)->nullable();
+            $table->decimal('pretrip_distance', 10, 2)->nullable();
+            $table->integer('pretrip_duration')->nullable();
+            $table->json('pretrip_geometry')->nullable();
+
+            $table->foreignId('reservation_id')->nullable()->constrained('reservations')->nullOnDelete();
         });
 
         Schema::create('assignments', function (Blueprint $table){
             $table->id();
-
 
             $table->foreignId('reservation_id')->nullable()->constrained('reservations')->nullOnDelete();
             $table->foreignId('vehicle_id')->nullable()->constrained('vehicles')->nullOnDelete();
@@ -103,6 +114,7 @@ return new class extends Migration
         Schema::dropIfExists('dispatch_locations');
         Schema::dropIfExists('dispatches');
         Schema::dropIfExists('assignments');
+        Schema::dropIfExists('trip_data');
         Schema::dropIfExists('reservations');
     }
 };
