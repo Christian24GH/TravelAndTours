@@ -5,32 +5,36 @@ Single Page Application + Cross Site Request
 ##  Teck stack
     - Xampp
     - MariaDB (Pwede mabago)
-    - Laravel Framework with Reverb and Sanctum Package (Backend)
+    - Laravel Framework with Reverb and Sanctum Package (Backend). Reverb is optional, we have polling for fetching updates periodically
     - ReactJs (Frontend)
     - Shadcn  (UI Component Template)
     - Tailwind
 
 ##  Structure
-[Backend]
-- auth          - Authentication Service, uses Laravel Sanctum for tokens
-- fleet_service - Logistics II, uses Laravel Reverb (Websocket)
-- logisticsI    - Logistics 1 backend uses laravel
+### [Backend]
+    ALL BACKEND REQUEST SHOULD POINT AT [BACKEND]/public/index.html
 
-* waiting for other groups
+    - auth          - Authentication Service, uses Laravel Sanctum for tokens
+    - fleet_service - Logistics II Laravel
+    - logisticsI    - Logistics 1 Laravel
 
-[Frontend]
+    * waiting for other groups
+
+### [Frontend]
+    ALL NAVIGATION AND FRONTEND REQUEST SHOULD POINT AT frontend/dist/index.html
+    For rewrite rule, follow instructions at frontend setup section
+
     - frontend      - Unified frontend folder for the whole section
 
-[Database]
+### [Database]
+
     - Mariadb Initial pero pwede namin baguhin sa mga backends namin
     - [Backend]database/migrations - Location ng Database Blueprints namin.
     - [Backend] terminal, kapag na-setup na yung backend, run sa terminal
-
-```bash
+    
     php artisan migrate
-```
 
-##  Commands
+## Setup Instructions
 1. Backend Setup
 ```bash
     cd (Backendfolder example. auth)
@@ -40,13 +44,14 @@ Single Page Application + Cross Site Request
     php artisan migrate
 ```
 
+
 modify .env
 ```bash
     #CONFIGURE FOR DEPLOYMENT
     APP_ENV=production #set to production
     APP_KEY=    # run php artisan key:generate
     APP_DEBUG=false #set to false in production
-    APP_URL=http://localhost #url
+    APP_URL=http://subdomain.domain/public/ # ALL REQUEST SHOULD POINT AT public/ folder
     SERVER_PORT=8091    #localhost only
 
     SESSION_DRIVER=database
@@ -159,38 +164,12 @@ Or in auth/.env
     FRONTEND_URL=https://travelandtours-c9xk.onrender.com
 ```
 
-5. Start Laravel Reverb on Supported Backends
+5. (OPTIONAL )Start Laravel Reverb on Supported Backends
 
 ```bash
     php artisan reverb:start
     
 ```
-
-# Issues
-    cors issue (Need Dedicated domain) -- Fixed, switched to Token Based Auth instead of Session Based
-    
-
-### Notes
-Yung Backend po namin nag-eexpose po yan ng mga APIs na nasa /routes/api.php. Kahit maaccess lang po muna namin yung URI ng backend api sa internet palag na kami. Later nalang po isetup yung frontend kapag fixed na APIs ng backend.
-
-Right now sa localhost. Inaaccess po namin yung mga APIs using 
-
-```bash 
-    http://localhost:<port>/api/<api_name>
-
-``` 
-kapag nirun namin yung php artisan serve. 
-
-Lahat po ng exposed API na gagamitin ng frontend ay nakastore po sa frontend/src/api
-
-Dun po namin yan babaguhin once up na yung hosting.
-
-And about po sa mga .env(environment variables), may mga keys po kasi ako dun na private kaya hindi ko maisama sa remote repository. Gusto ko malaman kung may ibang way kami para magupload ng .env files.
-
-
-Maraming salamat po at pasensya na magulo yung setup.
-
-
 
 
 
