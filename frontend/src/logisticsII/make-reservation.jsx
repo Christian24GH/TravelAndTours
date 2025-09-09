@@ -1,6 +1,8 @@
 /** TODO: Change the vehicle reservation 
  *  FROM: VIN and CAPACITY 
- *  TO:   TYPE and CAPACITY */
+ *  TO:   TYPE and CAPACITY 
+ *  STATUS: DONE
+ * */
 import {motion} from 'motion/react'
 import { Label } from "@/components/ui/label"
 import { 

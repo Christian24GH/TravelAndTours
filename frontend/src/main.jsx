@@ -6,14 +6,15 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './layout/GuestRoute';
 import { Layout } from './layout/ProtectedLayout';
+import LandingPage from './main/landing'
 import LoginPage from './main/login';
 import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
 import LogisticsIIDispatchPage from './logisticsII/dispatch';
 import LogisticsIIMakeReservationPage from './logisticsII/make-reservation'
-import DashboardLog1 from './logistics1/dashboard';
-import InventoryManagement from './logistics1/InventoryManagement';
+
+
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -24,23 +25,22 @@ createRoot(document.getElementById('root')).render(
             <Route path="/login" index element={<LoginPage/>}/>
           </Route>
 
-         {/**LogisticsI */}
-          <Route path="/logistics1" element={<Layout allowedRoles={['LogisticI Admin', 'Super Admin']}/>}>
-            <Route index element={<DashboardLog1/>}/>
-            <Route path='InventoryManagement' element={<InventoryManagement/>}/>
-          </Route>
 
-          {/**LogisticsII */}
-          <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
-            <Route index element={<LogisticsIIDashboard/>}/>
-            <Route path='vehicles' element={<LogisticsIIFleet/>}/>
-            <Route path='reservation' element={<LogisticsIIReservation/>}/>
-            <Route path='reservation/make' element={<LogisticsIIMakeReservationPage/>}/>
-            <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
+
+        {/**LogisticsII */}
+        <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
+          <Route index element={<LogisticsIIDashboard/>}/>
+          <Route path='vehicles' element={<LogisticsIIFleet/>}/>
+          <Route path='reservation'>
+            <Route index element={<LogisticsIIReservation/>}/>
+            <Route path='make' element={<LogisticsIIMakeReservationPage/>}/>
+            <Route path=':batch_number' element={<LogisticsIIReservationDetails/>}/>
           </Route>
-  
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>
+          <Route path='dispatch' element={<LogisticsIIDispatchPage/>}/>
+          <Route path='drivers' element={<LogisticsIIDrivers/>}/>
+        </Route>
+        <Route path='*'/>
+      </Routes>
+    </AuthProvider>
+  </BrowserRouter>
 )

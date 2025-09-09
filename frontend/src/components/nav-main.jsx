@@ -36,7 +36,8 @@ export function NavMain({
                 <SidebarMenu>
                   {group.NavGroup.NavItems.map((item, j) => (
                     <SidebarMenuItem key={j}>
-                      <SidebarMenuButton asChild isActive={item.url == curLocation}>
+                      <SidebarMenuButton className="data-[active=true]:bg-[var(--vivid-indigo)]" 
+                        asChild isActive={item.url == curLocation}>
                         <Link to={item.url}>
                           <item.icon/>
                         {item.title}

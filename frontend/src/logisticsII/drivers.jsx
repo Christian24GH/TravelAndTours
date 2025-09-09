@@ -11,7 +11,6 @@ import { useEchoPublic } from "@laravel/echo-react";
 import { logisticsII } from "../api/logisticsII"
 import PaginationComponent from "../components/logisticsII/pagination"
 import TableComponent from "../components/logisticsII/table";
-import UpdateDialog from '../components/logisticsII/edit-dialog';
 import {motion} from 'motion/react'
 
 const api = logisticsII.backend.api
@@ -19,59 +18,61 @@ const reverb = logisticsII.reverb
 
 reverb.config()
 
+import { Button } from '@/components/ui/button'
+
 const header = [
-  { title: "VIN", accessor: "vin", cellClassName: "font-medium" },
-  { title: "Make", accessor: "make" },
-  { title: "Model", accessor: "model" },
-  { title: "Year", accessor: "year", cellClassName: "text-right" },
-  { title: "Status", accessor: "status", cellClassName: "text-right" },
-  { title: "Created At", accessor: "created_at", cellClassName: "text-right" },
-  { title: "Updated At", accessor: "updated_at", cellClassName: "text-right" },
-  {
-    render: (item) => (
-      <UpdateDialog item={item} />
-    )
-  }
+  { title: "Name", accessor: "name", cellClassName: "font-medium"  },
+  { title: "Status", accessor: "status" },
 ]
 
-export default function Fleet() {
-  const [ vehicles , setVehicles ] = useState([])
+export default function Drivers() {
+  const [ record , setRecord ] = useState([])
   const [ page , setPage] = useState(1)
   const [ totalPage, setTotalPage ] = useState()
   const [search, setSearch] = useState("")
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      axios.get(`${api.vehicles}`, {
+      axios.get(`${api.drivers}`, {
           params: {
             page,
             q: search || undefined
           }
         })
         .then((response) => {
-          let data = response.data.vehicles;
-          setVehicles(data.data || []);
+          let data = response.data.drivers;
+          setRecord(data.data || []);
           setTotalPage(data.last_page);
         })
         .catch(() => {
-          toast.error("Error fetching vehicles", { position: "top-center" })
+          toast.error("Error fetching drivers", { position: "top-center" })
         })
     }, 300) // debounce API calls by 300ms
 
     return () => clearTimeout(delayDebounce);
   }, [page, search]);
 
-  useEchoPublic('vehicle_channel', "VehicleUpdates", (e)=>{
-    let v = e.vehicles
+  const [ fetching, setFetching ] = useState(false)
 
-    setVehicles((prev)=>{
-      const exist = prev.find(item => item.id === v.id)
-      if(exist){
-        return prev.map(item => item.id === v.id ? v : item)
-      }
+  const fetchDrivers = () => {
+    setFetching(true)
 
-      return [...prev, v]
-    })
+    axios.get(api.fetchDrivers)
+        .then(response=>{
+            console.log(response)
+            toast.success('Successfully fetch drivers from HR', {position: "top-center"})
+        })
+        .catch(errors=>{
+            console.log(errors)
+            toast.error('Failed to fetch drivers from HR', {position: "top-center"})
+        })
+        .finally(()=>setFetching(false))
+  }
+
+  
+  useEchoPublic('driver_channel', "DriverEvent", (e)=>{
+    let driver = e.record;
+    setRecord((prev) => [driver, ...prev]);
   })
 
   return (
@@ -80,16 +81,16 @@ export default function Fleet() {
         <div className='flex-4/5'>
           <div className="flex mb-3 gap-2">
             <Input
-                placeholder="Search VIN, Plate Number, Brand and Model"
+                placeholder="Search Drivers"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-            <RegisterDialog />
+            <Button disabled={fetching} onClick={fetchDrivers}>Fetch Drivers</Button>
           </div>
           <div className="min-h-96"> 
             <TableComponent 
-                list={vehicles} 
-                recordName="vehicle" 
+                list={record} 
+                recordName="driver" 
                 columns={header} 
               />
           </div>
