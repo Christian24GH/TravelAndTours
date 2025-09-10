@@ -29,7 +29,8 @@ const location = useLocation()
                         <React.Fragment key={`${to}-${index}`}>
                             <BreadcrumbItem>
                                 {index === pathnames.length - 1 ? (
-                                    <span className="font-medium">{label == 'LogisticsII' ? 'Home' : label}</span>
+                                    <span className="font-medium">{label == 'LogisticsII' ? 'Home' : label}</span>,
+                                    <span className="font-medium">{label == 'HR1 Admin' ? 'Home' : label}</span>
                                 ) : index === 0 ? (
                                     <>
                                         <BreadcrumbLink asChild>

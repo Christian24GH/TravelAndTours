@@ -23,6 +23,10 @@ import Hr1Onboarding from "./hr1/onboarding";
 import Hr1Performance from "./hr1/performance";
 import Hr1Recognition from "./hr1/recognition";
 import Hr1JobPosting from "./hr1/jobposting";
+import Hr1OfferManagement from "./hr1/offermanagement";
+
+console.log('app: src/main.jsx loaded'); 
+
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -31,8 +35,8 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           {/** Main Routes */}
           <Route element={<GuestRoute/>}>
-            <Route path="/login" index element={<LoginPage/>}/>
-          </Route>
+          <Route path="/login" element={<LoginPage/>}/>
+        </Route>
 
           {/** LogisticsII */}
           <Route path="/logisticsII" element={<Layout allowedRoles={['LogisticsII Admin', 'Super Admin']}/>}>
@@ -44,23 +48,20 @@ createRoot(document.getElementById('root')).render(
 
           {/** HR1 */}
           <Route path="/hr1" element={<Layout allowedRoles={['HR1 Admin', 'Super Admin']}/>}>
-  <Route index element={<Hr1Dashboard/>}/> 
+            <Route index element={<Hr1Dashboard/>}/> 
 
-  {/* Application Management */}
-  <Route path="applicants">
-    <Route index element={<Hr1ApplicantPage/>}/>   {/* /hr1/applicants */}
-    <Route path="interviews" element={<Hr1InterviewPage/>}/>  {/* /hr1/applicants/interviews */}
-  </Route>
-   {/* Recruitment Management */}
-  <Route path="recruitment" element={<Hr1Recruitment/>}/>
-  <Route path="jobposting" element={<Hr1JobPosting/>}/>
+            {/* Applicants & Interviews are separate now */}
+            <Route path="applicant" element={<Hr1ApplicantPage/>}/> 
+            <Route path="interview" element={<Hr1InterviewPage/>}/> 
 
-  <Route path="recruitment" element={<Hr1Recruitment/>}/>
-  <Route path="onboarding" element={<Hr1Onboarding/>}/>
-  <Route path="performance" element={<Hr1Performance/>}/>
-  <Route path="recognition" element={<Hr1Recognition/>}/>
-</Route>
-
+            {/* Recruitment Management */}
+            <Route path="recruitment" element={<Hr1Recruitment/>}/>
+            <Route path="jobposting" element={<Hr1JobPosting/>}/>
+            <Route path="onboarding" element={<Hr1Onboarding/>}/>
+            <Route path="performance" element={<Hr1Performance/>}/>
+            <Route path="recognition" element={<Hr1Recognition/>}/>
+            <Route path="offermanagement" element={<Hr1OfferManagement />} />
+          </Route>
 
         </Routes>
       </AuthProvider>

@@ -248,8 +248,8 @@ const data = {
     NavGroup: {
       NavLabel: 'Applicant Management',
       NavItems: [
-        { title: "Applicant List", url: '/hr1/applicants', icon: User },
-        { title: "Interview Scheduling", url: '/hr1/applicants/interviews', icon: Calendar },
+        { title: "Applicant List", url: '/hr1/applicant', icon: User },
+        { title: "Interview Scheduling", url: '/hr1/interview', icon: Calendar },
       ],
     },
   },
@@ -258,7 +258,7 @@ const data = {
       NavLabel: 'Recruitment Management',
       NavItems: [
         { title: "Job Postings", url: '/hr1/jobposting', icon: FileText },
-        { title: "Offer Management", url: '/hr1/recruitment/offers', icon: Tag },
+        { title: "Offer Management", url: '/hr1/offermanagement', icon: Tag },
       ],
     },
   },
@@ -328,13 +328,12 @@ export function AppSidebar({...props}) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Travel and Tours</span>
+                  <span className="truncate font-medium">JOLI Travel and Tours</span>
                   <span className="truncate text-xs">
                     {loading ? (<Skeleton className="w-2/3 h-full"/>) :
                      user.role == "LogisticsI Admin"  ? 'Logistics I Admin' : //just copy this line
                      user.role == "LogisticsII Admin" ? 'Logistics II Admin' :
-                     //and place it here
-
+                     user.role == "HR1 Admin" ? 'HR1 Admin' :
                      null
                     }
                   </span>
@@ -360,8 +359,7 @@ export function AppSidebar({...props}) {
               (<NavMain data={data.logisticsIINav}/>) 
               : user.role === "LogisticsI Admin" ? 
               (<NavMain data={data.logisticsINav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
-              : null}
-              {user.role === "HR1 Admin" ? 
+              :user.role === "HR1 Admin" ? 
               (<NavMain data={data.HR1Nav}/>) // add more here via ?(<NavMain data={data.yoursidebaritems}/>)
               : null}
             </>

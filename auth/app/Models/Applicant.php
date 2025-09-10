@@ -9,5 +9,10 @@ class Applicant extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'phone', 'position'];
+    protected $fillable = [
+    'employee_code', 'name', 'email', 'phone', 'status', 'hire_date',
+    'job', 'job_title', 'employment_type', 'department', 'salary',
+    'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_address'
+];
+
 }

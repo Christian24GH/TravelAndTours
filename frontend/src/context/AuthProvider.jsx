@@ -1,92 +1,108 @@
-import {createContext, useState, useEffect } from "react";
-import axios from "../api/axios";
+import { createContext, useState, useEffect } from "react";
+import api, { login as apiLogin, logout as apiLogout, removeToken, setToken } from "../api/axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
-const AuthContext = createContext({})
 
-export const AuthProvider = ({children})=>{
-    const [auth, setAuth] = useState({})
-    const [loading, setLoading] = useState(true);
-    const navigate = useNavigate()
+const AuthContext = createContext({});
 
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                // Sanctum ensures session is tied to HttpOnly cookie
-                const response = await axios.get("/api/user", { withCredentials: true })
-                setAuth(response.data) // user object returned by Laravel
-            } catch (error) {
-                setAuth(null) // not logged in
-            }finally {
-                setLoading(false); // check complete
-            }
-        }
-        checkAuth()
-    }, [])
+export const AuthProvider = ({ children }) => {
+  const [auth, setAuth] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-    const login = async (data) => {
-        await axios.get("/sanctum/csrf-cookie"); // get CSRF cookie
-        try {
-            // Ensure CSRF cookie is set first
-            await axios.get('/sanctum/csrf-cookie')
-    
-            // Attempt login
-            const response = await axios.post('/api/login', data)
-    
-            if (response.status === 200) {
-                const user = response.data?.user
-    
-                // Save user in your auth state/context
-                setAuth(user)
-    
-                toast.success('Login successful, redirecting...', { position: "top-center" })
-
-                roleAccess(user, navigate)
-            }
-        } catch (error) {
-            if (error.response) {
-                if (error.response.status === 422 || error.response.status === 401) {
-                toast.error('Invalid credentials', { position: "top-center" })
-                } else if (error.response.status === 500) {
-                toast.error('Server error. Please try again later.', { position: "top-center" })
-                } else {
-                toast.error(`Login failed (${error.response.status})`, { position: "top-center" })
-                }
-            } else {
-                toast.error('Network error. Please check your connection.', { position: "top-center" })
-            }
-        }
-    }
-    
-    const roleAccess = (user, navigate) => {
-        switch (user.role) {
-            case 'Super Admin':
-                navigate('/login');
-                break;
-            case 'LogisticsII Admin':
-            case 'Driver':
-            case 'Employee':
-                navigate('/logisticsII/');
-                break;
-            case 'HR1 Admin':
-                navigate('/hr1/');
-                break;
-            default:
-                navigate('/login');
-        }
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (token) {
+      // temporary state until API confirms
+      setAuth({ token });
     }
 
-    const logout = () => {
-        axios.post("/api/logout");
-        navigate('/login') // back to login
-        setAuth(null);
+    const checkAuth = async () => {
+      try {
+        const response = await api.get("/user");
+        setAuth(response.data); // user object from backend
+      } catch (error) {
+        if (error.response?.status === 401) {
+          removeToken();
+          setAuth(null);
+        } else {
+          console.error("Auth check failed", error);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const login = async (data) => {
+    try {
+      const res = await apiLogin(data); // returns { token, user }
+      const user = res?.user;
+
+      if (res?.token) {
+        setToken(res.token); // ✅ save to localStorage + axios header
+        setAuth(user);
+        toast.success("Login successful, redirecting...", { position: "top-center" });
+        roleAccess(user, navigate);
+      } else {
+        toast.error("Login failed: no token returned", { position: "top-center" });
+      }
+    } catch (error) {
+      if (error.response) {
+        if (error.response.status === 422 || error.response.status === 401) {
+          toast.error("Invalid credentials", { position: "top-center" });
+        } else if (error.response.status === 500) {
+          toast.error("Server error. Please try again later.", { position: "top-center" });
+        } else {
+          toast.error(`Login failed (${error.response.status})`, { position: "top-center" });
+        }
+      } else {
+        toast.error("Network error. Please check your connection.", { position: "top-center" });
+      }
+      console.error(error);
     }
+  };
 
-    return(
-        <AuthContext.Provider value={{auth, setAuth, login, loading, roleAccess, logout}}>
-            {children}
-        </AuthContext.Provider>
-    )
-}
+  const roleAccess = (user, navigate) => {
+    switch (user?.role) {
+      case "Super Admin":
+        navigate("/login");
+        break;
+      case "LogisticsII Admin":
+      case "Driver":
+      case "Employee":
+        navigate("/logisticsII/");
+        break;
+      case "LogisticsI Admin":
+        navigate("/logistics1/");
+        break;
+      case "HR1 Admin":
+        navigate("/hr1/");
+        break;
+      default:
+        navigate("/login");
+    }
+  };
 
-export default AuthContext
+  const logout = async () => {
+    try {
+      await apiLogout();
+    } catch (_) {
+      // ignore errors, still clear local state
+    } finally {
+      removeToken();
+      setAuth(null);
+      navigate("/login");
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ auth, setAuth, login, loading, roleAccess, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export default AuthContext;

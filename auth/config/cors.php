@@ -1,16 +1,14 @@
 <?php
 
 return [
+
     /*
     |--------------------------------------------------------------------------
     | Cross-Origin Resource Sharing (CORS) Configuration
     |--------------------------------------------------------------------------
     |
-    | Here you may configure your settings for cross-origin resource sharing
-    | or "CORS". This determines what cross-origin operations may execute
-    | in web browsers. You are free to adjust these settings as needed.
-    |
-    | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+    | This determines what cross-origin operations are allowed.
+    | We now support both local (Vite dev server) and production frontend.
     |
     */
 
@@ -18,9 +16,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    //SPECIFY ALLOWED ORIGINS HERE
     'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:5173'),
+        'http://localhost:5173',
+        'https://travelandtours-c9xk.onrender.com',
     ],
 
     'allowed_origins_patterns' => [],
@@ -31,6 +29,5 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false, // true if sessionbased
-
+    'supports_credentials' => true, // change to true if using cookies/session
 ];

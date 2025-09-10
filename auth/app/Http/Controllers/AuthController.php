@@ -6,65 +6,64 @@ use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
-    /**
-     * Register a new user
-     */
-    public function register(Request $request)
-    {
+    public function register(Request $request){
+        //dd($request);
         $validated = (object)$request->validate([
             'name'      => ['required', 'min:6'],
             'email'     => ['required', 'email', 'unique:users,email'],
             'password'  => ['required', 'min:6'],
-            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1 Admin'])],
+            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'LogisticsI Admin', 'HR1 Admin'])],
         ]);
-
-        try {
+        try{
             User::create([
                 'name'     => $validated->name,
                 'email'    => $validated->email,
-                'password' => $validated->password, // ✅ hash password
+                'password' => $validated->password,
                 'role'     => $validated->role,
             ]);
-        } catch (Exception $e) {
-            return response()->json('Registration Failed' . $e, 500);
+        }catch(Exception $e){
+            return response()->json('Registration Failed'.$e, 500);
         }
 
         return response()->json('Registered Successfully', 200);
     }
 
-    /**
-     * Login user
-     */
-    public function login(Request $request)
-    {
+    public function login(Request $request){
         $validated = (object)$request->validate([
-            'email'     => ['required', 'email:rfc,dns', 'exists:users,email'],
+            'email'     => ['required', 'email', 'exists:users,email'],
             'password'  => ['required', 'min:6'],
+            'device_name' => 'sometimes|string', // Token based only
         ]);
 
         $user = User::where('email', $validated->email)->first();
 
-        // ✅ check password with hash
         if (!$user || $validated->password != $user->password) {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        
+        /*
         Auth::login($user);
-
         // Revoke old tokens if you want single login
         $user->tokens()->delete();
 
         // regenerate session to prevent fixation
         $request->session()->regenerate();
+        */
+
+        /**Switched to Token Based */
+        $device = $data['device_name'] ?? $request->header('User-Agent') ?? 'spa';
+        $token = $user->createToken($device)->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
-            'user'   => Auth::user()
+            //'user'   => Auth::user()
+            'token' => $token,
+            'user'  => $user,
         ], 200);
 
     }
@@ -74,11 +73,13 @@ class AuthController extends Controller
     }
 
     public function user(Request $request){
-        return $request->user();
+        //return $request->user();
+        return response()->json($request->user());
     }
 
     public function logout(Request $request)
     {
+        /* SESSION BASED
         Auth::guard('web')->logout(); // log out the user
 
         // invalidate the session
@@ -90,5 +91,18 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully'
         ], 200);
+        */
+
+        // Token Based
+        // if bearer token present, revoke current access token
+        if ($request->user() && $request->user()->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
+
+        // optionally revoke all tokens:
+        // $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logged out']);
+    
     }
 }
