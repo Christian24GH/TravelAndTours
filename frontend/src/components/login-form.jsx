@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { AlertDescription } from '@/components/ui/alert'
-
 import {
   Card,
   CardContent,
@@ -31,10 +30,10 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="py-10 px-5">
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-center">Login to your account</CardTitle>
+          <CardDescription className="text-center">
             Enter your email below to login to your account
           </CardDescription>
         </CardHeader>
@@ -45,7 +44,9 @@ export function LoginForm({
                 <Label htmlFor='email'>Email</Label>
                 <Input {...register('email', {
                     required: 'Email is required'
-                  })} id="email" type="email" placeholder="juan.delacruz@example.com"/>
+                  })} id="email" type="email" placeholder="m@example.com"
+                  disabled={isSubmitting}
+                  />
                 {errors.email && (
                   <AlertDescription className="text-red-500">{errors.email.message}</AlertDescription>
                 )}
@@ -53,15 +54,19 @@ export function LoginForm({
               <div className="flex flex-col gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
-                    Forgot your password?
-                  </a>
+                  {/*
+                    <a
+                      href="#"
+                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline">
+                      Forgot your password?
+                    </a>
+                  */}
                 </div>
                 <Input {...register('password', {
                     required: 'Password is required'
-                  })} id="password" type="password" placeholder="Enter your password"/>
+                  })} id="password" type="password"
+                  disabled={isSubmitting}
+                  />
                 {errors.password && (
                   <AlertDescription className="text-red-500">{errors.password.message}</AlertDescription>
                 )}
@@ -71,16 +76,6 @@ export function LoginForm({
                   Login
                 </Button>
               </div>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <button 
-                type="button"
-                onClick={onShowRegister}
-                className="underline underline-offset-4 hover:text-primary"
-              >
-                Sign up
-              </button>
             </div>
           </form>
         </CardContent>

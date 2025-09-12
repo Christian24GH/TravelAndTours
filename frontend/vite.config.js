@@ -21,4 +21,11 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
+  /** Value depends on frontend serve directory
+   *  If app needs to be accessible at http://localhost/TravelAndTour/frontend/ → keep base: '/TravelAndTour/frontend/'.
+      if directory is htdocs/dist(http://localhost/) (directly from htdocs/dist) → change base: '/' and rebuild.
+   */
+  // Sets assets(js/css) url for dist/index.html
+  base: '/'
 })

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class Vehicles extends Controller
 {
@@ -27,6 +28,7 @@ class Vehicles extends Controller
                     ->orWhere('plate_number', 'like', "%{$q}%")
                     ->orWhere('make', 'like', "%{$q}%")
                     ->orWhere('model', 'like', "%{$q}%")
+                    ->orWhere('status', 'like', "%{$q}%")
                     ->get(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
 
             }catch(Exception $e){
@@ -39,10 +41,30 @@ class Vehicles extends Controller
         return response()->json(['vehicles' => $vehicles]);
     }
 
+    /**TODO:
+     * Prevent showing available vehicles if its already selected in a reservation request
+     */
     public function showAll(Request $request)
     {
-        $vehicles = DB::table('vehicles')
-            ->get(array_merge($this->rows, ['id','created_at', 'updated_at']));
+        $table = DB::table('vehicles');
+
+        $q = $request->input('q');
+
+        if ($request->filled('q')) {
+            try{
+                $table->where('vin', 'like', "%{$q}%")
+                    ->orWhere('plate_number', 'like', "%{$q}%")
+                    ->orWhere('make', 'like', "%{$q}%")
+                    ->orWhere('model', 'like', "%{$q}%")
+                    ->orWhere('status', 'like', "%{$q}%")
+                    ->get(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
+
+            }catch(Exception $e){
+                return response()->json($e, 500);
+            }
+        }
+
+        $vehicles = $table->get(array_merge($this->rows, ['id','created_at', 'updated_at']));
 
         return response()->json(['vehicles' => $vehicles]);
     }
@@ -112,7 +134,7 @@ class Vehicles extends Controller
 
             broadcast(new VehicleUpdates($new));
         } catch (Exception $e) {
-            return response()->json('Failed to fetch new data', 500);
+            //return response()->json('Failed to fetch new data', 500);
         }
 
         return response()->json("Vehicle Registered", 200);
@@ -130,7 +152,7 @@ class Vehicles extends Controller
             'type'            => ['required', 'string'],
             'capacity'        => ['required', 'string'],
             'acqdate'         => ['nullable', 'date'],
-            'status'          => ['required', 'in:available,under_maintenance,retired']
+            'status'          => ['required', Rule::in(['Available', 'Reserved', 'Under Maintenance', 'Retired'])],
         ]);
 
         try {
@@ -158,7 +180,7 @@ class Vehicles extends Controller
             broadcast(new VehicleUpdates($new));
             
         } catch (Exception $e) {
-            return response()->json($e->getMessage(), 500);
+            //return response()->json($e->getMessage(), 500);
         }
 
         return response()->json("Record Updated Successfully", 200);

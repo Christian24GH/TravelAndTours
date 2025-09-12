@@ -11,5 +11,11 @@ class DatabaseSeeder extends Seeder
     {
 
     $this->call(HR2Seeder::class);
+        User::factory()->create([
+            'name'      => 'Fleet Manager',
+            'email'     => 'fleetManager@gmail.com',
+            'password'  => '123456',
+            'role'      => 'LogisticsII Admin',
+        ]);
     }
 }

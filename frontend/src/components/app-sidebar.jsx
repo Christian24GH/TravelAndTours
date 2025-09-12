@@ -14,8 +14,9 @@ import {
   HistoryIcon,
   LogsIcon,
   MapPinIcon,
-  LayoutDashboard
-} from "lucide-react"
+  LayoutDashboard,
+  GlobeIcon
+} from "lucide-react";
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -33,6 +34,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import AuthContext from "../context/AuthProvider"
 import { useContext } from "react"
 
+import logo from '@/assets/finallogo.avif'
 const data = {
 
   /** Logistics 1 NavItems */
@@ -185,7 +187,7 @@ const data = {
           },
           {
             title: "Drivers",
-            url: '#',
+            url: '/logisticsII/drivers',
             icon: User,
           },
         ],
@@ -287,22 +289,25 @@ const data = {
 }
 
 export function AppSidebar({...props}) {
-  const { auth, logout, loading } = useContext(AuthContext)
+  const { auth, logout, loading } = useContext(AuthContext);
   const user = {
     name: auth?.name,
     role: auth?.role,
     avatar: null,
     email: auth?.email
-  }
+  };
 
-  const hr2NavForEmployee = user.role === "Employee" ? [
-    {
-      NavGroup: {
-        NavLabel: 'Human Resources 2',
-        NavItems: data.HR2Nav[0].NavGroup.NavItems.filter(item => item.title !== "Account Center (Data)")
-      }
-    }
-  ] : data.HR2Nav
+  // For Employee, filter out "Account Center (Data)" from HR2Nav
+  const hr2NavForEmployee = user.role === "Employee"
+    ? [
+        {
+          NavGroup: {
+            NavLabel: 'Human Resources 2',
+            NavItems: data.HR2Nav[0].NavGroup.NavItems.filter(item => item.title !== "Account Center (Data)")
+          }
+        }
+      ]
+    : data.HR2Nav;
 
   return (
     <Sidebar variant="floating" {...props}>
@@ -312,13 +317,19 @@ export function AppSidebar({...props}) {
             <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div
-                  className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+                  className="bg-[var(--vivid-neon-pink)] text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <GlobeIcon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Travel and Tours</span>
+                  <span className="truncate font-medium">JOLI Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {loading ? (<Skeleton className="w-2/3 h-full"/>) : user.role == "LogisticsII Admin" ? "LogisticsI Admin" : ''}
+                    {loading ? (
+                      <Skeleton className="w-2/3 h-full" />
+                    ) : user.role === "LogisticsI Admin" ? (
+                      'Logistics I Admin'
+                    ) : user.role === "LogisticsII Admin" ? (
+                      'Logistics II Admin'
+                    ) : null}
                   </span>
                 </div>
               </a>
@@ -328,28 +339,34 @@ export function AppSidebar({...props}) {
       </SidebarHeader>
       <SidebarContent className="flex flex-col gap-2">
         {loading ? (
-            <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-8 w-full" />
+            {/* Skeleton Placeholder while loading */}
+            <div className="flex flex-col gap-2 px-2 h-full">
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
+              <Skeleton className="flex-1 w-full" />
+              <Skeleton className="flex-1 w-full" />
             </div>
-          ) : (
-            <>
-              {user.role === "LogisticsII Admin" ? 
-                (<NavMain data={data.logisticsIINav}/>) 
-              : user.role === "LogisticsI Admin" ? 
-                (<NavMain data={data.logisticsINav}/>)
-              : user.role === "HR2 Admin" || user.role === "Employee" ? 
-                (<NavMain data={hr2NavForEmployee}/>)
-              : null}
-            </>
-          )
-        }
+          </div>
+        ) : (
+          <>
+            {user.role === "LogisticsII Admin" ? (
+              <NavMain data={data.logisticsIINav} />
+            ) : user.role === "LogisticsI Admin" ? (
+              <NavMain data={data.logisticsINav} />
+            ) : user.role === "HR2 Admin" || user.role === "Employee" ? (
+              <NavMain data={hr2NavForEmployee} />
+            ) : null}
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
-        {loading ? 
-          (<Skeleton className="w-full h-full"/>) : (<NavUser user={user} logout={logout} />)
-        }
+        {loading ? (
+          <Skeleton className="w-full h-full" />
+        ) : (
+          <NavUser user={user} logout={logout} />
+        )}
       </SidebarFooter>
     </Sidebar>
   );

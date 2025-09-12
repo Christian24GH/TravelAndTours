@@ -24,7 +24,7 @@ export function NavMain({
   data
 }) {
   const curLocation = location.pathname
-  console.log(curLocation)
+  
   return (
     <SidebarGroup> 
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -36,7 +36,8 @@ export function NavMain({
                 <SidebarMenu>
                   {group.NavGroup.NavItems.map((item, j) => (
                     <SidebarMenuItem key={j}>
-                      <SidebarMenuButton asChild isActive={item.url == curLocation}>
+                      <SidebarMenuButton className="data-[active=true]:bg-[var(--vivid-indigo)]" 
+                        asChild isActive={item.url == curLocation}>
                         <Link to={item.url}>
                           <item.icon/>
                         {item.title}

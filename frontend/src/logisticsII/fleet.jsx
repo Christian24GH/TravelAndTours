@@ -28,7 +28,6 @@ const header = [
   { title: "Created At", accessor: "created_at", cellClassName: "text-right" },
   { title: "Updated At", accessor: "updated_at", cellClassName: "text-right" },
   {
-    title: "Actions",
     render: (item) => (
       <UpdateDialog item={item} />
     )

@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /TravelAndTour/Frontend/
+
+    # Serve existing files/directories as-is
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Don't rewrite API requests (if proxied through same host)
+    RewriteRule ^api/ - [L]
+
+    # Don't rewrite static asset folders
+    RewriteRule ^(assets|css|js|img|images|static)/ - [L]
+
+    # Fallback to dist/index.html in this directory for SPA routes
+    RewriteRule . dist/index.html [L]
+</IfModule>

@@ -17,8 +17,8 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name'      => ['required', 'min:2'],
             'email'     => ['required', 'email', 'unique:users,email'],
-            'password'  => ['required', 'min:8', 'confirmed'],
-            'role'      => ['sometimes', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'HR1', 'HR2 Admin', 'Guest'])],
+            'password'  => ['required', 'string', 'min:6'],
+            'role'      => ['required', Rule::in(['Super Admin', 'LogisticsII Admin', 'Driver', 'Employee', 'LogisticsI Admin', 'HR1', 'HR2 Admin'])]
         ]);
 
         if ($validator->fails()) {
@@ -74,8 +74,9 @@ class AuthController extends Controller
 
     public function login(Request $request){
         $validated = (object)$request->validate([
-            'email'     => ['required', 'email:rfs,dns', 'exists:users,email'],
+            'email'     => ['required', 'email', 'exists:users,email'],
             'password'  => ['required', 'min:6'],
+            'device_name' => 'sometimes|string', // Token based only
         ]);
 
         $user = User::where('email', $validated->email)->first();
@@ -84,15 +85,24 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        
+        /*
         Auth::login($user);
-
+        // Revoke old tokens if you want single login
         $user->tokens()->delete();
 
         $request->session()->regenerate();
+        */
+
+        /**Switched to Token Based */
+        $device = $data['device_name'] ?? $request->header('User-Agent') ?? 'spa';
+        $token = $user->createToken($device)->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
-            'user'   => Auth::user()
+            //'user'   => Auth::user()
+            'token' => $token,
+            'user'  => $user,
         ], 200);
 
     }
@@ -101,12 +111,14 @@ class AuthController extends Controller
     }
 
     public function user(Request $request){
-        return $request->user();
+        //return $request->user();
+        return response()->json($request->user());
     }
 
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
+        /* SESSION BASED
+        Auth::guard('web')->logout(); // log out the user
 
         $request->session()->invalidate();
 
@@ -115,5 +127,18 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Logged out successfully'
         ], 200);
+        */
+
+        // Token Based
+        // if bearer token present, revoke current access token
+        if ($request->user() && $request->user()->currentAccessToken()) {
+            $request->user()->currentAccessToken()->delete();
+        }
+
+        // optionally revoke all tokens:
+        // $request->user()->tokens()->delete();
+
+        return response()->json(['message' => 'Logged out']);
+    
     }
 }

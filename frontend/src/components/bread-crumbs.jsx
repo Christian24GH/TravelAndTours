@@ -1,3 +1,4 @@
+import { Home, HomeIcon } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,42 +15,44 @@ const location = useLocation()
     const curLocation = location.pathname
 
     const pathnames = curLocation.split("/").filter(Boolean)
-    console.log(pathnames)
+    
     return (
         <Breadcrumb>
-        <BreadcrumbList>
-            {pathnames.map((segment, index) => {
-            const to = "/" + pathnames.slice(0, index + 1).join("/")
-            console.log(to)
-            const label = segment.charAt(0).toUpperCase() + segment.slice(1)
-            
-            console.log(label)
-            return (
-                <React.Fragment key={to}>
-                    <BreadcrumbItem>
-                        {index === pathnames.length - 1 ? (
-                            <span className="font-medium">{label}</span>
-                        ) : index === pathnames[0] ? (
-                            <BreadcrumbLink asChild>
-                                <Link to={to}>
-                                    {label}
-                                </Link>
-                            </BreadcrumbLink>
-                        ): (
-                            <>
-                                <BreadcrumbLink asChild>
-                                    <Link to={to}>
-                                        {label}
-                                    </Link>
-                                </BreadcrumbLink>
-                                <BreadcrumbSeparator/>
-                            </>
-                        )}
-                    </BreadcrumbItem>
-                </React.Fragment>
-            )
-            })}
-        </BreadcrumbList>
+            <BreadcrumbList>
+                {pathnames.map((segment, index) => {
+                
+                    const to = "/" + pathnames.slice(0, index + 1).join("/")
+                
+                    const label = segment.charAt(0).toUpperCase() + segment.slice(1)
+                    return (
+                        <React.Fragment key={`${to}-${index}`}>
+                            <BreadcrumbItem>
+                                {index === pathnames.length - 1 ? (
+                                    <span className="font-medium">{label == 'LogisticsII' ? 'Home' : label}</span>
+                                ) : index === 0 ? (
+                                    <>
+                                        <BreadcrumbLink asChild>
+                                            <Link to={to}>
+                                                Home
+                                            </Link>
+                                        </BreadcrumbLink>
+                                        
+                                    </>
+                                ): (
+                                    <>
+                                        <BreadcrumbLink asChild>
+                                            <Link to={to}>
+                                                {label}
+                                            </Link>
+                                        </BreadcrumbLink>                       
+                                    </>
+                                )}
+                            </BreadcrumbItem>
+                        {index !== pathnames.length - 1 && <BreadcrumbSeparator />}
+                        </React.Fragment>
+                    )
+                })}
+            </BreadcrumbList>
         </Breadcrumb>
     )
 }
