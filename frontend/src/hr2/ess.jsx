@@ -6,26 +6,56 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogFooter
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select } from "@/components/ui/select";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { 
+    BriefcaseBusiness,
+    Mail, 
+    Phone, 
+    MapPin, 
+    Cake,
+    UserRoundPlus 
+} from 'lucide-react';
 
 function ESS() {
+    // Submit leave request to backend
+    const handleLeaveRequest = async () => {
+        if (!leaveForm.type || !leaveForm.start || !leaveForm.end || !leaveForm.reason) {
+            toast.error('Please fill in all leave fields.');
+            return;
+        }
+        try {
+            const res = await fetch(hr2.backend.api.leaveRequests, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                // No CSRF token needed for API routes
+                credentials: 'include',
+                body: JSON.stringify(leaveForm),
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to submit leave request');
+            }
+            toast.success('Leave request submitted!');
+            setLeaveForm({ type: '', start: '', end: '', reason: '' });
+            // Optionally refresh leave requests list here
+        } catch (e) {
+            toast.error(e.message);
+        }
+    };
+    // Leave requests state (must be at the top so it's always defined)
+    const [leaveRequests, setLeaveRequests] = useState([]);
+    const [leaveForm, setLeaveForm] = useState({
+        type: '',
+        start: '',
+        end: '',
+        reason: ''
+    });
+
     const [employeeId, setEmployeeId] = useState(null);
     const loggedInEmployeeId = localStorage.getItem('employeeId');
     const [searchId, setSearchId] = useState("");
@@ -59,7 +89,7 @@ function ESS() {
         name: "",
         email: "",
         password: "",
-        role: "Employee",
+    roles: "Employee",
     });
 
     const [saving, setSaving] = useState(false);
@@ -85,8 +115,10 @@ function ESS() {
             if (!res.ok) throw new Error('Failed to fetch CSRF token.');
             const data = await res.json();
             setCsrfToken(data.csrfToken);
+            return data.csrfToken;
         } catch (e) {
             toast.error('Failed to fetch CSRF token.');
+            return null;
         }
     };
 
@@ -133,7 +165,6 @@ function ESS() {
         }
     };
 
-    // Placeholder function to fetch the user's role
     const fetchUserRole = async () => {
         try {
             setUserRole('Employee');
@@ -195,14 +226,14 @@ function ESS() {
         setSuccess("");
 
         try {
-            const res = await fetch("http://localhost:8091/api/employees", {
+            const res = await fetch(hr2.backend.api.employees, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                 },
                 credentials: 'include',
-                body: JSON.stringify(newAccountForm),
+                body: JSON.stringify({ ...newAccountForm, roles: newAccountForm.roles }),
             });
 
             if (res.status === 201) {
@@ -227,26 +258,39 @@ function ESS() {
 
     const handleUpdateEmployee = async () => {
         setSaving(true);
-        if (!csrfToken) {
-            toast.error("CSRF token is not available. Please try again.");
-            setSaving(false);
-            return;
-        }
-
+        
         try {
-            const url = `${hr2.backend.ess.profile}/${employeeId}`;
-            const method = 'PATCH';
+            const freshCsrfToken = await fetchCsrfToken();
+            
+            if (!freshCsrfToken) {
+                toast.error("CSRF token is not available. Please try again.");
+                setSaving(false);
+                return;
+            }
+
+            const url = `${hr2.backend.api.employeeUpdate}${employeeId}`;
+            const method = 'PUT';
             const data = { ...form };
             delete data.profile_photo_url;
+
+            const cleanedData = {};
+            Object.keys(data).forEach(key => {
+                const value = data[key];
+                if (value !== "" || key === 'middle_name' || key === 'suffix' || key === 'roles') {
+                    cleanedData[key] = value;
+                }
+            });
+
+            console.log('Sending data to backend:', cleanedData);
 
             const res = await fetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
+                    'X-CSRF-TOKEN': freshCsrfToken,
                 },
                 credentials: 'include',
-                body: JSON.stringify(data),
+                body: JSON.stringify(cleanedData),
             });
 
             const responseData = await res.json();
@@ -259,7 +303,6 @@ function ESS() {
 
             toast.success('Employee profile updated successfully.');
             await loadAllEmployees();
-            await fetchCsrfToken();
             await loadProfile(employeeId);
             setDialogOpen(false);
             setIsEditing(false);
@@ -334,7 +377,7 @@ function ESS() {
             name: "",
             email: "",
             password: "",
-            role: "Employee",
+            roles: "Employee",
         });
     };
 
@@ -385,6 +428,90 @@ function ESS() {
                         </h1>
                     </header>
                     {loading && <div>Loading...</div>}
+
+                    {/* Leave Request Form for Employees */}
+                    {isEmployee && (
+                        <Card className="mb-6 max-w-xl mx-auto">
+                            <CardHeader>
+                                <CardTitle>Request Leave</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label>Type</Label>
+                                        <Input value={leaveForm.type} onChange={e => setLeaveForm(f => ({ ...f, type: e.target.value }))} placeholder="e.g. Vacation, Sick" />
+                                    </div>
+                                    <div>
+                                        <Label>Reason</Label>
+                                        <Input value={leaveForm.reason} onChange={e => setLeaveForm(f => ({ ...f, reason: e.target.value }))} placeholder="Reason for leave" />
+                                    </div>
+                                    <div>
+                                        <Label>Start Date</Label>
+                                        <Input type="date" value={leaveForm.start} onChange={e => setLeaveForm(f => ({ ...f, start: e.target.value }))} />
+                                    </div>
+                                    <div>
+                                        <Label>End Date</Label>
+                                        <Input type="date" value={leaveForm.end} onChange={e => setLeaveForm(f => ({ ...f, end: e.target.value }))} />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end mt-4">
+                                    <Button onClick={handleLeaveRequest}>Submit Leave Request</Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Leave Requests Table (visible to all, actions for HR Admin) */}
+                    <Card className="mb-6 max-w-4xl mx-auto">
+                        <CardHeader>
+                            <CardTitle>Leave Requests</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="text-center">Employee</TableHead>
+                                            <TableHead className="text-center">Type</TableHead>
+                                            <TableHead className="text-center">Reason</TableHead>
+                                            <TableHead className="text-center">Start</TableHead>
+                                            <TableHead className="text-center">End</TableHead>
+                                            <TableHead className="text-center">Status</TableHead>
+                                            {isHR2Admin && <TableHead className="text-center">Action</TableHead>}
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {leaveRequests.length > 0 ? leaveRequests.map(lr => (
+                                            <TableRow key={lr.id}>
+                                                <TableCell className="text-center">{lr.employee}</TableCell>
+                                                <TableCell className="text-center">{lr.type}</TableCell>
+                                                <TableCell className="text-center">{lr.reason}</TableCell>
+                                                <TableCell className="text-center">{lr.start}</TableCell>
+                                                <TableCell className="text-center">{lr.end}</TableCell>
+                                                <TableCell className="text-center">{lr.status}</TableCell>
+                                                {isHR2Admin && (
+                                                    <TableCell className="text-center">
+                                                        {lr.status === 'Pending' && (
+                                                            <>
+                                                                <Button size="sm" className="mr-2" onClick={() => handleLeaveAction(lr.id, 'Accepted')}>Accept</Button>
+                                                                <Button size="sm" variant="destructive" onClick={() => handleLeaveAction(lr.id, 'Denied')}>Deny</Button>
+                                                            </>
+                                                        )}
+                                                    </TableCell>
+                                                )}
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell className="text-center text-gray-600" colSpan={isHR2Admin ? 7 : 6}>No leave requests.</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* ...existing code... */}
                     {!loading && (
                         profile ? (
                             <div className="flex justify-center w-full mt-8">
@@ -421,7 +548,7 @@ function ESS() {
                                                                 <div className="font-semibold text-center text-base">{profile.first_name} {profile.middle_name} {profile.last_name} {profile.suffix}</div>
                                                                 <div className="flex items-center gap-1">
                                                                     <span className="flex items-center gap-2">
-                                                                        <img src={"https://img.icons8.com/?size=100&id=2333&format=png&color=000000"} alt="Position" className="inline w-4 h-4" />
+                                                                        <BriefcaseBusiness className="w-5 h-5" />
                                                                         <span>{profile.position}</span>
                                                                     </span>
                                                                     -
@@ -429,11 +556,11 @@ function ESS() {
                                                                         <span>{profile.department}</span>
                                                                     </span>
                                                                 </div>
-                                                                <div className="flex items-center gap-2"><img src={"https://img.icons8.com/?size=100&id=82785&format=png&color=000000"} alt="Email" className="inline w-4 h-4" /> <span className="text-xs text-gray-500">{profile.email}</span></div>
-                                                                <div className="flex items-center gap-2"><img src={"https://img.icons8.com/?size=100&id=Fld0fUcMNHLy&format=png&color=000000"} alt="Phone" className="inline w-4 h-4" /> <span>{profile.phone}</span></div>
-                                                                <div className="flex items-center gap-2"><img src={"https://img.icons8.com/?size=100&id=gmrqGLXMVNDf&format=png&color=000000"} alt="Address" className="inline w-4 h-4" /> <span>{profile.address}</span></div>
-                                                                <div className="flex items-center gap-2"><img src={"https://img.icons8.com/?size=100&id=1615&format=png&color=000000"} alt="Birthday" className="inline w-4 h-4" /> <span>{profile.birthday}</span></div>
-                                                                <div className="flex items-center gap-2"><img src={"https://img.icons8.com/?size=100&id=o7N3nVNi8Ayy&format=png&color=000000"} alt="Emergency Contact" className="inline w-4 h-4" /> <span>{profile.emergency_contact}</span></div>
+                                                                <div className="flex items-center gap-2"><Mail className="w-5 h-5" /> <span className="text-xs text-gray-500">{profile.email}</span></div>
+                                                                <div className="flex items-center gap-2"><Phone className="w-5 h-5" /> <span>{profile.phone}</span></div>
+                                                                <div className="flex items-center gap-2"><MapPin className="w-5 h-5" /> <span>{profile.address}</span></div>
+                                                                <div className="flex items-center gap-2"><Cake className="w-5 h-5" /> <span>{profile.birthday}</span></div>
+                                                                <div className="flex items-center gap-2"><UserRoundPlus className="w-5 h-5" /> <span>{profile.emergency_contact}</span></div>
                                                             </div>
                                                         </div>
                                                     )}
@@ -463,9 +590,9 @@ function ESS() {
                                                         <Label htmlFor="phone">Phone Number</Label>
                                                         <Input id="phone" value={form.phone} onChange={e => handleChange("phone", e.target.value)} readOnly={!isEmployee} />
                                                     </div>
-                                                    <div className="opacity-60 pointer-events-none">
+                                                    <div>
                                                         <Label htmlFor="birthday">Birthday</Label>
-                                                        <Input id="birthday" value={form.birthday} type="date" readOnly />
+                                                        <Input id="birthday" value={form.birthday} type="date" onChange={e => handleChange("birthday", e.target.value)} readOnly={!isEmployee} />
                                                     </div>
                                                     <div>
                                                         <Label htmlFor="address">Address</Label>
@@ -510,5 +637,5 @@ function ESS() {
     );
 }
 
-ESS.layout = (page) => <ProtectedLayout children={page} />
+ESS.layout = (page) => <ProtectedLayout children={page} />;
 export default ESS;

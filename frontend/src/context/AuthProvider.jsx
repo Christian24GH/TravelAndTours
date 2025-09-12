@@ -81,10 +81,6 @@ export const AuthProvider = ({children})=>{
                 navigate('/hr2/db');
                 break;
 
-            case 'Guest':
-                navigate('/main/maintenance');
-                break;
-
             default:
                 navigate('/login');
         }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ export default function SuccessionPlanning() {
 	const [sortDirection, setSortDirection] = useState("asc");
 	const [pageSize, setPageSize] = useState(10);
 	const [currentPage, setCurrentPage] = useState(1);
+	
 
 	useEffect(() => {
 		let cancelled = false;
@@ -28,7 +30,7 @@ export default function SuccessionPlanning() {
 				if (!employeeId) throw new Error('Not authenticated. Please log in.');
 				if (cancelled) return;
 
-				const res = await fetch(hr2.backend.api.successionIndex + `?employee_id=${employeeId}`, {
+				const res = await fetch(`${hr2.backend.api.successionIndex}?employee_id=${employeeId}`, {
 					credentials: 'include',
 					headers: { Accept: "application/json" }
 				});
@@ -84,6 +86,10 @@ export default function SuccessionPlanning() {
 
 	return (
 		<>
+			<Helmet>
+				<title>Succession Planning</title>
+			</Helmet>
+			
 			<header className="mb-6">
 				<h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">Succession Planning</h1>
 			</header>

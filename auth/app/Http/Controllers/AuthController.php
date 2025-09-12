@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Employee;
+use App\Models\EmployeeSelfService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Exception;
@@ -38,7 +38,7 @@ class AuthController extends Controller
                 'role'     => $request->role ?? 'Guest',
             ]);
 
-            $employee = Employee::create([
+            $employee = EmployeeSelfService::create([
                 'first_name' => explode(' ', $user->name, 2)[0] ?? '',
                 'last_name' => explode(' ', $user->name, 2)[1] ?? '',
                 'email' => $user->email,

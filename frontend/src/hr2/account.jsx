@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useEffect, useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router";
 import AuthContext from "../context/AuthProvider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -29,7 +29,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function ESS() {
     const [employeeId, setEmployeeId] = useState(null);
-    const [searchId, setSearchId] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
     const [profile, setProfile] = useState(null);
     const [employees, setEmployees] = useState([]);
     const [filteredEmployees, setFilteredEmployees] = useState([]);
@@ -54,7 +54,7 @@ function ESS() {
         emergency_contact: "",
         hire_date: "",
         manager: "",
-        employee_status: "Active",
+        roles: "",
         profile_photo_url: "",
     });
 
@@ -62,7 +62,7 @@ function ESS() {
         name: "",
         email: "",
         password: "",
-        role: "Employee",
+        roles: "Employee",
     });
 
     const [saving, setSaving] = useState(false);
@@ -84,12 +84,14 @@ function ESS() {
 
     const fetchCsrfToken = async () => {
         try {
-            const res = await fetch(`${hr2.backend.uri}/api/csrf-token`, { credentials: 'include' });
+            const res = await fetch(hr2.backend.api.csrfToken, { credentials: 'include' });
             if (!res.ok) throw new Error('Failed to fetch CSRF token.');
             const data = await res.json();
             setCsrfToken(data.csrfToken);
+            return data.csrfToken;
         } catch (e) {
             toast.error('Failed to fetch CSRF token.');
+            return null;
         }
     };
 
@@ -102,7 +104,7 @@ function ESS() {
 
         setLoading(true);
         try {
-            const res = await fetch(hr2.backend.ess.profile + `/${id}`, { credentials: 'include' });
+            const res = await fetch(`${hr2.backend.ess.profile}/${id}`, { credentials: 'include' });
             if (!res.ok) {
                 if (res.status === 404) {
                     toast.error('Profile not found. The employee ID might be invalid.');
@@ -112,8 +114,21 @@ function ESS() {
                 throw new Error('Failed to load profile');
             }
             const profileJson = await res.json();
-            setProfile(profileJson);
-            setForm(profileJson);
+            
+            const sanitizedProfile = {
+                ...profileJson,
+                first_name: profileJson.first_name || "",
+                last_name: profileJson.last_name || "",
+                department: profileJson.department || "",
+                position: profileJson.position || "",
+                email: profileJson.email || "",
+                hire_date: profileJson.hire_date || "",
+                employee_status: profileJson.employee_status || "Active",
+                roles: profileJson.roles || "",
+            };
+            
+            setProfile(sanitizedProfile);
+            setForm(sanitizedProfile);
         } catch (e) {
             toast.error(e.message);
         } finally {
@@ -157,7 +172,7 @@ function ESS() {
     const editableFields = isHR2Admin
         ? [
             "profile_photo_url", "phone", "address", "civil_status", "emergency_contact",
-            "email", "department", "position", "birthday", "hire_date", "manager", "employee_status",
+            "email", "department", "position", "birthday", "hire_date", "manager", "roles",
             "last_name", "first_name", "middle_name", "suffix"
         ]
         : ["profile_photo_url", "phone", "address", "civil_status", "emergency_contact"];
@@ -175,14 +190,14 @@ function ESS() {
         setSuccess("");
 
         try {
-            const res = await fetch("http://localhost:8091/api/employees", {
+            const res = await fetch(hr2.backend.api.employees, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
                 },
                 credentials: 'include',
-                body: JSON.stringify(newAccountForm),
+                body: JSON.stringify({ ...newAccountForm, roles: newAccountForm.roles }),
             });
 
             if (res.status === 201) {
@@ -207,26 +222,39 @@ function ESS() {
 
     const handleUpdateEmployee = async () => {
         setSaving(true);
-        if (!csrfToken) {
-            toast.error("CSRF token is not available. Please try again.");
-            setSaving(false);
-            return;
-        }
-
+        
         try {
-            const url = `${hr2.backend.ess.profile}/${employeeId}`;
-            const method = 'PATCH';
+            const freshCsrfToken = await fetchCsrfToken();
+            
+            if (!freshCsrfToken) {
+                toast.error("CSRF token is not available. Please try again.");
+                setSaving(false);
+                return;
+            }
+
+            const url = `${hr2.backend.api.employeeUpdate}${employeeId}`;
+            const method = 'PUT';
             const data = { ...form };
             delete data.profile_photo_url;
+
+            const cleanedData = {};
+            Object.keys(data).forEach(key => {
+                const value = data[key];
+                if (value !== "" || key === 'middle_name' || key === 'suffix' || key === 'roles') {
+                    cleanedData[key] = value;
+                }
+            });
+
+            console.log('Sending data to backend:', cleanedData);
 
             const res = await fetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
+                    'X-CSRF-TOKEN': freshCsrfToken,
                 },
                 credentials: 'include',
-                body: JSON.stringify(data),
+                body: JSON.stringify(cleanedData),
             });
 
             const responseData = await res.json();
@@ -239,7 +267,6 @@ function ESS() {
 
             toast.success('Employee profile updated successfully.');
             await loadAllEmployees();
-            await fetchCsrfToken();
             setDialogOpen(false);
             setIsEditing(false);
             setEmployeeId(null);
@@ -261,7 +288,7 @@ function ESS() {
         }
 
         try {
-            const res = await fetch(hr2.backend.ess.profile + `/${id}`, {
+            const res = await fetch(`${hr2.backend.api.employees}/${id}`, {
                 method: 'DELETE',
                 headers: { 'X-CSRF-TOKEN': csrfToken },
                 credentials: 'include',
@@ -279,8 +306,23 @@ function ESS() {
     };
 
     const handleSearch = () => {
-        if (searchId) {
-            const results = employees.filter(emp => emp.id == searchId);
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            const results = employees.filter(emp => {
+                const id = emp.id ? emp.id.toString() : '';
+                const name = formatName(emp).toLowerCase();
+                const department = (emp.department || '').toLowerCase();
+                const position = (emp.position || '').toLowerCase();
+                const email = (emp.email || '').toLowerCase();
+                const role = (emp.roles || '').toLowerCase();
+                
+                return id.includes(query) ||
+                       name.includes(query) ||
+                       department.includes(query) ||
+                       position.includes(query) ||
+                       email.includes(query) ||
+                       role.includes(query);
+            });
             setFilteredEmployees(results);
         } else {
             setFilteredEmployees(employees);
@@ -307,14 +349,14 @@ function ESS() {
             emergency_contact: "",
             hire_date: "",
             manager: "",
-            employee_status: "Active",
+            roles: "",
             profile_photo_url: "",
         });
         setNewAccountForm({
             name: "",
             email: "",
             password: "",
-            role: "Employee",
+            roles: "Employee",
         });
     };
 
@@ -353,10 +395,10 @@ function ESS() {
         <div className="flex flex-1 min-h-screen bg-gray-100" style={{ height: '100vh' }}>
             <main className="flex-1 flex flex-col h-full m-4">
                 <Helmet>
-                    <title>HR Admin</title>
+                    <title>Account Center</title>
                 </Helmet>
                 <div className="flex items-center gap-4 px-4 py-2 bg-white border-b border-gray-200 sticky top-0 z-10 -m-4">
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">HR2 Admin (Sample Data Only)</h1>
+                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">Account Center</h1>
                 </div>
                 <div className="flex-1 overflow-y-auto pt-4">
                     <header className="mb-6">
@@ -369,86 +411,64 @@ function ESS() {
                             <div className="mb-4 flex items-end justify-between gap-3">
                                 <div className="flex items-end gap-3">
                                     <div className="flex flex-col">
-                                        <Label className="text-sm text-gray-600 mb-1">Search ID</Label>
-                                        <Input type="number" min={1} value={searchId} onChange={(e) => setSearchId(e.target.value)} className="w-32" />
+                                        <Label className="text-sm text-gray-600 mb-1">Search Employees</Label>
+                                        <div className="relative">
+                                            <Input 
+                                                type="text" 
+                                                value={searchQuery} 
+                                                onChange={(e) => setSearchQuery(e.target.value)} 
+                                                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                                                className="w-83 pr-8" 
+                                                placeholder="ID, name, department, position, email, or role..."
+                                            />
+                                            {searchQuery && (
+                                                <button
+                                                    onClick={() => {
+                                                        setSearchQuery("");
+                                                        setFilteredEmployees(employees);
+                                                        setCurrentPage(1);
+                                                    }}
+                                                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                                                    type="button"
+                                                >
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                    </svg>
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
-                                        <Button onClick={handleSearch}>Search</Button>
-                                    </div>
-                                    <Dialog open={showAddForm} onOpenChange={(open) => {
-                                        setShowAddForm(open);
-                                        if (!open) {
-                                            handleDiscard();
-                                        }
-                                        }}>
-                                        <DialogTrigger asChild>
-                                            <Button variant="outline" onClick={() => {
-                                                setShowAddForm(true);
-                                                setIsEditing(false);
-                                                handleDiscard();
-                                            }}>Add Employee Account</Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-md">
-                                            <DialogHeader>
-                                                <DialogTitle>Add New Employee Account</DialogTitle>
-                                            </DialogHeader>
-                                            <div className="grid gap-4 py-4">
-                                                <div>
-                                                    <Label htmlFor="addName">Name</Label>
-                                                    <Input id="addName" name="name" value={newAccountForm.name} onChange={handleNewAccountFormChange} placeholder="Full Name" />
-                                                </div>
-                                                <div>
-                                                    <Label htmlFor="addEmail">Email</Label>
-                                                    <Input id="addEmail" name="email" value={newAccountForm.email} onChange={handleNewAccountFormChange} placeholder="employee@example.com" />
-                                                </div>
-                                                <div>
-                                                    <Label htmlFor="addPassword">Password</Label>
-                                                    <Input id="addPassword" name="password" type="password" value={newAccountForm.password} onChange={handleNewAccountFormChange} placeholder="••••••••" />
-                                                </div>
-                                                <div>
-                                                    <Label htmlFor="addRole">Role</Label>
-                                                    <Select onValueChange={(value) => setNewAccountForm(f => ({ ...f, role: value }))} value={newAccountForm.role}>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a role" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="HR2 Admin">HR2 Admin</SelectItem>
-                                                            <SelectItem value="Employee">Employee</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            </div>
-                                            <DialogFooter>
-                                                <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
-                                                <Button onClick={handleCreateAccount} disabled={saving}>Create Account</Button>
-                                            </DialogFooter>
-                                        </DialogContent>
-                                    </Dialog>
+                                    <Button onClick={handleSearch}>Search</Button>
                                 </div>
+                            </div>
                                 <Card className="mb-6">
                                     <CardHeader>
-                                        <CardTitle>List of Employees</CardTitle>
+                                        <CardTitle  className="text-lg font-semibold">List of Employees</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="overflow-x-auto">
                                             <Table>
                                                 <TableHeader>
                                                     <TableRow>
-                                                        <TableHead>ID</TableHead>
-                                                        <TableHead>Name</TableHead>
-                                                        <TableHead>Department</TableHead>
-                                                        <TableHead>Position</TableHead>
-                                                        <TableHead>Email</TableHead>
-                                                        <TableHead>Actions</TableHead>
+                                                        <TableHead className="text-center">ID</TableHead>
+                                                        <TableHead className="text-center">Name</TableHead>
+                                                        <TableHead className="text-center">Department</TableHead>
+                                                        <TableHead className="text-center">Position</TableHead>
+                                                        <TableHead className="text-center">Email</TableHead>
+                                                        <TableHead className="text-center">Role</TableHead>
+                                                        <TableHead className="text-center">Actions</TableHead>
                                                     </TableRow>
                                                 </TableHeader>
                                                 <TableBody>
                                                     {currentEmployees.map(emp => (
-                                                        <TableRow key={emp.id}>
+                                                        <TableRow key={emp.id}  className="text-center">
                                                             <TableCell className="font-mono text-xs text-gray-500">{emp.id}</TableCell>
                                                             <TableCell>{formatName(emp)}</TableCell>
                                                             <TableCell>{emp.department}</TableCell>
                                                             <TableCell>{emp.position}</TableCell>
                                                             <TableCell>{emp.email}</TableCell>
+                                                            <TableCell>{emp.roles || emp.user_type || 'N/A'}</TableCell>
                                                             <TableCell>
                                                                 <Dialog open={dialogOpen && employeeId === emp.id} onOpenChange={(open) => {
                                                                     setDialogOpen(open);
@@ -525,8 +545,33 @@ function ESS() {
                                                                                     <Input id="manager" value={form.manager} onChange={e => handleChange("manager", e.target.value)} />
                                                                                 </div>
                                                                                 <div>
-                                                                                    <Label htmlFor="employeeStatus">Employee Status</Label>
-                                                                                    <Input id="employeeStatus" value={form.employee_status} onChange={e => handleChange("employee_status", e.target.value)} />
+                                                                                    <Label htmlFor="roles">Roles</Label>
+                                                                                    <Select 
+                                                                                        value={form.roles || ""}
+                                                                                        onValueChange={(value) => {
+                                                                                            handleChange("roles", value);
+                                                                                        }}
+                                                                                    >
+                                                                                        <SelectTrigger className="min-h-[40px] h-auto">
+                                                                                            <div className="flex flex-wrap gap-1 w-full">
+                                                                                                {form.roles ? (
+                                                                                                    <div className="flex items-center px-2 py-1 rounded text-sm">
+                                                                                                        <span>{form.roles}</span>
+                                                                                                    </div>
+                                                                                                ) : (
+                                                                                                    <span className="text-gray-500">Edit a role</span>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </SelectTrigger>
+                                                                                        <SelectContent>
+                                                                                            <SelectItem value="Super Admin">Super Admin</SelectItem>
+                                                                                            <SelectItem value="LogisticsII Admin">LogisticsII Admin</SelectItem>
+                                                                                            <SelectItem value="Driver">Driver</SelectItem>
+                                                                                            <SelectItem value="Employee">Employee</SelectItem>
+                                                                                            <SelectItem value="HR1">HR1</SelectItem>
+                                                                                            <SelectItem value="HR2 Admin">HR2 Admin</SelectItem>
+                                                                                        </SelectContent>
+                                                                                    </Select>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -548,33 +593,17 @@ function ESS() {
                                                             </TableCell>
                                                         </TableRow>
                                                     ))}
-                                                    <TableRow>
-                                                        <TableCell colSpan={6} className="text-right">
-                                                            <div className="flex justify-end items-center gap-2">
-                                                                <span className="text-sm text-gray-600">
-                                                                    Page {currentPage} of {totalPages}
-                                                                </span>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    onClick={handlePrevPage}
-                                                                    disabled={currentPage === 1}
-                                                                >
-                                                                    Previous
-                                                                </Button>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    onClick={handleNextPage}
-                                                                    disabled={currentPage === totalPages}
-                                                                >
-                                                                    Next
-                                                                </Button>
-                                                            </div>
-                                                        </TableCell>
-                                                    </TableRow>
                                                 </TableBody>
                                             </Table>
                                         </div>
                                     </CardContent>
+                                    <CardFooter className="flex items-center justify-between text-sm text-gray-700">
+                                        <div>Page {currentPage} of {totalPages} • {filteredEmployees.length} items</div>
+                                        <div className="flex gap-2">
+                                            <Button variant="outline" onClick={handlePrevPage} disabled={currentPage <= 1}>Previous</Button>
+                                            <Button variant="outline" onClick={handleNextPage} disabled={currentPage >= totalPages}>Next</Button>
+                                        </div>
+                                    </CardFooter>
                                 </Card>
                             </>
                         ) : (
@@ -591,6 +620,7 @@ function ESS() {
                                                     <TableHead>Name</TableHead>
                                                     <TableHead>Department</TableHead>
                                                     <TableHead>Position</TableHead>
+                                                    <TableHead>Role</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -599,35 +629,20 @@ function ESS() {
                                                         <TableCell>{formatName(emp)}</TableCell>
                                                         <TableCell>{emp.department}</TableCell>
                                                         <TableCell>{emp.position}</TableCell>
+                                                        <TableCell>{emp.roles || emp.user_type || 'N/A'}</TableCell>
                                                     </TableRow>
                                                 ))}
-                                                <TableRow>
-                                                    <TableCell colSpan={3} className="text-right">
-                                                        <div className="flex justify-end items-center gap-2">
-                                                            <span className="text-sm text-gray-600">
-                                                                Page {currentPage} of {totalPages}
-                                                            </span>
-                                                            <Button
-                                                                variant="outline"
-                                                                onClick={handlePrevPage}
-                                                                disabled={currentPage === 1}
-                                                            >
-                                                                Previous
-                                                            </Button>
-                                                            <Button
-                                                                variant="outline"
-                                                                onClick={handleNextPage}
-                                                                disabled={currentPage === totalPages}
-                                                            >
-                                                                Next
-                                                            </Button>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
                                             </TableBody>
                                         </Table>
                                     </div>
                                 </CardContent>
+                                <CardFooter className="flex items-center justify-between text-sm text-gray-700">
+                                    <div>Page {currentPage} of {totalPages} • {filteredEmployees.length} items</div>
+                                    <div className="flex gap-2">
+                                        <Button variant="outline" onClick={handlePrevPage} disabled={currentPage <= 1}>Previous</Button>
+                                        <Button variant="outline" onClick={handleNextPage} disabled={currentPage >= totalPages}>Next</Button>
+                                    </div>
+                                </CardFooter>
                                 </Card>
                             </>
                         )}

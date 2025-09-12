@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Helmet } from "react-helmet";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,6 @@ export default function CompetencyManagement() {
   const [error, setError] = useState(null);
   const [employees, setEmployees] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  // Only show 'Travel and Tours' department
   const [departmentFilter, setDepartmentFilter] = useState("Travel and Tours");
   const [sortBy, setSortBy] = useState("employee_name");
   const [sortDirection, setSortDirection] = useState("asc");
@@ -49,8 +49,8 @@ export default function CompetencyManagement() {
         if (!employeeId) throw new Error('Not authenticated. Please log in.');
         if (cancelled) return;
 
-        // 1. Competency Management: Fetch all employees (with competencies)
-        const empRes = await fetch(hr2.backend.ess.profile, {
+        // Competency Management
+  const empRes = await fetch(hr2.backend.ess.profile, {
           credentials: 'include',
           headers: { Accept: "application/json" }
         });
@@ -71,8 +71,8 @@ export default function CompetencyManagement() {
         });
         setEmployees(Array.isArray(empData) ? empData.map(normalizeEmployee) : []);
 
-        // 2. Work Progress (Learning Management):
-        const wp = await fetch(hr2.backend.api.workProgress + `?employee_id=${employeeId}`, {
+        // Learning Management
+  const wp = await fetch(`${hr2.backend.api.workProgress}?employee_id=${employeeId}`, {
           credentials: 'include',
           headers: { Accept: "application/json" }
         });
@@ -80,8 +80,8 @@ export default function CompetencyManagement() {
         if (wp.status === 404) setWorkProgress([]);
         else if (wp.ok) setWorkProgress(await wp.json());
 
-        // 3. Awards (Training Management):
-        const aw = await fetch(hr2.backend.api.awards + `?employee_id=${employeeId}`, {
+        // Training Management:
+  const aw = await fetch(`${hr2.backend.api.awards}?employee_id=${employeeId}`, {
           credentials: 'include',
           headers: { Accept: "application/json" }
         });
@@ -102,7 +102,6 @@ export default function CompetencyManagement() {
     return ["Travel and Tours"];
   }, []);
 
-  // Filter all employees, search, sort, and paginate
   const processedRows = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const filtered = employees.filter((emp) => {
@@ -131,7 +130,6 @@ export default function CompetencyManagement() {
     return sorted;
   }, [employees, searchQuery, sortBy, sortDirection]);
 
-  // For large lists, use pagination (pageSize, currentPage)
   const totalItems = processedRows.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const currentPageSafe = Math.min(currentPage, totalPages);
@@ -148,6 +146,10 @@ export default function CompetencyManagement() {
 
   return (
     <>
+      <Helmet>
+        <title>Competency Management</title>
+      </Helmet>
+      
       <header className="mb-6">
         <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">Competency Management</h1>
       </header>

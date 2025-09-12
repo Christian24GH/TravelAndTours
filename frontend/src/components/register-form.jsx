@@ -31,16 +31,14 @@ export function RegisterForm({
   const formSubmit = async (data) => {
     setIsLoading(true)
     try {
-      // Get CSRF cookie first
       await axios.get('/sanctum/csrf-cookie')
       
-      // Register user
       const response = await axios.post('/api/register', {
         name: data.name,
         email: data.email,
         password: data.password,
         password_confirmation: data.password_confirmation,
-        role: 'Guest'
+        role: 'Employee'
       })
 
       if (response.status === 201 || response.status === 200) {
@@ -54,7 +52,6 @@ export function RegisterForm({
     } catch (error) {
       if (error.response) {
         if (error.response.status === 422) {
-          // Validation errors
           const errors = error.response.data.errors
           if (errors) {
             Object.keys(errors).forEach(field => {
@@ -86,7 +83,7 @@ export function RegisterForm({
         <CardHeader>
           <CardTitle>Create your account</CardTitle>
           <CardDescription>
-            Enter your information below to create your Guest account
+            Enter your information below to create your Employee account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -183,7 +180,7 @@ export function RegisterForm({
                 onClick={onBackToLogin}
                 className="underline underline-offset-4 hover:text-primary"
                 disabled={isLoading}
-              >
+>
                 Sign in
               </button>
             </div>

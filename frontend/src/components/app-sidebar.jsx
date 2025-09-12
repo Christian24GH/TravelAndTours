@@ -9,10 +9,12 @@ import {
   Gauge,
   ChartSpline,
   User,
+  Users,
   TagsIcon,
   HistoryIcon,
   LogsIcon,
-  MapPinIcon
+  MapPinIcon,
+  LayoutDashboard
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -233,7 +235,7 @@ const data = {
           {
             title: "Dashboard",
             url: '/hr2/db',
-            icon: Command,
+            icon: LayoutDashboard,
           },
           {
             title: "Competency",
@@ -261,9 +263,9 @@ const data = {
             icon: User,
           },
           {
-            title: "HRAdmin (SampleData)",
-            url: '/hr2/admin',
-            icon: User,
+            title: "Account Center (Admin)",
+            url: '/hr2/account',
+            icon: Users,
           },
         ],
       }
@@ -292,6 +294,15 @@ export function AppSidebar({...props}) {
     avatar: null,
     email: auth?.email
   }
+
+  const hr2NavForEmployee = user.role === "Employee" ? [
+    {
+      NavGroup: {
+        NavLabel: 'Human Resources 2',
+        NavItems: data.HR2Nav[0].NavGroup.NavItems.filter(item => item.title !== "Account Center (Data)")
+      }
+    }
+  ] : data.HR2Nav
 
   return (
     <Sidebar variant="floating" {...props}>
@@ -328,8 +339,8 @@ export function AppSidebar({...props}) {
                 (<NavMain data={data.logisticsIINav}/>) 
               : user.role === "LogisticsI Admin" ? 
                 (<NavMain data={data.logisticsINav}/>)
-              : user.role === "HR2 Admin" ? 
-                (<NavMain data={data.HR2Nav}/>)
+              : user.role === "HR2 Admin" || user.role === "Employee" ? 
+                (<NavMain data={hr2NavForEmployee}/>)
               : null}
             </>
           )

@@ -7,7 +7,6 @@ import { AuthProvider } from './context/AuthProvider';
 import { GuestRoute } from './layout/GuestRoute';
 import ProtectedLayout from './layout/ProtectedLayout';
 import LoginPage from './main/login';
-import LandingPage from './main/maintenance';
 import LogisticsIIDashboard from './logisticsII/dashboard'
 import LogisticsIIFleet from './logisticsII/fleet'
 import LogisticsIIReservation from './logisticsII/reservation';
@@ -17,7 +16,7 @@ import CompetencyManagement from './hr2/cms';
 import LearningManagement from './hr2/lms';
 import TrainingManagement from './hr2/tms';
 import SuccessionPlanning from './hr2/sps';
-import HR2Admin from './hr2/admin';
+import Account from './hr2/account';
 import HR2ESS from './hr2/ess';
 import { HelmetProvider } from 'react-helmet-async';
 
@@ -34,11 +33,6 @@ createRoot(document.getElementById('root')).render(
             {/** Main Routes */}
             <Route element={<GuestRoute/>}>
               <Route path="/login" index element={<LoginPage/>}/>
-            </Route>
-
-            {/** Guest Landing Page */}
-            <Route path="/main" element={<ProtectedLayout allowedRoles={['Guest', 'Super Admin']}/>}>
-              <Route path="maintenance" element={<LandingPage/>}/>
             </Route>
 
             {/**LogisticsII */}
@@ -58,11 +52,9 @@ createRoot(document.getElementById('root')).render(
               <Route path="lms" element={<LearningManagement/>}/>
               <Route path="tms" element={<TrainingManagement/>}/>
               <Route path="sps" element={<SuccessionPlanning/>}/>
-              <Route path="admin" element={<HR2Admin/>}/>
               <Route path="ess" element={<HR2ESS/>}/>
+              <Route path="account" element={<Account/>}/>
             </Route>
-
-
             
           </Routes>
         </HelmetProvider>

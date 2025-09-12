@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
@@ -21,8 +22,11 @@ const COLORS = ["#10b981", "#6366f1", "#f59e42"];
 export default function HR2Dashboard() {
 	return (
 		<div className="p-6 space-y-6">
-			<h1 className="text-3xl font-bold text-gray-800 mb-4">HR2 Dashboard</h1>
+			<h1 className="text-3xl font-bold text-gray-800 mb-4">Dashboard</h1>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+				<Helmet>
+					<title>Dashboard</title>
+				</Helmet>
 				{summaryData.map((item) => (
 					<Link to={item.link} key={item.label} className="group">
 						<Card className="shadow-sm transition-transform group-hover:scale-105 group-hover:shadow-lg cursor-pointer">
