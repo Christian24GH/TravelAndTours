@@ -28,6 +28,7 @@ createRoot(document.getElementById('root')).render(
   <BrowserRouter basename={baseUrl ? baseUrl : '/'}>
     <AuthProvider>
       <Routes>
+        
         {/** Main Routes */}
         <Route element={<GuestRoute/>}>
           <Route path="/" element={<LandingPage/>}/>
