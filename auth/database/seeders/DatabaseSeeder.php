@@ -21,5 +21,14 @@ class DatabaseSeeder extends Seeder
             'password'  => '123456',
             'role'      => 'LogisticsII Admin',
         ]);
+
+
+        User::factory()->create([
+            'name'      => 'HR2 Manager',
+            'email'     => 'hr2@gmail.com',
+            'password'  => '123456',
+            'role'      => 'HR2 Admin',
+        ]);
+
     }
 }

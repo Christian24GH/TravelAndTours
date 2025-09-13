@@ -9,14 +9,12 @@ import {
   Gauge,
   ChartSpline,
   User,
-  Users,
   TagsIcon,
   HistoryIcon,
   LogsIcon,
   MapPinIcon,
-  LayoutDashboard,
   GlobeIcon
-} from "lucide-react";
+} from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -31,11 +29,28 @@ import {
 } from "@/components/ui/sidebar"
 
 import { Skeleton } from '@/components/ui/skeleton'
+
 import AuthContext from "../context/AuthProvider"
 import { useContext } from "react"
 
 import logo from '@/assets/finallogo.avif'
 const data = {
+
+  /** HR2 NavItems */
+  HR2INav: [
+    {
+      NavGroup: {
+        NavLabel: 'Human Resource 2',
+        NavItems: [
+          {
+            title: "Dashboard",
+            url: '/human-resource-II/',
+            icon: Gauge,
+          },
+        ],
+      }
+    },
+  ],
 
   /** Logistics 1 NavItems */
   logisticsINav: [
@@ -228,51 +243,6 @@ const data = {
       }
     }
   ],
-  /** HR2 NavItems */
-  HR2Nav: [
-    {
-      NavGroup: {
-        NavLabel: 'Human Resources 2',
-        NavItems: [
-          {
-            title: "Dashboard",
-            url: '/hr2/db',
-            icon: LayoutDashboard,
-          },
-          {
-            title: "Competency",
-            url: '/hr2/cms',
-            icon: PieChartIcon,
-          },
-          {
-            title: "Learning",
-            url: '/hr2/lms',
-            icon: BookOpenCheckIcon,
-          },
-          {
-            title: "Training",
-            url: '/hr2/tms',
-            icon: Gauge,
-          },
-          {
-            title: "Succession",
-            url: '/hr2/sps',
-            icon: ChartSpline,
-          },
-          {
-            title: "Employee Self-Service",
-            url: '/hr2/ess',
-            icon: User,
-          },
-          {
-            title: "Account Center (Admin)",
-            url: '/hr2/account',
-            icon: Users,
-          },
-        ],
-      }
-    },
-  ],
   navSecondary: [
     {
       title: "Support",
@@ -289,25 +259,13 @@ const data = {
 }
 
 export function AppSidebar({...props}) {
-  const { auth, logout, loading } = useContext(AuthContext);
+  const { auth, logout, loading } = useContext(AuthContext)
   const user = {
     name: auth?.name,
     role: auth?.role,
     avatar: null,
     email: auth?.email
-  };
-
-  // For Employee, filter out "Account Center (Data)" from HR2Nav
-  const hr2NavForEmployee = user.role === "Employee"
-    ? [
-        {
-          NavGroup: {
-            NavLabel: 'Human Resources 2',
-            NavItems: data.HR2Nav[0].NavGroup.NavItems.filter(item => item.title !== "Account Center (Data)")
-          }
-        }
-      ]
-    : data.HR2Nav;
+  }
 
   return (
     <Sidebar variant="floating" {...props}>
@@ -323,13 +281,14 @@ export function AppSidebar({...props}) {
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">JOLI Travel and Tours</span>
                   <span className="truncate text-xs">
-                    {loading ? (
-                      <Skeleton className="w-2/3 h-full" />
-                    ) : user.role === "LogisticsI Admin" ? (
-                      'Logistics I Admin'
-                    ) : user.role === "LogisticsII Admin" ? (
-                      'Logistics II Admin'
-                    ) : null}
+                    {loading ? (<Skeleton className="w-2/3 h-full"/>) :
+                      user.role == "HR2 Admin" ? 'Human Resource II Admin' :
+                      user.role == "LogisticsI Admin"  ? 'Logistics I Admin' : //just copy this line
+                      user.role == "LogisticsII Admin" ? 'Logistics II Admin' :
+                     //and place it here
+
+                     null
+                    }
                   </span>
                 </div>
               </a>
@@ -338,35 +297,33 @@ export function AppSidebar({...props}) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="flex flex-col gap-2">
+        
         {loading ? (
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-8 w-full" />
-            {/* Skeleton Placeholder while loading */}
+            // Skeleton Placeholder while loading
             <div className="flex flex-col gap-2 px-2 h-full">
               <Skeleton className="h-8 w-full" />
               <Skeleton className="h-8 w-full" />
               <Skeleton className="flex-1 w-full" />
               <Skeleton className="flex-1 w-full" />
             </div>
-          </div>
-        ) : (
-          <>
-            {user.role === "LogisticsII Admin" ? (
-              <NavMain data={data.logisticsIINav} />
-            ) : user.role === "LogisticsI Admin" ? (
-              <NavMain data={data.logisticsINav} />
-            ) : user.role === "HR2 Admin" || user.role === "Employee" ? (
-              <NavMain data={hr2NavForEmployee} />
-            ) : null}
-          </>
-        )}
+          ) : (
+            <>
+              {user.role === "LogisticsII Admin" ? 
+              (<NavMain data={data.logisticsIINav}/>) 
+              : user.role === "LogisticsI Admin" ? 
+              (<NavMain data={data.logisticsINav}/>) 
+              : user.role === "HR2 Admin" ? 
+              (<NavMain data={data.HR2INav}/>)// add more here via : user.role === "ROLE" ? (<NavMain data={data.ROLENAV}/>)
+              
+              : null}
+            </>
+          )
+        }
       </SidebarContent>
       <SidebarFooter>
-        {loading ? (
-          <Skeleton className="w-full h-full" />
-        ) : (
-          <NavUser user={user} logout={logout} />
-        )}
+        {loading ? 
+          (<Skeleton className="w-full h-full"/>) : (<NavUser user={user} logout={logout} />)
+        }
       </SidebarFooter>
     </Sidebar>
   );
