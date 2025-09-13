@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { AlertDescription } from '@/components/ui/alert'
-
 import {
   Card,
   CardContent,
@@ -18,6 +17,7 @@ import { useContext } from "react"
 
 export function LoginForm({
   className,
+  onShowRegister,
   ...props
 }) {
 

@@ -14,7 +14,6 @@ export default function Breadcrumps(){
 const location = useLocation()
     const curLocation = location.pathname
 
-    // Split pathname into segments
     const pathnames = curLocation.split("/").filter(Boolean)
     
     return (
