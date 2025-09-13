@@ -1,6 +1,6 @@
 import { Store } from "lucide-react";
 
-const backendPort = 8091;
+const backendPort = 8093;
 const backendUri = `http://localhost:${backendPort}`;
 
 export const hr2 = {
