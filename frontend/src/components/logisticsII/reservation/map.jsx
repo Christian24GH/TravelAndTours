@@ -1,96 +1,81 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import axios from "axios";
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-export default function Map({ start_cord, end_cord }) {
+function Map({ stops, className, geometry }) {
+  console.log('Map Mounted')
   const mapContainer = useRef(null);
   const map = useRef(null);
 
   useEffect(() => {
-    if (!mapContainer.current || !start_cord || !end_cord) return;
+    if (!mapContainer.current || !geometry) return;
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v12",
-      center: start_cord,
+      center: stops[0],
       zoom: 13,
     });
 
-    map.current.on("load", async () => {
-      try {
-        // Request directions from Mapbox Directions API
-        const res = await axios.get(
-          `https://api.mapbox.com/directions/v5/mapbox/driving/${start_cord[0]},${start_cord[1]};${end_cord[0]},${end_cord[1]}`,
-          {
-            params: {
-              geometries: "geojson",
-              access_token: mapboxgl.accessToken,
-            },
-          }
-        );
+    map.current.on("load", () => {
+      map.current.addSource("route", {
+        type: "geojson",
+        data: { type: "Feature", geometry },
+      });
+      map.current.addLayer({
+        id: "route",
+        type: "line",
+        source: "route",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-color": "#007bff", "line-width": 4 },
+      });
 
-        const route = res.data.routes[0].geometry;
-
-        // Add route to the map
-        map.current.addSource("route", {
-          type: "geojson",
-          data: {
+      // Stops
+      map.current.addSource("stops", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: stops.map((c, i) => ({
             type: "Feature",
-            geometry: route,
-          },
-        });
+            geometry: { type: "Point", coordinates: c },
+            properties: { label: `Stop ${i + 1}` },
+          })),
+        },
+      });
+      map.current.addLayer({
+        id: "stops-layer",
+        type: "circle",
+        source: "stops",
+        paint: {
+          "circle-radius": 6,
+          "circle-color": "#ff0000",
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#fff",
+        },
+      });
 
-        map.current.addLayer({
-          id: "route",
-          type: "line",
-          source: "route",
-          layout: { "line-join": "round", "line-cap": "round" },
-          paint: { "line-color": "#007bff", "line-width": 4 },
-        });
-
-        // Add start/end points
-        map.current.addSource("points", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [
-              {
-                type: "Feature",
-                geometry: { type: "Point", coordinates: start_cord },
-                properties: { color: "#00ff00" }, // green
-              },
-              {
-                type: "Feature",
-                geometry: { type: "Point", coordinates: end_cord },
-                properties: { color: "#ff0000" }, // red
-              },
-            ],
-          },
-        });
-
-        map.current.addLayer({
-          id: "points-layer",
-          type: "circle",
-          source: "points",
-          paint: {
-            "circle-radius": 8,
-            "circle-color": ["get", "color"],
-            "circle-stroke-width": 2,
-            "circle-stroke-color": "#fff",
-          },
-        });
-
-        // Fit map to route bounds
-        const bounds = new mapboxgl.LngLatBounds();
-        route.coordinates.forEach((coord) => bounds.extend(coord));
-        map.current.fitBounds(bounds, { padding: 50 });
-      } catch (error) {
-        console.error("Error fetching directions:", error);
-      }
+      const bounds = new mapboxgl.LngLatBounds();
+      geometry.coordinates.forEach((coord) => bounds.extend(coord));
+      map.current.fitBounds(bounds, { padding: 50 });
     });
-  }, [start_cord, end_cord]);
+  }, [geometry, stops]);
 
-  return <div ref={mapContainer} className="w-full h-full rounded-xl" />;
+  return <div ref={mapContainer} className={className} />;
 }
+
+const MemoizedMap = React.memo(Map, (prev, next) => {
+  return (
+    prev.start_cord?.[0] === next.start_cord?.[0] &&
+    prev.start_cord?.[1] === next.start_cord?.[1] &&
+    prev.end_cord?.[0] === next.end_cord?.[0] &&
+    prev.end_cord?.[1] === next.end_cord?.[1]
+  );
+});
+
+export default MemoizedMap;

@@ -39,6 +39,8 @@ export const logisticsII = {
             fetchDrivers: `${backendUri}/api/drivers/getDrivers`,
             dialogDrivers: `${backendUri}/api/drivers/dialogDrivers`,
             dispatches: `${backendUri}/api/dispatches`,
+            dispatchDetails: `${backendUri}/api/dispatches/details`,
+            
         },
     }
 }

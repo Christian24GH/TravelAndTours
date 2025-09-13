@@ -56,39 +56,52 @@ export function RegisterDialog({}){
 
     const onSubmit = async (data) => {
         
+        let formattedDate = null;
+        if (data.acqdate instanceof Date && !isNaN(data.acqdate.getTime())) {
+            formattedDate = format(data.acqdate, "yyyy-MM-dd");
+        }
+
         const formattedData = {
-             ...data,
-            acqdate: data.acqdate
-                ? format(new Date(data.acqdate), "yyyy-MM-dd")
-                : null
+            ...data,
+            acqdate: formattedDate, // ✅ always valid or null
         };
 
-        try{
-          let response = await axios.post(api.register, data)
-          console.log(response)
-          
-          if(response.status === 200){
-            setOpen(false)
-            reset()
-            toast.success(response.data, {
-              position: "top-center"
-            })
-          }
+        const formData = new FormData();
+        Object.entries(formattedData).forEach(([key, value]) => {
+            if (key !== "image") {
+            formData.append(key, value ?? "");
+            }
+        });
+
+        if (data.image?.[0]) {
+            formData.append("image", data.image[0]);
         }
-        catch(error){
-          if(error.status === 422){
+
+        try {
+            const response = await axios.post(api.register, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            if (response.status === 200) {
+                setOpen(false);
+                reset();
+                toast.success(response.data.message ?? "Vehicle registered successfully!", {
+                    position: "top-center",
+                });
+            }
+        } catch (error) {
             console.log(error)
-            toast.error(error.response.data.message, {
-              position: "top-center"
-            })
-          }
-          if(error.status === 500){
-            toast.error("Server Error", {
-              position: "top-center"
-            })
-          }
+            if (error.response?.status === 422) {
+                toast.error(error.response.data.message || "Validation error", {
+                    position: "top-center",
+                });
+            } else if (error.response?.status === 500) {
+                toast.error("Server Error", { position: "top-center" });
+            } else {
+                toast.error("Network error", { position: "top-center" });
+            }
         }
-    }
+        };
 
     const date = watch('acqdate')
 
@@ -227,24 +240,7 @@ export function RegisterDialog({}){
                     />
                 </div>
 
-                {/* Capacity */}
                 <div className="flex gap-2">
-                    <div className="flex flex-col gap-2 mb-3 flex-1">
-                        <div className="flex items-center justify-between">
-                        <Label>Capacity</Label>
-                        {errors.capacity && (
-                            <AlertDescription className="text-red-500">{errors.capacity.message}</AlertDescription>
-                        )}
-                        </div>
-                        <Input
-                            {...register('capacity', {
-                                required: 'Capacity is required'
-                            })}
-                            type="text"
-                            placeholder="Passengers or weight in kg"
-                            className={errors.capacity ? "border-red-500 focus-visible:ring-red-300" : ""}
-                            />
-                    </div>
                     {/* Acquisition Date */}
                     <div className="flex flex-col gap-2 mb-3 !flex-1">
                         <div className="flex items-center justify-between">
@@ -276,6 +272,74 @@ export function RegisterDialog({}){
                         />
                     </div>
                 </div>
+
+
+                {/* Capacity & Seats */}
+                <div className="flex gap-2 mb-3">
+                    <div className="flex flex-col gap-2 flex-1">
+                        <div className="flex items-center justify-between">
+                        <Label>Capacity (kg)</Label>
+                        {errors.capacity && (
+                            <AlertDescription className="text-red-500">{errors.capacity.message}</AlertDescription>
+                        )}
+                        </div>
+                        <Input
+                        {...register("capacity", { required: "Capacity is required!" })}
+                        type="number"
+                        placeholder="Weight in kg"
+                        className={errors.capacity ? "border-red-500 focus-visible:ring-red-300" : ""}
+                        />
+                    </div>
+
+                    <div className="flex flex-col gap-2 flex-1">
+                        <div className="flex items-center justify-between">
+                        <Label>Seats</Label>
+                        {errors.seats && (
+                            <AlertDescription className="text-red-500">{errors.seats.message}</AlertDescription>
+                        )}
+                        </div>
+                        <Input
+                        {...register("seats", { required: "Seats is required!" })}
+                            type="number"
+                            placeholder="Number of passenger seats"
+                            className={errors.seats ? "border-red-500 focus-visible:ring-red-300" : ""}
+                        />
+                    </div>
+                    </div>
+
+                {/* Fuel Efficiency */}
+                <div className="flex flex-col gap-2 mb-3">
+                    <div className="flex items-center justify-between">
+                        <Label>Fuel Efficiency (km/L)</Label>
+                        {errors.fuel_efficiency && (
+                        <AlertDescription className="text-red-500">{errors.fuel_efficiency.message}</AlertDescription>
+                        )}
+                    </div>
+                    <Input
+                        {...register("fuel_efficiency", { required: "Fuel efficiency is required!" })}
+                        type="number"
+                        step="0.01"
+                        placeholder="e.g. 2"
+                        className={errors.fuel_efficiency ? "border-red-500 focus-visible:ring-red-300" : ""}
+                    />
+                </div>
+                
+                {/* Vehicle Image */}
+                <div className="flex flex-col gap-2 mb-3">
+                    <div className="flex items-center justify-between">
+                        <Label>Vehicle Image (optional)</Label>
+                        {errors.image && (
+                        <AlertDescription className="text-red-500">{errors.image.message}</AlertDescription>
+                        )}
+                    </div>
+                    <Input
+                        {...register("image")}
+                        type="file"
+                        accept="image/*"
+                        className={errors.image ? "border-red-500 focus-visible:ring-red-300" : ""}
+                    />
+                </div>
+
                 {/* Footer */}
 
                 <DialogFooter>

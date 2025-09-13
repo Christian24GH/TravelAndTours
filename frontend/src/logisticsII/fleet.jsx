@@ -2,7 +2,7 @@
 import { RegisterDialog } from '@/components/logisticsII/register-dialog'
 
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input"
 
 import { toast } from "sonner";
@@ -40,27 +40,43 @@ export default function Fleet() {
   const [ totalPage, setTotalPage ] = useState()
   const [search, setSearch] = useState("")
 
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+  const fetchVehicles = useCallback(() => {
       axios.get(`${api.vehicles}`, {
-          params: {
-            page,
-            q: search || undefined
-          }
-        })
-        .then((response) => {
-          let data = response.data.vehicles;
-          setVehicles(data.data || []);
-          setTotalPage(data.last_page);
-        })
-        .catch(() => {
-          toast.error("Error fetching vehicles", { position: "top-center" })
-        })
-    }, 300) // debounce API calls by 300ms
+        params: {
+          page,
+          q: search || undefined,
+        },
+      })
+      .then((response) => {
+        let data = response.data.vehicles;
+        //console.log(data)
+        setVehicles(data.data || []);
+        setTotalPage(data.last_page);
+      })
+      .catch((error) => {
+        //console.log(error)
+        //toast.error("Error fetching vehicles", { position: "top-center" });
+      });
+    }, [page, search])
 
-    return () => clearTimeout(delayDebounce);
-  }, [page, search]);
+  useEffect(() => {
+    let delayDebounce = setTimeout(fetchVehicles, 300);
+    return () => {
+      clearTimeout(delayDebounce);
+    };
+    
+  }, [fetchVehicles]);
 
+  useEffect(() => {
+    let polling = setInterval(fetchVehicles, 3400);
+    return () => {
+      clearInterval(polling);
+    };
+    
+  }, [fetchVehicles]);
+
+
+  /*
   useEchoPublic('vehicle_channel', "VehicleUpdates", (e)=>{
     let v = e.vehicles
 
@@ -72,7 +88,7 @@ export default function Fleet() {
 
       return [...prev, v]
     })
-  })
+  })*/
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className='h-full'>

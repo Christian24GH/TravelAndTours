@@ -16,7 +16,7 @@ export const AuthProvider = ({children})=>{
                 // token-based: api already boots token from storage
                 const response = await api.get("/user")
                 setAuth(response.data) // user object returned by backend
-                console.log(response)
+                //console.log(response)
             } catch (error) {
                 // token invalid or not present
                 removeToken()
@@ -61,12 +61,15 @@ export const AuthProvider = ({children})=>{
             case 'Super Admin':
                 navigate('/login');
                 break;
+            case 'HR2 Admin':
+                navigate('/human-resource-II');
+                break;
             case 'LogisticsII Admin':
             case 'Driver':
             case 'Employee':
                 navigate('/logisticsII/');
                 break;
-            case 'LogisticI Admin':
+            case 'LogisticsI Admin':
                 navigate('/logistics1/');
                 break;
             default:

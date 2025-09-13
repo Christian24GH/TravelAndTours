@@ -1,5 +1,5 @@
 import { ChevronRightIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import axios from "axios";
 import { Input } from "@/components/ui/input"
@@ -13,8 +13,6 @@ import { logisticsII } from "@/api/logisticsII";
 import PaginationComponent from "@/components/logisticsII/pagination";
 import TableComponent from "@/components/logisticsII/table";
 
-import { ViewDialog } from "@/components/logisticsII/reservation/modals";
-
 const api = logisticsII.backend.api;
 const reverb = logisticsII.reverb;
 
@@ -22,7 +20,7 @@ reverb.config();
 
 const header = [
   { title: "Batch", accessor: "batch_number", cellClassName: "font-medium h-1"},
-  { title: "Employee", accessor: "employee_id", cellClassName: "h-1" },
+  { title: "Requestor", accessor: "requestor_uuid", cellClassName: "h-1" },
   { title: "Status", accessor: "status", cellClassName: "h-1" },
   { title: "Created", accessor: "created_at", cellClassName: "h-1"},
   {
@@ -33,6 +31,7 @@ const header = [
     )
   },
 ];
+
 export function statusColumn(){
   return (
     <>
@@ -46,8 +45,7 @@ export default function Reservation() {
   const [totalPage, setTotalPage] = useState();
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
+  const fetchRecord = useCallback(() => {
       axios
         .get(api.reservations, {
           params: {
@@ -66,10 +64,24 @@ export default function Reservation() {
             position: "top-center",
           });
         });
-    }, 300); // debounce API calls by 300ms
+  }, [page,search])
 
-    return () => clearTimeout(delayDebounce);
-  }, [page, search]);
+  useEffect(() => {
+    let delayDebounce = setTimeout(fetchRecord, 300)
+
+    return () => {
+      clearTimeout(delayDebounce)
+    }
+    
+  }, [fetchRecord]);
+
+  useEffect(() => {
+    let polling = setInterval(fetchRecord, 2000)
+
+    return () => {
+      clearInterval(polling)
+    }
+  }, [fetchRecord]);
 
   useEchoPublic('reservation_channel', "ReservationUpdates", (e)=>{
     console.log(e)

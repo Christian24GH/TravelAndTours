@@ -36,22 +36,20 @@ import { useContext } from "react"
 import logo from '@/assets/finallogo.avif'
 const data = {
 
-  /** HR2 NavItems */
-  HR2INav: [
+  HR2Nav: [
     {
       NavGroup: {
-        NavLabel: 'Human Resource 2',
+        NavLabel: 'Home',
         NavItems: [
           {
             title: "Dashboard",
             url: '/human-resource-II/',
             icon: Gauge,
           },
-        ],
+        ]
       }
-    },
+    }
   ],
-
   /** Logistics 1 NavItems */
   logisticsINav: [
     {
@@ -282,9 +280,9 @@ export function AppSidebar({...props}) {
                   <span className="truncate font-medium">JOLI Travel and Tours</span>
                   <span className="truncate text-xs">
                     {loading ? (<Skeleton className="w-2/3 h-full"/>) :
-                      user.role == "HR2 Admin" ? 'Human Resource II Admin' :
-                      user.role == "LogisticsI Admin"  ? 'Logistics I Admin' : //just copy this line
-                      user.role == "LogisticsII Admin" ? 'Logistics II Admin' :
+                     user.role == "LogisticsI Admin"  ? 'Logistics I Admin' : //just copy this line
+                     user.role == "LogisticsII Admin" ? 'Logistics II Admin' :
+                     user.role == "HR2 Admin" ? 'Human Resource II Admin' :
                      //and place it here
 
                      null
@@ -311,10 +309,9 @@ export function AppSidebar({...props}) {
               {user.role === "LogisticsII Admin" ? 
               (<NavMain data={data.logisticsIINav}/>) 
               : user.role === "LogisticsI Admin" ? 
-              (<NavMain data={data.logisticsINav}/>) 
+              (<NavMain data={data.logisticsINav}/>)
               : user.role === "HR2 Admin" ? 
-              (<NavMain data={data.HR2INav}/>)// add more here via : user.role === "ROLE" ? (<NavMain data={data.ROLENAV}/>)
-              
+              (<NavMain data={data.HR2Nav}/>) // add more here via : user.role === "LogisticsI Admin" ? (<NavMain data={data.logisticsINav}/>)
               : null}
             </>
           )
