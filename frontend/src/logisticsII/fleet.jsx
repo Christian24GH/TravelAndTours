@@ -53,8 +53,9 @@ export default function Fleet() {
         setVehicles(data.data || []);
         setTotalPage(data.last_page);
       })
-      .catch(() => {
-        toast.error("Error fetching vehicles", { position: "top-center" });
+      .catch((error) => {
+        //console.log(error)
+        //toast.error("Error fetching vehicles", { position: "top-center" });
       });
     }, [page, search])
 

@@ -44,36 +44,65 @@ class Dispatches extends Controller
     }
 
 
-    public function dispatchDetails(Request $request){
+    public function dispatchDetails(Request $request)
+    {
         $request->validate([
-            'batch_number'=>['required', 'exists:reservation,batch_number'],
+            'batch_number' => ['required', 'exists:reservations,batch_number'],
         ]);
 
-        try{
+        try {
             $dispatch = DB::table('dispatches as d')
                 ->join('assignments as a', 'a.id', '=', 'd.assignment_id')
-                ->join('reservation as r', 'r.id', '=', 'a.reservation_id')
+                ->join('reservations as r', 'r.id', '=', 'a.reservation_id')
+                ->join('trip_data as td', 'td.reservation_id', '=', 'r.id')
                 ->where('r.batch_number', $request['batch_number'])
-                ->first([
+                ->select([
                     'd.id as dispatch_id',
-                    
+                    'd.status as dispatch_status',
+                    'd.scheduled_time',
+                    'd.start_time',
+                    'd.arrival_time',
+                    'd.return_time',
+                    'd.remarks',
+                    'd.cancelled_at',
+                    'd.closed_at',
+                    'r.id as reservation_id',
+                    'r.pickup',
+                    'r.dropoff',
+                    'r.status as reservation_status',
+                ])
+                ->first();
+
+            if (!$dispatch) {
+                return response()->json(['message' => 'No dispatch found'], 404);
+            }
+
+            $assignments = DB::table('assignments as a')
+                ->join('vehicles as v', 'v.id', '=', 'a.vehicle_id')
+                ->leftJoin('drivers as d', 'd.uuid', '=', 'a.driver_uuid')
+                ->where('a.reservation_id', $dispatch->reservation_id)
+                ->get([
+                    'v.id as vehicle_id',
+                    'v.plate_number',
+                    'v.model',
+                    'v.type',
+                    'v.capacity',
+                    'v.status as vehicle_status',
+                    'd.uuid as driver_uuid',
+                    'd.name as driver_name',
+                    'd.status as driver_status',
                 ]);
 
-
-            
             $dispatch = (array) $dispatch;
+            $dispatch['assignments'] = $assignments;
 
-            
-        }catch(Throwable $e){
-            return response()->json(['message'=>'Failed to find the requested record'], 500);
+            return response()->json(['dispatch' => $dispatch], 200);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Failed to find the requested record'], 500);
         }
-
-        return response()->json(
-
-        );
-
     }
 
+    
 
     public function showToDriver(Request $request)
     {

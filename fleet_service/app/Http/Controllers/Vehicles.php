@@ -14,10 +14,11 @@ class Vehicles extends Controller
     // Include all visible columns
     private $rows = [
         'vin', 'plate_number', 'make', 'model', 'year',
-        'type', 'capacity', 'acquisition_date', 'status'
+        'type', 'capacity', 'seats', 'fuel_efficiency',
+        'acquisition_date', 'status'
     ];
 
-   public function show(Request $request)
+    public function show(Request $request)
     {
         $q = $request->input('q');
 
@@ -41,55 +42,47 @@ class Vehicles extends Controller
         return response()->json(['vehicles' => $vehicles]);
     }
 
-
-    /**TODO:
-     * Prevent showing available vehicles if its already selected in a reservation request
+    /** 
+     * TODO: Prevent showing available vehicles if already selected in a reservation request
      */
     public function showAll(Request $request)
     {
         $table = DB::table('vehicles');
 
-        $q = $request->input('q');
-
         if ($request->filled('q')) {
-            try{
-                $table->where('vin', 'like', "%{$q}%")
+            $q = $request->input('q');
+
+            $table->where(function ($query) use ($q) {
+                $query->where('vin', 'like', "%{$q}%")
                     ->orWhere('plate_number', 'like', "%{$q}%")
                     ->orWhere('make', 'like', "%{$q}%")
                     ->orWhere('model', 'like', "%{$q}%")
-                    ->orWhere('status', 'like', "%{$q}%")
-                    ->get(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
-
-            }catch(Exception $e){
-                return response()->json($e, 500);
-            }
+                    ->orWhere('status', 'like', "%{$q}%");
+            });
         }
 
-        $vehicles = $table->get(array_merge($this->rows, ['id','created_at', 'updated_at']));
+        $vehicles = $table->get(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
 
         return response()->json(['vehicles' => $vehicles]);
     }
 
-    public function search(Request $request){
-        
-        $query = $request->validate([
-            'q' => 'string',
+    public function search(Request $request)
+    {
+        $request->validate([
+            'q' => 'required|string',
         ]);
 
-        if (!$query) {
-            return response()->json(['message' => 'Search query is required'], 400);
-        }
+        $q = $request->input('q');
 
-        try{
+        try {
             $vehicles = DB::table('vehicles')
-                ->where('vin', 'like', "%{$query}%")
-                ->orWhere('plate_number', 'like', "%{$query}%")
-                ->orWhere('make', 'like', "%{$query}%")
-                ->orWhere('model', 'like', "%{$query}%")
+                ->where('vin', 'like', "%{$q}%")
+                ->orWhere('plate_number', 'like', "%{$q}%")
+                ->orWhere('make', 'like', "%{$q}%")
+                ->orWhere('model', 'like', "%{$q}%")
                 ->get(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
-
-        }catch(Exception $e){
-            return response()->json($e, 500);
+        } catch (Exception $e) {
+            return response()->json($e->getMessage(), 500);
         }
 
         return response()->json(['data' => $vehicles]);
@@ -102,40 +95,44 @@ class Vehicles extends Controller
             'plate_number'    => ['required', 'string', 'max:15', 'unique:vehicles,plate_number'],
             'make'            => ['required', 'string'],
             'model'           => ['required', 'string'],
-            'year'            => ['required', 'digits:4'],
+            'year'            => ['required', 'digits:4', 'integer'],
             'type'            => ['required', 'string'],
-            'capacity'        => ['required', 'string'],
+            'capacity'        => ['nullable', 'numeric', 'min:0'],
+            'seats'           => ['nullable', 'integer', 'min:1'],
+            'fuel_efficiency' => ['required', 'numeric', 'min:0'],
             'acqdate'         => ['nullable', 'date'],
+            'image'           => ['nullable', 'image', 'max:2048'], // max 2MB
         ]);
 
         try {
-            DB::transaction(function () use ($validated) {
+            DB::transaction(function () use ($validated, $request) {
+                 $imagePath = null;
+
+                if ($request->hasFile('image')) {
+                    $imagePath = $request->file('image')->store('vehicles', 'public');
+                }else{
+                    $imagePath = 'vehicles/default.webp';
+                }
+
                 DB::table('vehicles')->insert([
-                    'vin'             => $validated->vin,
-                    'plate_number'    => $validated->plate_number,
-                    'make'            => $validated->make,
-                    'model'           => $validated->model,
-                    'year'            => $validated->year,
-                    'type'            => $validated->type,
-                    'capacity'        => $validated->capacity,
-                    'acquisition_date'=> Carbon::parse($validated->acqdate)->format('Y-m-d') ?? '',
-                    'status'          => 'available',
-                    'created_at'      => now(),
-                    'updated_at'      => now(),
+                    'vin'              => $validated->vin,
+                    'plate_number'     => $validated->plate_number,
+                    'make'             => $validated->make,
+                    'model'            => $validated->model,
+                    'year'             => $validated->year,
+                    'type'             => $validated->type,
+                    'capacity'         => $validated->capacity,
+                    'seats'            => $validated->seats,
+                    'fuel_efficiency'  => $validated->fuel_efficiency,
+                    'acquisition_date' => $validated->acqdate ? Carbon::parse($validated->acqdate)->format('Y-m-d') : null,
+                    'status'           => 'Available',
+                    'image_path'       => $imagePath,
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
                 ]);
             });
         } catch (Exception $e) {
             return response()->json($e->getMessage(), 500);
-        }
-
-        try {
-            $new = DB::table('vehicles')
-                ->where('vin', $validated->vin)
-                ->first(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
-
-            broadcast(new VehicleUpdates($new));
-        } catch (Exception $e) {
-            //return response()->json('Failed to fetch new data', 500);
         }
 
         return response()->json("Vehicle Registered", 200);
@@ -149,9 +146,11 @@ class Vehicles extends Controller
             'plate_number'    => ['required', 'string', 'max:15'],
             'make'            => ['required', 'string'],
             'model'           => ['required', 'string'],
-            'year'            => ['required', 'digits:4'],
+            'year'            => ['required', 'digits:4', 'integer'],
             'type'            => ['required', 'string'],
-            'capacity'        => ['required', 'string'],
+            'capacity'        => ['nullable', 'numeric', 'min:0'],
+            'seats'           => ['nullable', 'integer', 'min:1'],
+            'fuel_efficiency' => ['required', 'numeric', 'min:0'],
             'acqdate'         => ['nullable', 'date'],
             'status'          => ['required', Rule::in(['Available', 'Reserved', 'Under Maintenance', 'Retired'])],
         ]);
@@ -161,16 +160,18 @@ class Vehicles extends Controller
                 DB::table('vehicles')
                     ->where('id', $validated->id)
                     ->update([
-                        'vin'             => $validated->vin,
-                        'plate_number'    => $validated->plate_number,
-                        'make'            => $validated->make,
-                        'model'           => $validated->model,
-                        'year'            => $validated->year,
-                        'type'            => $validated->type,
-                        'capacity'        => $validated->capacity,
-                        'acquisition_date'=> Carbon::parse($validated->acqdate)->format('Y-m-d'),
-                        'status'          => $validated->status,
-                        'updated_at'      => now(),
+                        'vin'              => $validated->vin,
+                        'plate_number'     => $validated->plate_number,
+                        'make'             => $validated->make,
+                        'model'            => $validated->model,
+                        'year'             => $validated->year,
+                        'type'             => $validated->type,
+                        'capacity'         => $validated->capacity,
+                        'seats'            => $validated->seats,
+                        'fuel_efficiency'  => $validated->fuel_efficiency,
+                        'acquisition_date' => $validated->acqdate ? Carbon::parse($validated->acqdate)->format('Y-m-d') : null,
+                        'status'           => $validated->status,
+                        'updated_at'       => now(),
                     ]);
             });
 
@@ -179,9 +180,8 @@ class Vehicles extends Controller
                 ->first(array_merge($this->rows, ['id', 'created_at', 'updated_at']));
 
             broadcast(new VehicleUpdates($new));
-            
         } catch (Exception $e) {
-            //return response()->json($e->getMessage(), 500);
+            return response()->json($e->getMessage(), 500);
         }
 
         return response()->json("Record Updated Successfully", 200);

@@ -17,14 +17,6 @@ return new class extends Migration
             $table->string('name');
             $table->enum('status', ['Assigned', 'Available', 'Unavailable', 'Inactive']);
         });
-
-        Schema::create('performances', function(Blueprint $table){
-            $table->id();
-            $table->uuid('uuid')->unique();
-            $table->decimal('rating', 3, 1);
-
-            $table->foreignId('driver_id')->nullable()->constrained('drivers')->nullOnDelete();
-        });
     }
 
     /**
@@ -32,7 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('performances');
         Schema::dropIfExists('drivers');
     }
 };

@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 
 const ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
-export default function AddressInput({ label, name, register, setValue, errors }) {
+export default function AddressInput({ label, name, register, setValue, errors, className }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [typingTimeout, setTypingTimeout] = useState(null);
@@ -68,8 +68,6 @@ export default function AddressInput({ label, name, register, setValue, errors }
       const feature = res.data.features[0];
 
       if (!feature) return;
-      console.log(feature)
-      const locName = feature.properties?.name || "";
 
       let fullAddress = '';
       if (feature.properties?.name && feature.properties?.full_address) {
@@ -80,18 +78,18 @@ export default function AddressInput({ label, name, register, setValue, errors }
         fullAddress = feature.properties?.full_address || '';
       }
 
-      const coordinates = feature.geometry?.coordinates;
+      const coordinates = feature.geometry?.coordinates || [];
+      const [longitude, latitude] = coordinates;
 
-      // Update input display
       setQuery(fullAddress);
       setResults([]);
       setSelected(true);
 
-      // Update form value
-      setValue(
-        name,
-        JSON.stringify({ address: fullAddress, coordinates })
-      );
+      setValue(name, {
+        address_name: fullAddress,
+        longitude: longitude, 
+        latitude: latitude,
+      });
     } catch (err) {
       console.error("Mapbox retrieve error:", err);
     }
@@ -123,7 +121,7 @@ export default function AddressInput({ label, name, register, setValue, errors }
   };
 
   return (
-    <div className="relative flex flex-col gap-2">
+    <div className="relative flex flex-col gap-2 w-full">
       <Label className="font-normal text-secondary-foreground">{label}</Label>
       <div className="relative">
         <Input
@@ -138,7 +136,7 @@ export default function AddressInput({ label, name, register, setValue, errors }
           }}
           onBlur={() => setTimeout(() => setFocused(false), 200)}
           autoComplete="off"
-          className="pr-8"
+          className={className}
         />
         {loading && (
           <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-gray-400" />

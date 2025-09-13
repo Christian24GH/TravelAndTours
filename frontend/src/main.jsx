@@ -46,7 +46,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='success' element={<LogisticsIISuccessPage/>}/>
           <Route path='dispatch'>
             <Route index element={<LogisticsIIDispatchPage/>}/>
-            <Route path=':id' element={<LogisticsIIDispatchDetails/>}/>
+            <Route path=':batch_number' element={<LogisticsIIDispatchDetails/>}/>
           </Route>
           <Route path='drivers' element={<LogisticsIIDrivers/>}/>
         </Route>

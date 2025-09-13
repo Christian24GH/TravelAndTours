@@ -13,25 +13,33 @@ return new class extends Migration
     {
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->string('vin', 17)->unique(); // Vehicle Identification Number
-            $table->string('plate_number', 15)->unique();
+
+            $table->string('vin', 17)->unique()->index()->comment('Vehicle Identification Number');
+            $table->string('plate_number', 15)->unique()->index();
             $table->string('make'); // Toyota, Ford, etc.
             $table->string('model');
             $table->year('year');
             $table->string('type')->comment('Sedan, SUV, Truck, Van, etc.');
-            $table->string('capacity')->nullable()->comment('Passengers or weight in kg');
+
+            $table->decimal('capacity', 8, 2)->nullable()->comment('Weight in kg');
+            $table->integer('seats')->nullable()->comment('Passenger seats');
+            $table->decimal('fuel_efficiency', 5, 2)->comment('Liters per kilometer');
             $table->date('acquisition_date')->nullable();
 
-            // Instead of another table, track vehicle lifecycle state here
-            $table->enum('status', ['Available', 'Reserved', 'Under Maintenance', 'Retired'])->default('available');
+            $table->enum('status', ['Available', 'Reserved', 'Under Maintenance', 'Retired'])
+                ->default('available')
+                ->index();
 
+            $table->string('image_path')->nullable()->comment('Vehicle image path');
+            
             $table->timestamps();
+            $table->softDeletes();
         });
 
-        /*
+
         Schema::create('vehicle_compliance', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vehicle_id')->constrained('vehicles')->onDelete('cascade');
+            $table->foreignId('vehicle_id')->nullable()->constrained('vehicles')->nullOnDelete();
             $table->enum('document_type', ['registration', 'insurance', 'inspection']);
             $table->string('document_number')->nullable();
             $table->string('provider')->nullable();
@@ -40,7 +48,21 @@ return new class extends Migration
             $table->string('document_file')->nullable(); // Path to uploaded file
             $table->timestamps();
         });
-        */
+
+
+        Schema::create('vehicle_insurance', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('vehicle_id')->nullable()->constrained('vehicles')->nullOnDelete();
+            $table->string('provider');
+            $table->string('policy_number')->unique();
+            $table->text('coverage_details')->nullable();
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->enum('status', ['Active', 'Expired', 'Cancelled'])->default('Active');
+            $table->timestamps();
+        });
+
     }
 
     /**
@@ -48,8 +70,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('vehicle_insurance');
         Schema::dropIfExists('vehicle_compliance');
-        Schema::dropIfExists('vehicle_maintenance');
+       // Schema::dropIfExists('vehicle_maintenance');
         Schema::dropIfExists('vehicles');
     }
 };
