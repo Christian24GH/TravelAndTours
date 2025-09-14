@@ -15,19 +15,22 @@ export function DriverSelect({ onSelect, assignments, defaultValue }) {
   const [selected, setSelected] = useState(null)
 
   useEffect(() => {
+    let polling
+
     const getDrivers = async () => {
       try {
         const response = await axios.get(`${api.dialogDrivers}?q=Available`)
         if (response.status === 200) {
-          console.log(response)
+          //console.log(response)
           setDrivers(response.data?.drivers || [])
         }
       } catch (error) {
         console.error("Failed to fetch drivers", error)
       }
     }
+    polling = setInterval(getDrivers, 5000)
 
-    getDrivers()
+    return () => clearInterval(polling)
   }, [])
 
   return (
@@ -58,7 +61,7 @@ export function DriverSelect({ onSelect, assignments, defaultValue }) {
                 <CommandItem
                   key={d.id}
                   value={d.id}
-                  disabled={assignments?.some(a => a.driver_id === d.id) || defaultValue}
+                  disabled={assignments?.some(a => a.driver_uuid === d.uuid) || defaultValue}
                   onSelect={() => {
                     setSelected(d.id)
                     setOpen(false)

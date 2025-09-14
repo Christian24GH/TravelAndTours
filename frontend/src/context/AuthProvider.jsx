@@ -16,7 +16,7 @@ export const AuthProvider = ({children})=>{
                 // token-based: api already boots token from storage
                 const response = await api.get("/user")
                 setAuth(response.data) // user object returned by backend
-                console.log(response)
+                //console.log(response)
             } catch (error) {
                 // token invalid or not present
                 removeToken()

@@ -15,7 +15,7 @@ Route::put('/vehicles/change', [Vehicles::class, 'update']);
 
 //Reservations
 Route::get('/reserve', [Reservations::class, 'index']);
-Route::get('/reserve/details', [Reservations::class, 'details']);
+Route::post('/reserve/details', [Reservations::class, 'details']);
 Route::post('/reserve/submit', [Reservations::class, 'makeRequest']);
 Route::put('/reserve/approve', [Reservations::class, 'approveReservation']);
 Route::put('/reserve/cancel', [Reservations::class, 'cancelRequest']);
@@ -28,3 +28,7 @@ Route::get('/drivers/getDrivers', [Drivers::class, 'get']);
 //Dispatch
 Route::get('/dispatches', [Dispatches::class, 'show']);
 Route::get('/dispatches/driver', [Dispatches::class, 'showToDriver']);
+Route::get('/dispatches/details', [Dispatches::class, 'dispatchDetails']);
+Route::get('/dispatches/update', [Dispatches::class, 'updateStatus']);
+
+

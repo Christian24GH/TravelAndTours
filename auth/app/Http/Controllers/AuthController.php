@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -20,6 +21,7 @@ class AuthController extends Controller
         ]);
         try{
             User::create([
+                'uuid'     => Str::uuid(),
                 'name'     => $validated->name,
                 'email'    => $validated->email,
                 'password' => $validated->password,
