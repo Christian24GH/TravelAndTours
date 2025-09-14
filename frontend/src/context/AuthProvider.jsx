@@ -67,7 +67,7 @@ export const AuthProvider = ({children})=>{
                 navigate('/logisticsII/');
                 break;
             case 'LogisticI Admin':
-                navigate('/logistics1');
+                navigate('/logistics1/');
                 break;
             default:
                 navigate('/login');

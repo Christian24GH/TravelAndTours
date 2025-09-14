@@ -49,12 +49,12 @@ const data = {
           },
           {
             title: "Storage Organization",
-            url: '/logisticsI/storage-organization',
+            url: '/logistics1/StorageOrganization',
             icon: PieChartIcon,
           },
           {
             title: "Stock Monitoring",
-            url: '/logisticsI/stock-monitoring',
+            url: '/logistics1/StockMonitoring',
             icon: ChartSpline,
           },
         ],
@@ -66,17 +66,17 @@ const data = {
         NavItems: [
           {
             title: "Supplier Management",
-            url: '/logistic1/supplier-management',
+            url: '/logistics1/SupplierManagement',
             icon: User,
           },
           {
             title: "Purchase Processing",
-            url: '/logistic1/purchase-processing',
+            url: '/logistics1/PurchaseProcessing',
             icon: WrenchIcon,
           },
           {
             title: "Expense Records",
-            url: '/logistic1/expense-records',
+            url: '/logistics1/ExpenseRecords',
             icon: LifeBuoy,
           },
         ],
@@ -88,17 +88,17 @@ const data = {
         NavItems: [
           {
             title: "Equipment Scheduling",
-            url: '/logistic1/equipment-scheduling',
+            url: '/logistics1/EquipmentScheduling',
             icon: BookOpenCheckIcon,
           },
           {
             title: "Delivery & Transport Tracking",
-            url: '/logistic1/delivery-transport-tracking',
+            url: '/logistics1/DeliveryTransportTracking',
             icon: TagsIcon,
           },
           {
             title: "Tour Reports",
-            url: '/logistic1/tour-reports',
+            url: '/logistics1/TourReports',
             icon: HistoryIcon,
           },
         ],
@@ -110,17 +110,17 @@ const data = {
         NavItems: [
           {
             title: "Asset Registration & QR Tagging",
-            url: '/logistic1/asset-registration',
+            url: '/logistics1/AssetRegistration',
             icon: User,
           },
           {
             title: "Predictive Maintenance",
-            url: '/logistic1/predictive-maintenance',
+            url: '/logistics1/PredictiveMaintenance',
             icon: WrenchIcon,
           },
           {
             title: "Maintenance History",
-            url: '/logistic1/maintenance-history',
+            url: '/logistics1/MaintenanceHistory',
             icon: LogsIcon,
           },
         ],
@@ -132,17 +132,17 @@ const data = {
         NavItems: [
           {
             title: "Delivery Receipts",
-            url: '/logistic1/delivery-receipts',
+            url: '/logistics1/DeliveryReceipts',
             icon: BookOpenCheckIcon,
           },
           {
             title: "Check-In/Check-Out Logs",
-            url: '/logistic1/check-in-out-logs',
+            url: '/logistics1/CheckInOutLogs',
             icon: LifeBuoy,
           },
           {
             title: "Logistics Reports",
-            url: '/logistic1/logistics-reports',
+            url: '/logistics1/LogisticsReports',
             icon: HistoryIcon,
           },
         ],

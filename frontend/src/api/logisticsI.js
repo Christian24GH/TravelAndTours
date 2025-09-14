@@ -34,10 +34,21 @@ export const logisticsI = {
             equipmentAdd: `${backendUri}/api/equipment/add`,
             equipmentUpdate: `${backendUri}/api/equipment/change`,
             equipmentArchive: `${backendUri}/api/equipment/archive`,
+            equipmentUpdateStock: `${backendUri}/api/equipment/{id}/update-stock`,
             lowStockAlert: `${backendUri}/api/equipment/low-stock-alert`,
             overStockAlert: `${backendUri}/api/equipment/overstock-alert`,
             categorizeEquipment: `${backendUri}/api/equipment/{id}/categorize/{categoryId}`,
             archiveOldEquipment: `${backendUri}/api/equipment/{id}/archive-old`,
+
+            // Equipment Category Routes
+            equipmentCategory: `${backendUri}/api/equipment-category`,
+            equipmentCategorySearch: `${backendUri}/api/equipment-category/search`,
+            equipmentCategoryAdd: `${backendUri}/api/equipment-category/add`,
+            equipmentCategoryUpdate: `${backendUri}/api/equipment-category/change`,
+            equipmentCategoryArchive: `${backendUri}/api/equipment-category/archive`,
+
+            // Storage Location Routes
+            storageLocation: `${backendUri}/api/storage-location`,
 
             // ================================
             // Procurement & Sourcing Management (PSM)

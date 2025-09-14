@@ -30,5 +30,13 @@ class DatabaseSeeder extends Seeder
             'password'  => '123456',
             'role'      => 'Driver',
         ]);
+
+        User::factory()->create([
+            'name'      => 'Rence',
+            'uuid'      => Str::uuid(),
+            'email'     => 'rence@gmail.com',
+            'password'  => '123456',
+            'role'      => 'LogisticI Admin',
+        ]);
     }
 }
