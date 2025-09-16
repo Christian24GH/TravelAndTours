@@ -85,7 +85,7 @@ class ReservationDetailsTest extends TestCase
     }
 
     /** 
-     * 
+     * @test
      * 
      *  */
     public function it_returns_reservation_details()
@@ -157,7 +157,7 @@ class ReservationDetailsTest extends TestCase
     }
 
     /**
-     * @test
+     * 
      */
     public function it_approves_reservations(){
         
@@ -233,4 +233,214 @@ class ReservationDetailsTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+
+    /**
+     * 
+     */
+    public function it_rejects_reservations(){
+        
+        //make reservation
+        $this->artisan('db:seed');
+
+        $vehicleId = DB::table('vehicles')->limit(3)->pluck('id')->all();
+        
+        $this->mock(MapboxService::class, function ($mock) {
+            $mock->shouldReceive('getRoute')->andReturn([
+                'distance' => 10000,   // 10km
+                'duration' => 600,     // 10min
+                'geometry' => ['type' => 'LineString', 'coordinates' => []],
+            ]);
+        });
+
+        $payload = [
+            'purpose' => 'Business Trip',
+            'requestor_uuid' => (string) Str::uuid(),
+            'start_dt' => '2025-09-15 08:00:00',
+            'end_dt'   => '2025-09-15 12:00:00',
+            'trip_plan' => [
+                ['address_name' => 'Office', 'latitude' => 14.5995, 'longitude' => 120.9842],
+                ['address_name' => 'Airport', 'latitude' => 14.508, 'longitude' => 121.019],
+            ],
+            'vehicle_ids' => $vehicleId,
+        ];
+
+        $response = $this->postJson('/api/reserve/submit', $payload);
+
+        $response->assertStatus(200)
+                 ->assertJsonStructure(['success', 'batch_number']);
+
+        $batchNumber = $response->json('batch_number');
+
+        //approve reservation
+        $response = $this->putJson('/api/reserve/cancel', [
+            'batch_number' => $batchNumber,
+        ]);
+
+        //dd($assignments);
+        //$response->dump();
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('reservations', [
+            'batch_number' => $batchNumber,
+            'status'       => 'Rejected'
+        ]);
+    }
+
+    /**
+     *
+     */
+    public function it_shows_driver_dispatch(){
+        
+        //make reservation
+        $this->artisan('db:seed');
+
+        $vehicleId = DB::table('vehicles')->limit(3)->pluck('id')->all();
+        
+        $this->mock(MapboxService::class, function ($mock) {
+            $mock->shouldReceive('getRoute')->andReturn([
+                'distance' => 10000,   // 10km
+                'duration' => 600,     // 10min
+                'geometry' => ['type' => 'LineString', 'coordinates' => []],
+            ]);
+        });
+
+        $payload = [
+            'purpose' => 'Business Trip',
+            'requestor_uuid' => (string) Str::uuid(),
+            'start_dt' => '2025-09-15 08:00:00',
+            'end_dt'   => '2025-09-15 12:00:00',
+            'trip_plan' => [
+                ['address_name' => 'Office', 'latitude' => 14.5995, 'longitude' => 120.9842],
+                ['address_name' => 'Airport', 'latitude' => 14.508, 'longitude' => 121.019],
+            ],
+            'vehicle_ids' => $vehicleId,
+        ];
+
+        $response = $this->postJson('/api/reserve/submit', $payload);
+
+        $response->assertStatus(200)
+                 ->assertJsonStructure(['success', 'batch_number']);
+
+        $this->assertDatabaseHas('reservations', [
+            'purpose' => 'Business Trip',
+            'status' => 'Pending',
+        ]);
+
+        $this->assertDatabaseHas('vehicles', [
+            'id' => $vehicleId,
+            'status' => 'Reserved',
+        ]);
+
+        $this->assertDatabaseHas('trip_route', [
+            'start_address' => 'Office',
+            'end_address'   => 'Airport',
+        ]);
+
+        $this->assertDatabaseHas('trip_metrics', [
+            'type' => 'Pretrip',
+        ]);
+
+        $driverUIDs = DB::table('drivers')->limit(3)->pluck('uuid')->all();
+        $batchNumber = $response->json('batch_number');
+        
+        $assignments = [];
+
+        $assignments = array_map(function ($driverUIDs, $vehicleId) {
+            return [
+                'driver_uuid' => $driverUIDs,
+                'vehicle_id'  => $vehicleId,
+            ];
+        }, $driverUIDs, $vehicleId);
+
+        //approve reservation
+        $response = $this->putJson('/api/reserve/approve', [
+            'batch_number' => $batchNumber,
+            'assignments' => $assignments,
+        ]);
+
+        //dd($assignments);
+        $response->dump();
+
+        $response->assertStatus(200);
+    }
+
+    /**
+     * 
+     */
+    public function it_acknowledge_driver_dispatch(){
+        
+        //make reservation
+        $this->artisan('db:seed');
+
+        $vehicleId = DB::table('vehicles')->limit(3)->pluck('id')->all();
+        
+        $this->mock(MapboxService::class, function ($mock) {
+            $mock->shouldReceive('getRoute')->andReturn([
+                'distance' => 10000,   // 10km
+                'duration' => 600,     // 10min
+                'geometry' => ['type' => 'LineString', 'coordinates' => []],
+            ]);
+        });
+
+        $payload = [
+            'purpose' => 'Business Trip',
+            'requestor_uuid' => (string) Str::uuid(),
+            'start_dt' => '2025-09-15 08:00:00',
+            'end_dt'   => '2025-09-15 12:00:00',
+            'trip_plan' => [
+                ['address_name' => 'Office', 'latitude' => 14.5995, 'longitude' => 120.9842],
+                ['address_name' => 'Airport', 'latitude' => 14.508, 'longitude' => 121.019],
+            ],
+            'vehicle_ids' => $vehicleId,
+        ];
+
+        $response = $this->postJson('/api/reserve/submit', $payload);
+
+        $response->assertStatus(200)
+                 ->assertJsonStructure(['success', 'batch_number']);
+
+        $this->assertDatabaseHas('reservations', [
+            'purpose' => 'Business Trip',
+            'status' => 'Pending',
+        ]);
+
+        $this->assertDatabaseHas('vehicles', [
+            'id' => $vehicleId,
+            'status' => 'Reserved',
+        ]);
+
+        $this->assertDatabaseHas('trip_route', [
+            'start_address' => 'Office',
+            'end_address'   => 'Airport',
+        ]);
+
+        $this->assertDatabaseHas('trip_metrics', [
+            'type' => 'Pretrip',
+        ]);
+
+        $driverUIDs = DB::table('drivers')->limit(3)->pluck('uuid')->all();
+        $batchNumber = $response->json('batch_number');
+        
+        $assignments = [];
+
+        $assignments = array_map(function ($driverUIDs, $vehicleId) {
+            return [
+                'driver_uuid' => $driverUIDs,
+                'vehicle_id'  => $vehicleId,
+            ];
+        }, $driverUIDs, $vehicleId);
+
+        //approve reservation
+        $response = $this->putJson('/api/reserve/approve', [
+            'batch_number' => $batchNumber,
+            'assignments' => $assignments,
+        ]);
+
+        //dd($assignments);
+        $response->dump();
+
+        $response->assertStatus(200);
+    }
+
 }

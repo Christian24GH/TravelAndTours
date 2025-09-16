@@ -40,6 +40,8 @@ export const logisticsII = {
             dialogDrivers: `${backendUri}/api/drivers/dialogDrivers`,
             dispatches: `${backendUri}/api/dispatches`,
             dispatchDetails: `${backendUri}/api/dispatches/details`,
+            dispatchStart: `${backendUri}/api/dispatches/start`,
+            
             
         },
     }

@@ -37,13 +37,13 @@ export default function ReservationDetails() {
     controllerRef.current = controller;
 
     axios
-      .get(api.reservationDetails, {
-        params: { batch_number },
-        signal: controller.signal,
-      })
+      .post(api.reservationDetails, 
+        { batch_number: batch_number },
+        { signal: controller.signal }  
+      )
       .then((response) => {
         const data = response.data?.reservation;
-        console.log(data);
+        //console.log(data);
         const serialized = JSON.stringify(data);
         if (lastSerialized.current !== serialized) {
           lastSerialized.current = serialized;
@@ -51,6 +51,7 @@ export default function ReservationDetails() {
         }
       })
       .catch((errors) => {
+        //console.log(errors);
         if (errors?.name === "CanceledError") return;
         toast.error("Failed to fetch details", { position: "top-center" });
       })
@@ -61,7 +62,6 @@ export default function ReservationDetails() {
     setLoading(true);
     if (!batch_number) return;
 
-    fetchRecord();
     const polling = setInterval(fetchRecord, 5000);
     return () => {
       clearInterval(polling);
@@ -98,7 +98,7 @@ export default function ReservationDetails() {
     setApproveLoading(true);
     axios
       .put(api.approveReservation, {
-        id: record?.id,
+        batch_number: batch_number,
         assignments,
       })
       .then(() =>
@@ -120,7 +120,7 @@ export default function ReservationDetails() {
     setRejectLoading(true);
 
     axios
-      .put(api.cancelReservation, { id: record.id })
+      .put(api.cancelReservation, { batch_number: batch_number, })
       .then(() =>
         toast.success("Reservation rejected, resources freed", {
           position: "top-center",
@@ -135,12 +135,26 @@ export default function ReservationDetails() {
       .finally(() => setRejectLoading(false));
   };
 
-  // === Metrics ===
-  const pretripCosts =
-    record?.trip_metrics?.filter((c) => c.type === "Pretrip") || [];
-  const totalCost = pretripCosts.reduce((s, c) => s + (c.cost ?? 0), 0);
-  const totalDistance = pretripCosts.reduce((s, c) => s + (c.distance ?? 0), 0);
-  const totalDuration = pretripCosts.reduce((s, c) => s + (c.duration ?? 0), 0);
+  const tripMetrics = record?.trip_metrics?.map(m => ({
+    ...m,
+    geometry: m.geometry ? JSON.parse(m.geometry) : null
+  })) ?? [];
+  
+  let totalCost = record?.totals?.totalFuelCost ?? 0;
+  let totalRoundCost = record?.totals?.totalFuelCostDoubleTrip ?? 0;
+
+  // Sum all distances
+  let totalDistance = tripMetrics.reduce((sum, r) => sum + (r.distance || 0), 0);
+
+  // Sum all durations (assuming duration is in seconds/minutes already)
+  let totalDuration = tripMetrics.reduce((sum, r) => sum + (r.duration || 0), 0);
+
+  let geometry = {
+    type: "MultiLineString",
+    coordinates: tripMetrics
+      .map(r => r.geometry?.coordinates)
+      .filter(Boolean) // remove nulls
+  };
 
   return (
     <motion.div
@@ -198,7 +212,8 @@ export default function ReservationDetails() {
                 <Label className="font-semibold">Date and Time</Label>
                 <Separator className="my-1" />
                 <Label className="w-full flex justify-between">
-                  Start: <span className="font-medium">{record?.start_date}</span>
+                  Start:{" "}
+                  <span className="font-medium">{record?.start_date}</span>
                 </Label>
                 <Label className="w-full flex justify-between">
                   End: <span className="font-medium">{record?.end_date}</span>
@@ -217,10 +232,12 @@ export default function ReservationDetails() {
                           <span>Route {idx + 1}</span>
                         </Label>
                         <Label className="text-sm text-gray-600">
-                          From: <span className="font-medium">{r.start_address}</span>
+                          From:{" "}
+                          <span className="font-medium">{r.start_address}</span>
                         </Label>
                         <Label className="text-sm text-gray-600">
-                          To: <span className="font-medium">{r.end_address}</span>
+                          To:{" "}
+                          <span className="font-medium">{r.end_address}</span>
                         </Label>
                       </div>
                     ))
@@ -280,7 +297,9 @@ export default function ReservationDetails() {
                   <CardDescription>Pre-trip estimated cost</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Label className="text-xl text-gray-500">Philippine Peso</Label>
+                  <Label className="text-xl text-gray-500">
+                    Philippine Peso
+                  </Label>
                   <Label className="text-3xl font-semibold">{totalCost}</Label>
                 </CardContent>
               </Card>
@@ -291,7 +310,9 @@ export default function ReservationDetails() {
                 </CardHeader>
                 <CardContent>
                   <Label className="text-xl text-gray-500">Kilometer</Label>
-                  <Label className="text-3xl font-semibold">{totalDistance}</Label>
+                  <Label className="text-3xl font-semibold">
+                    {totalDistance}
+                  </Label>
                 </CardContent>
               </Card>
               <Card className="flex-1 rounded-md">
@@ -301,7 +322,9 @@ export default function ReservationDetails() {
                 </CardHeader>
                 <CardContent>
                   <Label className="text-xl text-gray-500">Minutes</Label>
-                  <Label className="text-3xl font-semibold">{totalDuration}</Label>
+                  <Label className="text-3xl font-semibold">
+                    {totalDuration}
+                  </Label>
                 </CardContent>
               </Card>
             </div>
@@ -310,13 +333,13 @@ export default function ReservationDetails() {
             {record?.trip_routes?.length >= 1 && (
               <div className="flex-2 rounded-md">
                 <Map
-                  className="w-full h-full"
+                  className="w-full h-full relative overflow-hidden"
                   key={record.trip_routes.map((r) => r.id).join("|")}
                   stops={record.trip_routes.flatMap((r) => [
                     [r.start_longitude, r.start_latitude],
                     [r.end_longitude, r.end_latitude],
                   ])}
-                  geometry={null} // use later when backend returns geometry
+                  geometry={geometry}
                 />
               </div>
             )}

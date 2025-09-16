@@ -95,7 +95,7 @@ export function BatchReservation() {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0); // force midnight
-  const minDateTime = tomorrow.toISOString().slice(0, 16) // "YYYY-MM-DDTHH:mm"
+  const minDateTime = tomorrow.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:mm"
 
   const onSubmit = async (data) => {
     console.log(tripPlan);
@@ -128,7 +128,7 @@ export function BatchReservation() {
       })),
     };
 
-    console.log(payload)
+    console.log(payload);
     try {
       const response = await axios.post(api.makeReservations, payload);
       if (response.status === 200) {
@@ -139,9 +139,9 @@ export function BatchReservation() {
           navigate("/logisticsII/success");
         }
       }
-    } catch(e) {
-        console.log(e)
-        toast.error("Reservation failed", { position: "top-center" });
+    } catch (e) {
+      console.log(e);
+      toast.error("Reservation failed", { position: "top-center" });
     }
   };
 
@@ -241,7 +241,6 @@ export function BatchReservation() {
 
         {/**Date time */}
         <div className="flex flex-col gap-2">
-
           <Label className="font-medium">Date & Time</Label>
           <div className="flex gap-2">
             <div className="flex-1 w-full">
@@ -260,7 +259,6 @@ export function BatchReservation() {
               )}
             </div>
             <div className="flex-1 w-full">
-
               <DateTimeField
                 control={control}
                 rules={{ required: "Start Time" }}

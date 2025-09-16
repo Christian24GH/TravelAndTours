@@ -91,19 +91,17 @@ class Reservations extends Controller
             $assignmentByVehicle = $assignments->keyBy('vehicle_id');
 
             // === Trip Routes ===
-            $tripRoutes = DB::table('trip_route')
+            $tripRoutes = DB::table('trip_routes')
                 ->where('reservation_id', $reservation->id)
                 ->orderBy('sequence', 'asc')
                 ->get();
 
             $tripRouteIds = $tripRoutes->pluck('id');
 
-            // === Trip Metrics + cost calculation ===
-            $fuelPrice = config('services.fuel.price_per_liter', 65); // fallback PHP 65/L
-
+            $fuelPrice = config('services.fuel.price_per_liter', 65);
             $totalPriceCosts = 0.0;
             $tripMetrics = DB::table('trip_metrics as tm')
-                ->join('trip_route as tr', 'tr.id', '=', 'tm.trip_route_id')
+                ->join('trip_routes as tr', 'tr.id', '=', 'tm.trip_route_id')
                 ->whereIn('tm.trip_route_id', $tripRouteIds)
                 ->get([
                     'tm.id',
@@ -111,6 +109,7 @@ class Reservations extends Controller
                     'tm.type',
                     'tm.distance',
                     'tm.duration',
+                    'tm.geometry',
                     'tr.reservation_id',
                 ])
                 ->map(function ($m) use ($assignmentByVehicle, $fuelPrice, &$totalPriceCosts){
@@ -145,6 +144,7 @@ class Reservations extends Controller
                         'distance'      => $distance,
                         'duration'      => $m->duration,
                         'vehicle_costs' => $vehicleCosts,
+                        'geometry'      => $m->geometry
                     ];
                 });
             
@@ -158,7 +158,6 @@ class Reservations extends Controller
             $reservation['trip_routes']   = $tripRoutes;
             $reservation['trip_metrics']  = $tripMetrics;
             $reservation['totals']        = $totals;
-
 
             return response()->json(['reservation' => $reservation], 200);
         }catch(Exception $e){
@@ -226,7 +225,7 @@ class Reservations extends Controller
                     $current = $validated['trip_plan'][$i];
                     $next    = $validated['trip_plan'][$i + 1];
 
-                    $trip_route_id = DB::table('trip_route')->insertGetId([
+                    $trip_route_id = DB::table('trip_routes')->insertGetId([
                         'uuid'           => (string) Str::uuid(),
                         'reservation_id' => $reservation_id,
 
@@ -308,30 +307,115 @@ class Reservations extends Controller
         ]);
 
         try{
-            DB::transaction(function() use($validated){
-                $reservation = DB::table('reservations')->where('batch_number', $validated['batch_number'])
-                    ->update([
-                        'status' => 'Confirmed'
+            DB::transaction(function () use ($validated) {
+                $reservation = DB::table('reservations')
+                    ->where('batch_number', $validated['batch_number'])
+                    ->first(['id']);
+
+                if (!$reservation) {
+                    throw new Exception("Reservation not found");
+                }
+
+                DB::table('reservations')
+                    ->where('id', $reservation->id)
+                    ->update(['status' => 'Confirmed']);
+
+                foreach ($validated['assignments'] as $assignment) {
+                    DB::table('assignments')
+                        ->where('reservation_id', $reservation->id)
+                        ->where('vehicle_id', $assignment['vehicle_id'])
+                        ->update([
+                            'driver_uuid' => $assignment['driver_uuid'],
+                            'updated_at'  => now(),
+                        ]);
+
+                    DB::table('drivers')
+                        ->where('uuid', $assignment['driver_uuid'])
+                        ->update(['status' => 'Assigned']);
+                    
+                    DB::table('dispatch_orders')->insert([
+                        'uuid'          => (string) Str::uuid(),
+                        'scheduled_time'=> now(),
+                        'status'        => 'Scheduled',
+                        'assignment_id' => DB::table('assignments')
+                            ->where('reservation_id', $reservation->id)
+                            ->where('vehicle_id', $assignment['vehicle_id'])
+                            ->value('id'),
+                        'created_at'    => now(),
+                        'updated_at'    => now(),
                     ]);
-
-                $assignments = $validated['assignments'];
-
-                
-                foreach($assignments as $assignment){
-                
                 }
             });
+            
+            return response()->json([
+                'message' => 'Reservation Approved',
+            ], 200);
         }catch(Exception $e){
-            Log::error('Approve Failed', $e);
+            Log::error('Approve Failed', ['error' => $e->getMessage()]);
+            return response()->json('Approve Failed', 500);
+        }
+    }
+
+    public function rejectReservation(Request $request)
+    {
+        $validated = $request->validate([
+            'batch_number' => ['required', 'exists:reservations,batch_number'],
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+    
+                $reservation = DB::table('reservations')
+                    ->where('batch_number', $validated['batch_number'])
+                    ->first();
+
+                if (!$reservation) {
+                    throw new \Exception("Reservation not found");
+                }
+
+                DB::table('reservations')
+                    ->where('id', $reservation->id)
+                    ->update(['status' => 'Rejected']);
+
+                // free drivers linked to assignments
+                $assignments = DB::table('assignments')
+                    ->where('reservation_id', $reservation->id)
+                    ->get();
+
+                foreach ($assignments as $assignment) {
+                    if ($assignment->driver_uuid) {
+                        DB::table('drivers')
+                            ->where('uuid', $assignment->driver_uuid)
+                            ->update(['status' => 'Available']);
+                    }
+
+                    if ($assignment->vehicle_id) {
+                        DB::table('vehicles')
+                            ->where('id', $assignment->vehicle_id)
+                            ->update(['status' => 'Available']);
+                    }
+                }
+
+                // clear assignments if needed
+                DB::table('assignments')
+                    ->where('reservation_id', $reservation->id)
+                    ->update([
+                        'driver_uuid' => null,
+                    ]);
+            });
+
+        } catch (\Exception $e) {
+            Log::error('Reject Failed', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString()
+            ]);
+
+            return response()->json(['error' => 'Reject failed'], 500);
         }
 
-        return response()->json($request, 200);
+        return response()->json([
+            'message' => 'Reservation Rejected',
+        ], 200);
     }
 
-    public function rejectReservation(Request $request){
-        //reject reservation
-        //check assignment
-        //free drivers
-        //fee vehicles
-    }
 }

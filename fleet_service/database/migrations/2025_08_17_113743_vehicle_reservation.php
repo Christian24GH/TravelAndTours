@@ -18,7 +18,7 @@ return new class extends Migration
             $table->datetime('start_date');
             $table->datetime('end_date')->nullable();
             $table->string('purpose')->nullable();
-            $table->enum('status', ['Pending', 'Confirmed', 'Cancelled'])->default('Pending');
+            $table->enum('status', ['Pending', 'Confirmed', 'Rejected', 'Cancelled'])->default('Pending');
             $table->uuid('requestor_uuid')->nullable();
             $table->timestamps();
         });
@@ -34,7 +34,7 @@ return new class extends Migration
         });
         
         // stores locations in sequence
-        Schema::create('trip_route', function (Blueprint $table) {
+        Schema::create('trip_routes', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('start_address');
@@ -43,7 +43,7 @@ return new class extends Migration
             $table->decimal('start_latitude', 10, 7)->nullable();
             $table->decimal('start_longitude', 10, 7)->nullable();
 
-             $table->string('end_address');
+            $table->string('end_address');
             $table->decimal('end_latitude', 10, 7)->nullable();
             $table->decimal('end_longitude', 10, 7)->nullable();
 
@@ -66,12 +66,12 @@ return new class extends Migration
             $table->integer('duration')->nullable();         // in minutes
             $table->json('geometry')->nullable();            // GeoJSON or encoded polyline
 
-            $table->foreignId('trip_route_id')->nullable()->constrained('trip_route')->nullOnDelete();
+            $table->foreignId('trip_route_id')->nullable()->constrained('trip_routes')->nullOnDelete();
 
             $table->timestamps();
         });
-
-        Schema::create('dispatches', function (Blueprint $table) {
+        
+        Schema::create('dispatch_orders', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
 
@@ -88,22 +88,25 @@ return new class extends Migration
                 'On Route',
                 'Completed',
                 'Cancelled',
-                'Closed',
+                'Closed'
             ])->default('Scheduled');
 
-            $table->text('remarks')->nullable();
+            $table->foreignId('assignment_id')->nullable()->constrained('assignments')->nullOnDelete();
 
             // Optional audit fields
+            $table->text('remarks')->nullable();
+            $table->timestamp('acknowledged_at')->nullable();
+            
+            $table->timestamp('dispatched_at')->nullable();
+            $table->timestamp('completed_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamp('closed_at')->nullable();
-
-            $table->foreignId('assignment_id')->nullable()->constrained('assignments')->nullOnDelete();
             $table->timestamps();
         });
 
-        Schema::create('route_log', function (Blueprint $table) {
+        Schema::create('route_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('dispatch_id')->constrained('dispatches')->cascadeOnDelete();
+            $table->foreignId('dispatch_order_id')->constrained('dispatch_orders')->cascadeOnDelete();
 
             $table->decimal('latitude', 10, 7);
             $table->decimal('longitude', 10, 7);
@@ -116,7 +119,7 @@ return new class extends Migration
 
         Schema::create('dispatch_analytics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('dispatch_id')->constrained('dispatches')->cascadeOnDelete();
+            $table->foreignId('dispatch_order_id')->constrained('dispatch_orders')->cascadeOnDelete();
 
             $table->decimal('total_distance', 10, 2)->nullable();
             $table->integer('total_duration')->nullable(); // in minutes
@@ -137,7 +140,7 @@ return new class extends Migration
 
         Schema::create('trip_metrics_history', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('trip_route_id')->constrained('trip_route')->cascadeOnDelete();
+            $table->foreignId('trip_route_id')->constrained('trip_routes')->cascadeOnDelete();
             $table->decimal('distance', 10, 2)->nullable();
             $table->integer('duration')->nullable();
             $table->decimal('fuel_price', 10, 2)->nullable();       // snapshot price
@@ -155,10 +158,10 @@ return new class extends Migration
         Schema::dropIfExists('trip_metrics_history');
         Schema::dropIfExists('driver_performance');
         Schema::dropIfExists('dispatch_analytics');
-        Schema::dropIfExists('route_log');
-        Schema::dropIfExists('dispatches');
+        Schema::dropIfExists('route_logs');
+        Schema::dropIfExists('dispatch_orders');
         Schema::dropIfExists('trip_metrics');
-        Schema::dropIfExists('trip_route');
+        Schema::dropIfExists('trip_routes');
         Schema::dropIfExists('assignments');
         Schema::dropIfExists('reservations');
     }

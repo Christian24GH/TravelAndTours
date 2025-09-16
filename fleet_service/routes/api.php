@@ -18,7 +18,7 @@ Route::get('/reserve', [Reservations::class, 'index']);
 Route::post('/reserve/details', [Reservations::class, 'details']);
 Route::post('/reserve/submit', [Reservations::class, 'makeRequest']);
 Route::put('/reserve/approve', [Reservations::class, 'approveReservation']);
-Route::put('/reserve/cancel', [Reservations::class, 'cancelRequest']);
+Route::put('/reserve/cancel', [Reservations::class, 'rejectReservation']);
 
 //Driver
 Route::get('/drivers', [Drivers::class, 'show']);
@@ -29,6 +29,8 @@ Route::get('/drivers/getDrivers', [Drivers::class, 'get']);
 Route::get('/dispatches', [Dispatches::class, 'show']);
 Route::get('/dispatches/driver', [Dispatches::class, 'showToDriver']);
 Route::get('/dispatches/details', [Dispatches::class, 'dispatchDetails']);
+Route::put('/dispatches/acknowledge', [Dispatches::class, 'driverAcknowledgement']);
+Route::put('/dispatches/start/{dispatchId}', [Dispatches::class, 'startTrip']);
 Route::get('/dispatches/update', [Dispatches::class, 'updateStatus']);
 
 
