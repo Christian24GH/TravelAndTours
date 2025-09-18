@@ -21,6 +21,6 @@ export default defineConfig(({mode})=>{
         if directory is htdocs/dist(http://localhost/) (directly from htdocs/dist) → change base: '/' and rebuild.
      */
     // Sets assets(js/css) url for dist/index.html
-    base: env.VITE_BASE_URL || '/'
+    base: env.VITE_BASE_URL || '/TravelAndTour/frontend/dist/'
   }
 })

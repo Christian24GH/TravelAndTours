@@ -25,7 +25,7 @@ const baseUrl = import.meta.env.VITE_BASE_URL
 createRoot(document.getElementById('root')).render(
   // basename = baseUrl jsut like base value inside vite.config.js
   // Tells BrowserRouter that this is the base URL
-  <BrowserRouter basename={baseUrl ? baseUrl : '/'}>
+  <BrowserRouter basename={baseUrl ? baseUrl : '/TravelAndTour/frontend/dist/'}>
     <AuthProvider>
       <Routes>
         
@@ -51,8 +51,6 @@ createRoot(document.getElementById('root')).render(
           </Route>
           <Route path='drivers' element={<LogisticsIIDrivers/>}/>
         </Route>
-        
-        
         
         {/**NOT FOUND PAGE AS LAST CHILD OF ROUTES */}
         <Route path='*' element={<NotFound/>}/>
